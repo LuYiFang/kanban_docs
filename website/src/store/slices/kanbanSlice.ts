@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface Task {
     id: string;
+    title: string;
     content: string;
 }
 
@@ -21,22 +22,22 @@ const initialState: KanbanState = {
             id: "todo",
             name: "To Do",
             tasks: [
-                { id: "task-1", content: "Setup project structure" },
-                { id: "task-2", content: "Install dependencies" },
+                { id: "task-1", title: "Setup Project", content: "Setup the project structure and tools." },
+                { id: "task-2", title: "Install Dependencies", content: "Install all required project dependencies." },
             ],
         },
         {
             id: "in-progress",
             name: "In Progress",
             tasks: [
-                { id: "task-3", content: "Design UI for Kanban Board" },
+                { id: "task-3", title: "UI Design", content: "Design the user interface for the Kanban board." },
             ],
         },
         {
             id: "done",
             name: "Done",
             tasks: [
-                { id: "task-4", content: "Research Tailwind CSS" },
+                { id: "task-4", title: "Research Tools", content: "Research and finalize Tailwind CSS tools." },
             ],
         },
     ],
@@ -75,8 +76,22 @@ const kanbanSlice = createSlice({
                 destinationColumn.tasks.splice(destinationIndex, 0, movedTask);
             }
         },
+        updateTask: (
+            state,
+            action: PayloadAction<{ columnId: string; taskId: string; updatedTitle: string; updatedContent: string }>
+        ) => {
+            const { columnId, taskId, updatedContent, updatedTitle } = action.payload;
+            const column = state.columns.find((col) => col.id === columnId);
+            if (column) {
+                const task = column.tasks.find((task) => task.id === taskId);
+                if (task) {
+                    task.title = updatedTitle;
+                    task.content = updatedContent;
+                }
+            }
+        }
     },
 });
 
-export const { addTask, moveTask } = kanbanSlice.actions;
+export const { addTask, moveTask, updateTask } = kanbanSlice.actions;
 export default kanbanSlice.reducer;
