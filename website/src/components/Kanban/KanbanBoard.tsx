@@ -11,9 +11,8 @@ const KanbanBoard: React.FC = () => {
     const handleDragEnd = (result: DropResult) => {
         const { source, destination } = result;
 
-        if (!destination) return; // 如果拖拽到無效區域則不進行操作
+        if (!destination) return;
 
-        // 如果拖拽位置未改變，直接返回
         if (
             source.droppableId === destination.droppableId &&
             source.index === destination.index
@@ -40,9 +39,9 @@ const KanbanBoard: React.FC = () => {
                             <div
                                 ref={provided.innerRef}
                                 {...provided.droppableProps}
-                                className="p-4 bg-gray-200 rounded"
+                                className="p-4 bg-gray-800 rounded shadow"
                             >
-                                <h2 className="text-lg font-bold mb-2">{column.name}</h2>
+                                <h2 className="text-lg font-bold text-gray-300 mb-2">{column.name}</h2>
                                 {column.tasks.map((task, index) => (
                                     <Draggable key={task.id} draggableId={task.id} index={index}>
                                         {(provided) => (
@@ -50,7 +49,7 @@ const KanbanBoard: React.FC = () => {
                                                 ref={provided.innerRef}
                                                 {...provided.draggableProps}
                                                 {...provided.dragHandleProps}
-                                                className="p-2 mb-2 bg-white rounded shadow"
+                                                className="p-2 mb-2 bg-gray-700 rounded shadow"
                                             >
                                                 {task.content}
                                             </div>
