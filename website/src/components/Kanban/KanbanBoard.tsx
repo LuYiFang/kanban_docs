@@ -7,12 +7,21 @@ import {
 } from "react-beautiful-dnd";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
-import { moveTask, updateTask } from "../../store/slices/kanbanSlice";
+import { moveTask, updateProperty } from "../../store/slices/kanbanSlice";
 import EditDialog from "../Dialog/EditDialog";
 
 const KanbanBoard: React.FC = () => {
   const columns = useSelector((state: RootState) => state.kanban.columns);
   const dispatch = useDispatch();
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<{
+    columnId: string;
+    taskId: string;
+    title: string;
+    content: string;
+    properties: { [key: string]: string };
+  } | null>(null);
 
   const handleDragEnd = (result: DropResult) => {
     const { source, destination } = result;
@@ -26,6 +35,9 @@ const KanbanBoard: React.FC = () => {
       return;
     }
 
+    const taskId = result.draggableId;
+    if (!taskId) return;
+
     dispatch(
       moveTask({
         sourceColumnId: source.droppableId,
@@ -34,16 +46,25 @@ const KanbanBoard: React.FC = () => {
         destinationIndex: destination.index,
       }),
     );
-  };
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<{
-    columnId: string;
-    taskId: string;
-    title: string;
-    content: string;
-    properties: { [key: string]: string };
-  } | null>(null);
+    const columnStatusMap: { [key: string]: string } = {
+      todo: "To Do",
+      "in-progress": "In Progress",
+      done: "Done",
+    };
+
+    const newStatus = columnStatusMap[destination.droppableId];
+    if (!newStatus) return;
+
+    dispatch(
+      updateProperty({
+        columnId: destination.droppableId,
+        taskId,
+        property: "Status",
+        value: newStatus,
+      }),
+    );
+  };
 
   const handleEdit = (
     columnId: string,
@@ -62,22 +83,6 @@ const KanbanBoard: React.FC = () => {
       properties: task.properties,
     });
     setIsDialogOpen(true);
-  };
-
-  const handleSave = (updatedTitle: string, updatedContent: string) => {
-    console.log("updatedTitle", updatedTitle, "updatedContent", updatedContent);
-    console.log("selectedTask", selectedTask);
-    if (selectedTask) {
-      dispatch(
-        updateTask({
-          columnId: selectedTask.columnId,
-          taskId: selectedTask.taskId,
-          updatedTitle: updatedTitle,
-          updatedContent: updatedContent,
-        }),
-      );
-    }
-    setIsDialogOpen(false);
   };
 
   return (

@@ -27,6 +27,14 @@ const EditDialog: React.FC<EditDialogProps> = ({
   const [content, setContent] = useState(initialContent);
   const [properties, setProperties] = useState(initialProperties);
 
+  useEffect(() => {
+    if (isOpen) {
+      setTitle(initialTitle);
+      setContent(initialContent);
+      setProperties(initialProperties);
+    }
+  }, [isOpen, initialTitle, initialContent, initialProperties]);
+
   const handlePropertyChange = (property: string, value: string) => {
     setProperties({ ...properties, [property]: value });
     dispatch(updateProperty({ columnId, taskId, property, value }));
