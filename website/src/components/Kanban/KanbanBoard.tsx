@@ -97,7 +97,8 @@ const KanbanBoard: React.FC = () => {
             <EditDialog
                 isOpen={isDialogOpen}
                 onClose={() => setIsDialogOpen(false)}
-                onSave={handleSave}
+                columnId={selectedTask.columnId}
+                taskId={selectedTask.taskId}
                 initialTitle={selectedTask.title}
                 initialContent={selectedTask.content}
             />
