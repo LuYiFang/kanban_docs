@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { updateTask, updateProperty } from "../../store/slices/kanbanSlice";
 import ReactMarkdown from "react-markdown";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUser } from "@fortawesome/free-solid-svg-icons";
 
 interface EditDialogProps {
   isOpen: boolean;
@@ -133,6 +135,23 @@ const EditDialog: React.FC<EditDialogProps> = ({
                   onChange={(e) =>
                     handlePropertyChange("Deadline", e.target.value)
                   }
+                />
+              </div>
+              <div className="flex items-center">
+                <FontAwesomeIcon
+                  icon={faUser}
+                  className="w-5 h-5 text-gray-300 mr-2"
+                />
+                <span className="w-32 text-gray-300">Assignee:</span>
+
+                <input
+                  type="text"
+                  className="flex-1 p-2 border border-gray-700 bg-gray-800 text-gray-300 rounded"
+                  value={properties.Assignee || ""}
+                  onChange={(e) =>
+                    handlePropertyChange("Assignee", e.target.value)
+                  }
+                  placeholder="Enter assignee name"
                 />
               </div>
             </div>

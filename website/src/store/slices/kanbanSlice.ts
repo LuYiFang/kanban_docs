@@ -4,7 +4,9 @@ export interface Task {
   id: string;
   title: string;
   content: string;
-  properties: { [key: string]: string };
+  properties: {
+    [key: string]: string;
+  };
 }
 
 export interface Column {
@@ -31,6 +33,7 @@ const initialState: KanbanState = {
             Priority: "High",
             Status: "To Do",
             Deadline: "2025-04-01",
+            Assignee: "Alice",
           },
         },
         {
@@ -57,6 +60,7 @@ const initialState: KanbanState = {
             Priority: "High",
             Status: "In Progress",
             Deadline: "2025-04-03",
+            Assignee: "Bob",
           },
         },
       ],

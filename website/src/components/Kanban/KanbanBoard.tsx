@@ -9,6 +9,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { moveTask, updateProperty } from "../../store/slices/kanbanSlice";
 import EditDialog from "../Dialog/EditDialog";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUser } from "@fortawesome/free-solid-svg-icons";
 
 const KanbanBoard: React.FC = () => {
   const columns = useSelector((state: RootState) => state.kanban.columns);
@@ -137,7 +139,17 @@ const KanbanBoard: React.FC = () => {
                           {/* Deadline 顯示為文字 */}
                           {task.properties.Deadline && (
                             <div className="text-sm text-gray-400 mt-2">
-                              Deadline: {task.properties.Deadline}
+                              {task.properties.Deadline}
+                            </div>
+                          )}
+
+                          {task.properties.Assignee && (
+                            <div className="flex items-center text-sm text-gray-400 mt-2">
+                              <FontAwesomeIcon
+                                icon={faUser}
+                                className="w-4 h-4 text-gray-400 mr-2"
+                              />
+                              {task.properties.Assignee}
                             </div>
                           )}
                         </div>
