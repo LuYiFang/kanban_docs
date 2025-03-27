@@ -86,11 +86,64 @@ const initialState: KanbanState = {
 
 const updateTaskProperties = (task: Task, property: string, value: string) => {
   task.properties[property] = value;
-
   task.properties["Update Date"] = new Date().toISOString().split("T")[0];
-
   if (property === "Status" && value === "Done") {
     task.properties["Finished Date"] = new Date().toISOString().split("T")[0];
+  }
+};
+
+const addTaskToColumn = (
+  column: Column | undefined,
+  taskId: string,
+  title: string,
+  content: string,
+  properties: { [key: string]: string } = {},
+) => {
+  if (!column) return;
+
+  const taskExists = column.tasks.some((task) => task.id === taskId);
+  if (taskExists) return;
+
+  const dateNow = new Date().toLocaleString();
+  const newTask: Task = {
+    id: taskId,
+    title,
+    content,
+    properties: {
+      ...properties,
+      "Create Date": dateNow,
+      "Update Date": dateNow,
+      Status: column.name,
+    },
+  };
+  column.tasks.push(newTask);
+};
+
+const updateTaskAndMove = (
+  columns: Column[],
+  columnId: string,
+  taskId: string,
+  property: string,
+  value: string,
+) => {
+  const column = columns.find((col) => col.id === columnId);
+  if (!column) return;
+
+  const taskIndex = column.tasks.findIndex((task) => task.id === taskId);
+  if (taskIndex === -1) return;
+
+  const task = column.tasks[taskIndex];
+  updateTaskProperties(task, property, value);
+
+  if (property === "Status") {
+    const destinationColumn = columns.find(
+      (col) => col.name.toLowerCase() === value.toLowerCase(),
+    );
+
+    if (destinationColumn && column.id !== destinationColumn.id) {
+      column.tasks.splice(taskIndex, 1);
+      destinationColumn.tasks.push(task);
+    }
   }
 };
 
@@ -104,10 +157,13 @@ const kanbanSlice = createSlice({
     ) => {
       const { columnId, task } = action.payload;
       const column = state.columns.find((col) => col.id === columnId);
-      if (column) {
-        task.properties["Create Date"] = new Date().toLocaleString();
-        column.tasks.push(task);
-      }
+      addTaskToColumn(
+        column,
+        task.id,
+        task.title,
+        task.content,
+        task.properties,
+      );
     },
     moveTask: (
       state,
@@ -152,14 +208,13 @@ const kanbanSlice = createSlice({
     ) => {
       const { columnId, taskId, updatedTitle, updatedContent } = action.payload;
       const column = state.columns.find((col) => col.id === columnId);
-      if (column) {
-        const task = column.tasks.find((task) => task.id === taskId);
-        if (task) {
-          task.title = updatedTitle;
-          task.content = updatedContent;
+      if (!column) return;
 
-          task.properties["Update Date"] = new Date().toLocaleString();
-        }
+      const task = column.tasks.find((task) => task.id === taskId);
+      if (task) {
+        task.title = updatedTitle;
+        task.content = updatedContent;
+        task.properties["Update Date"] = new Date().toLocaleString();
       }
     },
     updateProperty: (
