@@ -124,7 +124,7 @@ const KanbanBoard: React.FC = () => {
                           {/* Priority Chip */}
                           {task.properties.Priority && (
                             <span
-                              className={`inline-block px-3 py-1 text-sm font-semibold rounded-full ${
+                              className={`inline-block px-2 py-1 text-xs font-semibold rounded-md ${
                                 task.properties.Priority === "High"
                                   ? "bg-red-500 text-white"
                                   : task.properties.Priority === "Medium"

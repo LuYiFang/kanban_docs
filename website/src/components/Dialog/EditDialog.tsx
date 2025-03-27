@@ -4,6 +4,7 @@ import { updateTask, updateProperty } from "../../store/slices/kanbanSlice";
 import ReactMarkdown from "react-markdown";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
+import { propertyDefinitions } from "../../types/kanban";
 
 interface EditDialogProps {
   isOpen: boolean;
@@ -84,10 +85,10 @@ const EditDialog: React.FC<EditDialogProps> = ({
         <div className="w-1/2 flex flex-col space-y-4 pr-6">
           {/* 標題編輯 */}
           <div>
-            <h2 className="text-xl font-bold text-gray-200 mb-2">Edit Title</h2>
+            <h2 className="text-lg font-bold text-gray-200 mb-2">Edit Title</h2>
             <input
               type="text"
-              className="w-full p-3 border border-gray-700 bg-gray-800 text-gray-300 rounded text-lg"
+              className="w-full text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Task Title"
@@ -97,63 +98,58 @@ const EditDialog: React.FC<EditDialogProps> = ({
           {/* 屬性編輯 */}
           <div>
             <h3 className="text-lg font-bold text-gray-200 mb-2">Properties</h3>
-            <div className="flex flex-col space-y-2">
-              <div className="flex items-center">
-                <span className="w-32 text-gray-300">Priority:</span>
-                <select
-                  className="flex-1 p-2 border border-gray-700 bg-gray-800 text-gray-300 rounded"
-                  value={properties.Priority}
-                  onChange={(e) =>
-                    handlePropertyChange("Priority", e.target.value)
-                  }
-                >
-                  <option>High</option>
-                  <option>Medium</option>
-                  <option>Low</option>
-                </select>
-              </div>
-              <div className="flex items-center">
-                <span className="w-32 text-gray-300">Status:</span>
-                <select
-                  className="flex-1 p-2 border border-gray-700 bg-gray-800 text-gray-300 rounded"
-                  value={properties.Status}
-                  onChange={(e) =>
-                    handlePropertyChange("Status", e.target.value)
-                  }
-                >
-                  <option>To Do</option>
-                  <option>In Progress</option>
-                  <option>Done</option>
-                </select>
-              </div>
-              <div className="flex items-center">
-                <span className="w-32 text-gray-300">Deadline:</span>
-                <input
-                  type="date"
-                  className="flex-1 p-2 border border-gray-700 bg-gray-800 text-gray-300 rounded"
-                  value={properties.Deadline}
-                  onChange={(e) =>
-                    handlePropertyChange("Deadline", e.target.value)
-                  }
-                />
-              </div>
-              <div className="flex items-center">
-                <FontAwesomeIcon
-                  icon={faUser}
-                  className="w-5 h-5 text-gray-300 mr-2"
-                />
-                <span className="w-32 text-gray-300">Assignee:</span>
-
-                <input
-                  type="text"
-                  className="flex-1 p-2 border border-gray-700 bg-gray-800 text-gray-300 rounded"
-                  value={properties.Assignee || ""}
-                  onChange={(e) =>
-                    handlePropertyChange("Assignee", e.target.value)
-                  }
-                  placeholder="Enter assignee name"
-                />
-              </div>
+            <div className="flex flex-col space-y-1">
+              {Object.entries(propertyDefinitions).map(([key, config]) => (
+                <div key={key} className="flex items-center space-x-2">
+                  <span className="w-24 text-sm text-gray-300">{key}:</span>
+                  {config.type === "select" && (
+                    <select
+                      className="flex-1 text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
+                      value={properties[key] || ""}
+                      onChange={(e) =>
+                        handlePropertyChange(key, e.target.value)
+                      }
+                    >
+                      {config.options?.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  {config.type === "member" && (
+                    <div className="flex flex-1 items-center space-x-2">
+                      <FontAwesomeIcon
+                        icon={faUser}
+                        className="w-4 h-4 text-gray-300"
+                      />
+                      <input
+                        type="text"
+                        className="flex-1 text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
+                        value={properties[key] || ""}
+                        onChange={(e) =>
+                          handlePropertyChange(key, e.target.value)
+                        }
+                      />
+                    </div>
+                  )}
+                  {config.type === "date" && (
+                    <input
+                      type="date"
+                      className="flex-1 text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
+                      value={properties[key] || ""}
+                      onChange={(e) =>
+                        handlePropertyChange(key, e.target.value)
+                      }
+                    />
+                  )}
+                  {config.type === "readonly" && (
+                    <span className="flex-1 text-sm text-gray-400">
+                      {properties[key] || "N/A"}
+                    </span>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
 

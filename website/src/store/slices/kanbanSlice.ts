@@ -84,6 +84,16 @@ const initialState: KanbanState = {
   ],
 };
 
+const updateTaskProperties = (task: Task, property: string, value: string) => {
+  task.properties[property] = value;
+
+  task.properties["Update Date"] = new Date().toISOString().split("T")[0];
+
+  if (property === "Status" && value === "Done") {
+    task.properties["Finished Date"] = new Date().toISOString().split("T")[0];
+  }
+};
+
 const kanbanSlice = createSlice({
   name: "kanban",
   initialState,
@@ -95,6 +105,7 @@ const kanbanSlice = createSlice({
       const { columnId, task } = action.payload;
       const column = state.columns.find((col) => col.id === columnId);
       if (column) {
+        task.properties["Create Date"] = new Date().toLocaleString();
         column.tasks.push(task);
       }
     },
@@ -124,6 +135,10 @@ const kanbanSlice = createSlice({
       if (sourceColumn && destinationColumn) {
         const [movedTask] = sourceColumn.tasks.splice(sourceIndex, 1);
         destinationColumn.tasks.splice(destinationIndex, 0, movedTask);
+
+        const newStatus =
+          destinationColumnId === "done" ? "Done" : destinationColumn.name;
+        updateTaskProperties(movedTask, "Status", newStatus);
       }
     },
     updateTask: (
@@ -135,13 +150,15 @@ const kanbanSlice = createSlice({
         updatedContent: string;
       }>,
     ) => {
-      const { columnId, taskId, updatedContent, updatedTitle } = action.payload;
+      const { columnId, taskId, updatedTitle, updatedContent } = action.payload;
       const column = state.columns.find((col) => col.id === columnId);
       if (column) {
         const task = column.tasks.find((task) => task.id === taskId);
         if (task) {
           task.title = updatedTitle;
           task.content = updatedContent;
+
+          task.properties["Update Date"] = new Date().toLocaleString();
         }
       }
     },
@@ -159,7 +176,7 @@ const kanbanSlice = createSlice({
       if (column) {
         const task = column.tasks.find((task) => task.id === taskId);
         if (task) {
-          task.properties[property] = value;
+          updateTaskProperties(task, property, value);
         }
       }
     },
