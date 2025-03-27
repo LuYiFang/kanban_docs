@@ -5,6 +5,8 @@ import ReactMarkdown from "react-markdown";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { propertyDefinitions } from "../../types/kanban";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 
 interface EditDialogProps {
   isOpen: boolean;
@@ -78,98 +80,93 @@ const EditDialog: React.FC<EditDialogProps> = ({
       onClick={handleOverlayClick}
     >
       <div
-        className="bg-gray-900 p-6 rounded shadow-lg w-3/4 h-4/5 flex"
+        className="bg-gray-900 p-6 rounded shadow-lg w-3/4 h-4/5 flex flex-col space-y-4"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* 左側編輯區 */}
-        <div className="w-1/2 flex flex-col space-y-4 pr-6">
-          {/* 標題編輯 */}
-          <div>
-            <h2 className="text-lg font-bold text-gray-200 mb-2">Edit Title</h2>
-            <input
-              type="text"
-              className="w-full text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Task Title"
-            />
-          </div>
+        {/* Title */}
+        <div>
+          <h2 className="text-lg font-bold text-gray-200 mb-2">Edit Title</h2>
+          <input
+            type="text"
+            className="w-full text-lg p-2 border border-gray-700 bg-gray-800 text-gray-300 rounded"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Task Title"
+          />
+        </div>
 
-          {/* 屬性編輯 */}
-          <div>
-            <h3 className="text-lg font-bold text-gray-200 mb-2">Properties</h3>
-            <div className="flex flex-col space-y-1">
-              {Object.entries(propertyDefinitions).map(([key, config]) => (
-                <div key={key} className="flex items-center space-x-2">
-                  <span className="w-24 text-sm text-gray-300">{key}:</span>
-                  {config.type === "select" && (
-                    <select
-                      className="flex-1 text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
-                      value={properties[key] || ""}
-                      onChange={(e) =>
-                        handlePropertyChange(key, e.target.value)
-                      }
-                    >
-                      {config.options?.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                  {config.type === "member" && (
-                    <div className="flex flex-1 items-center space-x-2">
-                      <FontAwesomeIcon
-                        icon={faUser}
-                        className="w-4 h-4 text-gray-300"
-                      />
-                      <input
-                        type="text"
-                        className="flex-1 text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
-                        value={properties[key] || ""}
-                        onChange={(e) =>
-                          handlePropertyChange(key, e.target.value)
-                        }
-                      />
-                    </div>
-                  )}
-                  {config.type === "date" && (
+        {/* Properties */}
+        <div>
+          <h3 className="text-lg font-bold text-gray-200 mb-2">Properties</h3>
+          <div className="flex flex-col space-y-1">
+            {Object.entries(propertyDefinitions).map(([key, config]) => (
+              <div key={key} className="flex items-center space-x-2">
+                <span className="w-24 text-sm text-gray-300">{key}:</span>{" "}
+                {config.type === "select" && (
+                  <select
+                    className="w-1/3 text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded" /* 限制寬度 */
+                    value={properties[key] || ""}
+                    onChange={(e) => handlePropertyChange(key, e.target.value)}
+                  >
+                    {config.options?.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {config.type === "member" && (
+                  <div className="flex items-center space-x-2 w-1/3">
+                    <FontAwesomeIcon
+                      icon={faUser}
+                      className="w-4 h-4 text-gray-300"
+                    />
                     <input
-                      type="date"
-                      className="flex-1 text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
+                      type="text"
+                      className="w-full text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
                       value={properties[key] || ""}
                       onChange={(e) =>
                         handlePropertyChange(key, e.target.value)
                       }
                     />
-                  )}
-                  {config.type === "readonly" && (
-                    <span className="flex-1 text-sm text-gray-400">
-                      {properties[key] || "N/A"}
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Markdown 編輯 */}
-          <div className="flex-1 flex flex-col">
-            <h3 className="text-lg font-bold text-gray-200 mb-2">Content</h3>
-            <textarea
-              className="flex-1 border border-gray-700 bg-gray-800 text-gray-300 p-3 rounded text-lg resize-none"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Enter Markdown content here..."
-            />
+                  </div>
+                )}
+                {config.type === "date" && (
+                  <input
+                    type="date"
+                    className="w-1/3 text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
+                    value={properties[key] || ""}
+                    onChange={(e) => handlePropertyChange(key, e.target.value)}
+                  />
+                )}
+                {config.type === "readonly" && (
+                  <span className="w-1/3 text-sm text-gray-400">
+                    {properties[key] || "N/A"}
+                  </span>
+                )}
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* 右側 Markdown 預覽區 */}
-        <div className="w-1/2 bg-gray-800 p-4 rounded shadow overflow-auto">
-          <h3 className="text-lg font-bold text-gray-200 mb-4">Preview</h3>
-          <div className="text-gray-300">
-            <ReactMarkdown>{content}</ReactMarkdown>
+        {/* Markdown Input & Preview (side-by-side) */}
+        <div className="flex space-x-4 flex-1">
+          {/* Markdown Input */}
+          <textarea
+            className="flex-1 h-full border border-gray-700 bg-gray-800 text-gray-300 p-3 rounded text-sm resize-none"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="Enter Markdown content here..."
+          />
+
+          {/* Markdown Preview */}
+          <div className="flex-1 h-full border border-gray-700 bg-gray-800 text-gray-300 p-3 rounded overflow-auto">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeRaw]}
+            >
+              {content}
+            </ReactMarkdown>
           </div>
         </div>
       </div>
