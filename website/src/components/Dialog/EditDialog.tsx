@@ -45,21 +45,6 @@ const EditDialog: React.FC<EditDialogProps> = ({
     dispatch(updateProperty({ columnId, taskId, property, value }));
   };
 
-  useEffect(() => {
-    if (!isOpen) return;
-    const timer = setTimeout(() => {
-      dispatch(
-        updateTask({
-          columnId,
-          taskId,
-          updatedTitle: title,
-          updatedContent: content,
-        }),
-      );
-    }, 500);
-    return () => clearTimeout(timer);
-  }, [title, content, isOpen, dispatch, columnId, taskId]);
-
   if (!isOpen) return null;
 
   const handleOverlayClick = () => {
@@ -109,8 +94,8 @@ const EditDialog: React.FC<EditDialogProps> = ({
                     onChange={(e) => handlePropertyChange(key, e.target.value)}
                   >
                     {config.options?.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
+                      <option key={option.id} value={option.id}>
+                        {option.name}
                       </option>
                     ))}
                   </select>

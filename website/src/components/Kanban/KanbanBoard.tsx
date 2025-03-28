@@ -7,10 +7,17 @@ import {
 } from "react-beautiful-dnd";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
-import { moveTask, updateProperty } from "../../store/slices/kanbanSlice";
+import {
+  addTask,
+  moveTask,
+  updateProperty,
+} from "../../store/slices/kanbanSlice";
 import EditDialog from "../Dialog/EditDialog";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faUser } from "@fortawesome/free-solid-svg-icons";
+import { v4 as uuidv4 } from "uuid";
+
+const generateId = () => uuidv4();
 
 const KanbanBoard: React.FC = () => {
   const columns = useSelector((state: RootState) => state.kanban.columns);
@@ -77,6 +84,7 @@ const KanbanBoard: React.FC = () => {
       properties: { [key: string]: string };
     },
   ) => {
+    setIsDialogOpen(true);
     setSelectedTask({
       columnId,
       taskId: task.id,
@@ -84,11 +92,42 @@ const KanbanBoard: React.FC = () => {
       content: task.content,
       properties: task.properties,
     });
+  };
+
+  const handleAddTask = () => {
+    const newTask = {
+      id: generateId(),
+      title: "",
+      content: "",
+      properties: {},
+    };
+    const columnId = "todo";
+
+    dispatch(
+      addTask({
+        columnId: columnId,
+        task: newTask,
+      }),
+    );
     setIsDialogOpen(true);
+
+    setSelectedTask({
+      columnId,
+      taskId: newTask.id,
+      title: newTask.title,
+      content: newTask.content,
+      properties: newTask.properties,
+    });
   };
 
   return (
     <>
+      <button
+        className="fixed bottom-4 right-4 w-12 h-12 bg-blue-500 text-white rounded-full shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 flex items-center justify-center"
+        onClick={handleAddTask}
+      >
+        <FontAwesomeIcon icon={faPlus} className="w-6 h-6" />
+      </button>
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="grid grid-cols-3 gap-4 p-4">
           {columns.map((column) => (
