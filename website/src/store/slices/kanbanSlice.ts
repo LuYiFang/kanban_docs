@@ -231,9 +231,19 @@ const kanbanSlice = createSlice({
 
       updateTaskProperties(task, "Status", destinationColumn.name);
     },
+    removeTask: (
+      state,
+      action: PayloadAction<{ columnId: string; taskId: string }>,
+    ) => {
+      const { columnId, taskId } = action.payload;
+      const column = state.columns.find((col) => col.id === columnId);
+      if (!column) return;
+
+      column.tasks = column.tasks.filter((task) => task.id !== taskId);
+    },
   },
 });
 
-export const { addTask, moveTask, updateTask, updateProperty } =
+export const { addTask, moveTask, updateTask, updateProperty, removeTask } =
   kanbanSlice.actions;
 export default kanbanSlice.reducer;

@@ -1,9 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-import { updateTask, updateProperty } from "../../store/slices/kanbanSlice";
+import {
+  updateTask,
+  updateProperty,
+  removeTask,
+} from "../../store/slices/kanbanSlice";
 import ReactMarkdown from "react-markdown";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser } from "@fortawesome/free-solid-svg-icons";
+import { faUser, faEllipsisH } from "@fortawesome/free-solid-svg-icons";
 import { propertyDefinitions } from "../../types/kanban";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
@@ -31,6 +35,8 @@ const EditDialog: React.FC<EditDialogProps> = ({
   const [title, setTitle] = useState(initialTitle);
   const [content, setContent] = useState(initialContent);
   const [properties, setProperties] = useState(initialProperties);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -40,9 +46,31 @@ const EditDialog: React.FC<EditDialogProps> = ({
     }
   }, [isOpen, initialTitle, initialContent, initialProperties]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
+
   const handlePropertyChange = (property: string, value: string) => {
     setProperties({ ...properties, [property]: value });
     dispatch(updateProperty({ columnId, taskId, property, value }));
+  };
+
+  const handleDeleteTask = () => {
+    dispatch(removeTask({ columnId, taskId }));
+    onClose();
+    setIsMenuOpen(false);
   };
 
   if (!isOpen) return null;
@@ -56,6 +84,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
         updatedContent: content,
       }),
     );
+    setIsMenuOpen(false);
     onClose();
   };
 
@@ -65,9 +94,30 @@ const EditDialog: React.FC<EditDialogProps> = ({
       onClick={handleOverlayClick}
     >
       <div
-        className="bg-gray-900 p-6 rounded shadow-lg w-3/4 h-4/5 flex flex-col space-y-4"
+        className="bg-gray-900 p-6 rounded shadow-lg w-3/4 h-4/5 flex flex-col space-y-4 relative"
         onClick={(e) => e.stopPropagation()}
       >
+        <div className="absolute top-4 right-4">
+          <FontAwesomeIcon
+            icon={faEllipsisH}
+            className="text-gray-400 cursor-pointer"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          />
+          {isMenuOpen && (
+            <div
+              ref={menuRef}
+              className="absolute top-8 right-0 bg-gray-800 shadow rounded p-1 text-sm whitespace-nowrap"
+            >
+              <button
+                className="text-gray-200 hover:text-red-600"
+                onClick={handleDeleteTask}
+              >
+                Delete Task
+              </button>
+            </div>
+          )}
+        </div>
+
         {/* Title */}
         <div>
           <h2 className="text-lg font-bold text-gray-200 mb-2">Edit Title</h2>
@@ -89,7 +139,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
                 <span className="w-24 text-sm text-gray-300">{key}:</span>{" "}
                 {config.type === "select" && (
                   <select
-                    className="w-1/3 text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded" /* 限制寬度 */
+                    className="w-1/3 text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
                     value={properties[key] || ""}
                     onChange={(e) => handlePropertyChange(key, e.target.value)}
                   >
