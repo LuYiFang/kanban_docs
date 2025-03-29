@@ -1,15 +1,27 @@
-from pydantic import BaseModel
-from typing import List, Dict, Optional
+from datetime import datetime
+
+from pydantic import BaseModel, Field, field_validator
 
 
-class Task(BaseModel):
-    id: str
+class TransformDate(BaseModel):
+    createdAt: datetime
+    updatedAt: datetime
+
+    @field_validator("createdAt", "updatedAt", mode="before")
+    def parse_datetime(cls, value):
+        if isinstance(value, str):
+            return datetime.fromisoformat(value)
+        return value
+
+
+class Task(TransformDate):
+    id: str = Field(..., alias="_id")
     title: str
     content: str
-    properties: Dict[str, str]
 
 
-class Column(BaseModel):
-    id: str
+class Property(TransformDate):
+    id: str = Field(..., alias="_id")
     name: str
-    tasks: List[Task]
+    taskId: str
+    value: str

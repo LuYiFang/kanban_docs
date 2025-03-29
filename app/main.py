@@ -1,14 +1,23 @@
 from fastapi import FastAPI
-from routes import tasks
+
+from database import initialize_collections
+from routes import tasks, properties
 
 app = FastAPI()
 
-app.include_router(tasks.router, prefix="/api/v1", tags=["tasks"])
+prefix = '/api'
+app.include_router(tasks.router, prefix=prefix, tags=["tasks"])
+app.include_router(properties.router, prefix=prefix, tags=["properties"])
+
+
+@app.on_event("startup")
+async def on_startup():
+    await initialize_collections()
 
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to FastAPI + MongoDB + File System!"}
+    return {"message": "Hello World!"}
 
 
 if __name__ == "__main__":
