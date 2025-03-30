@@ -15,7 +15,7 @@ class TransformDate(BaseModel):
 
 
 class BaseResponse(BaseModel):
-    id: str = Field(..., alias="_id")
+    id: str
     createdAt: str
     updatedAt: str
 

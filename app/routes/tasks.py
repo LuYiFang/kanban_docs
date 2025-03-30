@@ -13,7 +13,6 @@ router = APIRouter()
 async def create_task(task: TaskUpdate):
     try:
         task = await upsert_task_service('', task.model_dump())
-
         return task
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

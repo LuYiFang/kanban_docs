@@ -24,13 +24,13 @@ async def get_tasks_with_properties_repo() -> List[dict]:
         },
         {
             "$project": {
-                "_id": 1,
+                "id": "$_id",
                 "title": 1,
                 "content": 1,
                 "createdAt": 1,
                 "updatedAt": 1,
                 "properties": {
-                    "_id": 1,
+                    "id": "$_id",
                     "name": 1,
                     "value": 1,
                     "createdAt": 1,
