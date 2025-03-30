@@ -19,6 +19,11 @@ export const createTPropertiesApi = async (
   return response.data;
 };
 
+export const updateTaskApi = async (taskId: string, taskData: TaskUpdate) => {
+  const response = await apiClient.put(`/task/${taskId}`, taskData);
+  return response.data;
+};
+
 export const deleteTaskApi = async (taskId: string) => {
   const response = await apiClient.delete(`/task/${taskId}`);
   return response.data;

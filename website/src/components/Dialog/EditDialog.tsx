@@ -1,10 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-import {
-  updateTask,
-  updateProperty,
-  removeTask,
-} from "../../store/slices/kanbanSlice";
+import { updateProperty, removeTask } from "../../store/slices/kanbanSlice";
 import ReactMarkdown from "react-markdown";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faEllipsisH } from "@fortawesome/free-solid-svg-icons";
@@ -12,6 +8,7 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { propertyDefinitions } from "../../types/property";
 import _ from "lodash";
+import { updateTask } from "../../store/slices/kanbanThuck";
 
 interface EditDialogProps {
   isOpen: boolean;
@@ -85,8 +82,10 @@ const EditDialog: React.FC<EditDialogProps> = ({
       updateTask({
         columnId,
         taskId,
-        updatedTitle: title,
-        updatedContent: content,
+        task: {
+          title,
+          content,
+        },
       }),
     );
     setIsMenuOpen(false);

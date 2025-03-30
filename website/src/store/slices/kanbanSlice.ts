@@ -6,6 +6,7 @@ import {
   createTaskWithDefaultProperties,
   deleteTask,
   getAllTaskWithProperties,
+  updateTask,
 } from "./kanbanThuck";
 import _ from "lodash";
 
@@ -77,51 +78,6 @@ const kanbanSlice = createSlice({
   name: "kanban",
   initialState,
   reducers: {
-    addTask: (
-      state,
-      action: PayloadAction<{ columnId: string; task: TaskCreate }>,
-    ) => {
-      const { columnId, task } = action.payload;
-
-      const column = state.columns.find((col) => col.id === columnId);
-      if (!column) return;
-
-      const taskExists = column.tasks.some((_task) => _task.id === task.id);
-      if (taskExists) return;
-
-      const mergedProperties = [
-        ...getDefaultProperties("", task.id),
-        ...Object.entries(task.properties),
-      ];
-
-      const newTask: TaskWithProperties = {
-        title: task.title,
-        content: task.content,
-        properties: mergedProperties,
-      };
-
-      column.tasks.push(newTask);
-    },
-    updateTask: (
-      state,
-      action: PayloadAction<{
-        columnId: string;
-        taskId: string;
-        updatedTitle: string;
-        updatedContent: string;
-      }>,
-    ) => {
-      const { columnId, taskId, updatedTitle, updatedContent } = action.payload;
-      const column = state.columns.find((col) => col.id === columnId);
-      if (!column) return;
-
-      const task = column.tasks.find((task) => task.id === taskId);
-      if (!task) return;
-
-      task.title = updatedTitle;
-      task.content = updatedContent;
-      updateTaskProperties(task, "Create Date", updatedTitle);
-    },
     updateProperty: (
       state,
       action: PayloadAction<{
@@ -229,6 +185,17 @@ const kanbanSlice = createSlice({
         const column = state.columns.find((col) => col.id === status);
         if (column) column.tasks.push(task);
       })
+      .addCase(updateTask.fulfilled, (state, action) => {
+        const { columnId, task } = action.payload;
+        const column = state.columns.find((col) => col.id === columnId);
+        if (!column) return;
+        const taskIndex = column.tasks.findIndex((t) => t.id === task.id);
+        if (taskIndex < 0) return;
+
+        task.properties = column.tasks[taskIndex].properties;
+
+        column.tasks[taskIndex] = task;
+      })
       .addCase(deleteTask.fulfilled, (state, action) => {
         const { columnId, taskId } = action.payload;
         const column = state.columns.find((col) => col.id === columnId);
@@ -238,6 +205,5 @@ const kanbanSlice = createSlice({
   },
 });
 
-export const { addTask, moveTask, updateTask, updateProperty, removeTask } =
-  kanbanSlice.actions;
+export const { moveTask, updateProperty, removeTask } = kanbanSlice.actions;
 export default kanbanSlice.reducer;

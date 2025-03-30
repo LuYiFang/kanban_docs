@@ -18,7 +18,7 @@ async def create_task(task: TaskUpdate):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.put("/", response_model=TaskResponse)
+@router.put("/{task_id}", response_model=TaskResponse)
 async def upsert_task_endpoint(task_id: str, updates: TaskUpdate):
     try:
         task = await upsert_task_service(task_id, updates.model_dump())

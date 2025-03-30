@@ -4,6 +4,7 @@ import {
   createTPropertiesApi,
   deleteTaskApi,
   getAllTaskWithPropertiesApi,
+  updateTaskApi,
 } from "../../hooks/useApi";
 import { TaskUpdate } from "../../types/task";
 import { defaultProperties } from "../../types/property";
@@ -33,6 +34,32 @@ export const createTaskWithDefaultProperties = createAsyncThunk(
 
       createdTask.properties = properties;
       return createdTask;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  },
+);
+
+export const updateTask = createAsyncThunk(
+  "kanban/updateTask",
+  async (
+    {
+      columnId,
+      taskId,
+      task,
+    }: {
+      columnId: string;
+      taskId: string;
+      task: TaskUpdate;
+    },
+    thunkAPI,
+  ) => {
+    try {
+      const updatedTask = await updateTaskApi(taskId, task);
+      return {
+        columnId,
+        task: updatedTask,
+      };
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
