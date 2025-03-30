@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   DragDropContext,
   Draggable,
@@ -18,7 +18,10 @@ import { faPlus, faUser } from "@fortawesome/free-solid-svg-icons";
 import { v4 as uuidv4 } from "uuid";
 import { TaskWithProperties } from "../../types/task";
 import { priorityColor, priorityName } from "../../types/property";
-import { createTaskWithDefaultProperties } from "../../store/slices/kanbanThuck";
+import {
+  createTaskWithDefaultProperties,
+  getAllTaskWithProperties,
+} from "../../store/slices/kanbanThuck";
 
 const generateId = () => uuidv4();
 
@@ -30,6 +33,10 @@ const KanbanBoard: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<
     (TaskWithProperties & { columnId: string }) | null
   >(null);
+
+  useEffect(() => {
+    dispatch(getAllTaskWithProperties());
+  }, []);
 
   const handleDragEnd = (result: DropResult) => {
     const { source, destination } = result;
@@ -94,12 +101,6 @@ const KanbanBoard: React.FC = () => {
     };
     const columnId = "todo";
 
-    dispatch(
-      addTask({
-        columnId: columnId,
-        task: newTask,
-      }),
-    );
     dispatch(createTaskWithDefaultProperties(newTask));
     setIsDialogOpen(true);
 

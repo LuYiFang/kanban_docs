@@ -68,6 +68,14 @@ export const priorityName = propertyDefinitions.Priority.options.reduce(
   {} as Record<string, string>,
 );
 
+export const statusName = propertyDefinitions.Status.options.reduce(
+  (acc, item) => {
+    acc[item.id] = item.name;
+    return acc;
+  },
+  {} as Record<string, string>,
+);
+
 export const defaultProperties = [
   { name: "priority", value: "low" },
   { name: "status", value: "todo" },

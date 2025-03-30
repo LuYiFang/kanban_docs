@@ -2,8 +2,13 @@ import { TaskUpdate } from "../types/task";
 import apiClient from "../utils/apiClient";
 import { PropertyCreate } from "../types/property";
 
+export const getAllTaskWithPropertiesApi = async () => {
+  const response = await apiClient.get("/task/properties");
+  return response.data;
+};
+
 export const createTaskApi = async (taskData: TaskUpdate) => {
-  const response = await apiClient.post("/task/", taskData);
+  const response = await apiClient.post("/task", taskData);
   return response.data;
 };
 
