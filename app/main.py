@@ -6,8 +6,8 @@ from routes import tasks, properties
 app = FastAPI()
 
 prefix = '/api'
-app.include_router(tasks.router, prefix=prefix, tags=["tasks"])
-app.include_router(properties.router, prefix=prefix, tags=["properties"])
+app.include_router(tasks.router, prefix=prefix + '/task', tags=["tasks"])
+app.include_router(properties.router, prefix=prefix + '/property', tags=["properties"])
 
 
 @app.on_event("startup")
