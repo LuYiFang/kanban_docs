@@ -1,5 +1,7 @@
 import datetime
 import uuid
+from typing import Dict, List, Any
+
 from database import db
 
 
@@ -16,7 +18,7 @@ async def upsert_document(collection_name: str, doc_id: str,
     if not doc_id:
         doc_id = str(uuid.uuid4())
         update_data["$setOnInsert"] = {
-            "createdAt": datetime.datetime.utcnow()
+            "createdAt": datetime.datetime.now()
         }
 
     result = await db[collection_name].find_one_and_update(
@@ -27,8 +29,25 @@ async def upsert_document(collection_name: str, doc_id: str,
     )
 
     if result:
-        result["_id"] = str(result["_id"])
+        result["id"] = str(result["_id"])
     return result
+
+
+async def batch_insert_documents(
+        collection_name: str,
+        documents: List[Dict[str, Any]]
+) -> list:
+    """
+    通用的批量 upsert 方法，用於插入或更新文檔
+    """
+    for doc in documents:
+        data_now = datetime.datetime.now()
+        doc['_id'] = str(uuid.uuid4())
+        doc['updatedAt'] = data_now
+        doc['createdAt'] = data_now
+
+    result = await db[collection_name].insert_many(documents)
+    return result.inserted_ids
 
 
 async def delete_document_by_id(collection_name: str, doc_id: str) -> bool:

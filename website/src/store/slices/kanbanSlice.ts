@@ -1,7 +1,9 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Column, KanbanState } from "../../types/kanban";
 import { TaskCreate, TaskWithProperties } from "../../types/task";
 import { propertyDefinitions } from "../../types/property";
+import { createTaskApi, deleteTaskApi } from "../../hooks/useApi";
+import { createTaskWithDefaultProperties, deleteTask } from "./kanbanThuck";
 
 const initialState: KanbanState = {
   columns: [
@@ -169,7 +171,6 @@ const kanbanSlice = createSlice({
       ];
 
       const newTask: TaskWithProperties = {
-        id: task.id,
         title: task.title,
         content: task.content,
         properties: mergedProperties,
@@ -278,6 +279,20 @@ const kanbanSlice = createSlice({
 
       column.tasks = column.tasks.filter((task) => task.id !== taskId);
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(createTaskWithDefaultProperties.fulfilled, (state, action) => {
+        const { task } = action.payload;
+        const column = state.columns.find((col) => col.id === columnId);
+        if (column) column.tasks.push(task);
+      })
+      .addCase(deleteTask.fulfilled, (state, action) => {
+        const { columnId, taskId } = action.payload;
+        const column = state.columns.find((col) => col.id === columnId);
+        if (column)
+          column.tasks = column.tasks.filter((task) => task.id !== taskId);
+      });
   },
 });
 

@@ -1,7 +1,10 @@
+from typing import List
+
 from fastapi import APIRouter, HTTPException
 from models.properties import PropertyResponse, PropertyUpdate, PropertyCreate
 from services.properties import (upsert_property_service,
-                                 delete_property_service)
+                                 delete_property_service,
+                                 upsert_properties_service)
 
 router = APIRouter()
 
@@ -11,6 +14,15 @@ async def create_property(property: PropertyCreate):
     try:
         property = await upsert_property_service('', property.model_dump())
         return property
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/batch", response_model=list)
+async def create_batch_property(properties: List[PropertyCreate]):
+    try:
+        properties = await upsert_properties_service(properties)
+        return properties
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

@@ -19,9 +19,10 @@ export interface Property {
   taskId: string;
 }
 
-export interface PropertyUpdate {
+export interface PropertyCreate {
   name: string;
   value: string;
+  taskId: string;
 }
 
 export const propertyDefinitions: Record<string, PropertyConfig> = {
@@ -66,3 +67,8 @@ export const priorityName = propertyDefinitions.Priority.options.reduce(
   },
   {} as Record<string, string>,
 );
+
+export const defaultProperties = [
+  { name: "priority", value: "low" },
+  { name: "status", value: "todo" },
+];

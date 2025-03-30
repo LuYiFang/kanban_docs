@@ -18,6 +18,7 @@ import { faPlus, faUser } from "@fortawesome/free-solid-svg-icons";
 import { v4 as uuidv4 } from "uuid";
 import { TaskWithProperties } from "../../types/task";
 import { priorityColor, priorityName } from "../../types/property";
+import { createTaskWithDefaultProperties } from "../../store/slices/kanbanThuck";
 
 const generateId = () => uuidv4();
 
@@ -99,6 +100,7 @@ const KanbanBoard: React.FC = () => {
         task: newTask,
       }),
     );
+    dispatch(createTaskWithDefaultProperties(newTask));
     setIsDialogOpen(true);
 
     setSelectedTask({

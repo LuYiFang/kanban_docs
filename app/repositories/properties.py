@@ -1,9 +1,18 @@
-from repositories.base import upsert_document, delete_document_by_id
+from typing import List, Dict, Any
+
+from repositories.base import (upsert_document, delete_document_by_id,
+                               batch_insert_documents)
+
+collection_name = "properties"
 
 
 async def upsert_property(property_id: str, updates: dict) -> dict:
-    return await upsert_document("properties", property_id, updates)
+    return await upsert_document(collection_name, property_id, updates)
+
+
+async def batch_insert_properties(properties: List[Dict[str, Any]]) -> list:
+    return await batch_insert_documents(collection_name, properties)
 
 
 async def delete_property_by_id(property_id: str) -> bool:
-    return await delete_document_by_id("properties", property_id)
+    return await delete_document_by_id(collection_name, property_id)

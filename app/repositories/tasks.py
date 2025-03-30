@@ -3,13 +3,15 @@ from typing import List
 from database import db
 from repositories.base import upsert_document, delete_document_by_id
 
+collection_name = "tasks"
+
 
 async def upsert_task(task_id: str, updates: dict) -> dict:
-    return await upsert_document("tasks", task_id, updates)
+    return await upsert_document(collection_name, task_id, updates)
 
 
 async def delete_task_by_id(task_id: str) -> bool:
-    return await delete_document_by_id("tasks", task_id)
+    return await delete_document_by_id(collection_name, task_id)
 
 
 async def get_tasks_with_properties_repo() -> List[dict]:
@@ -40,5 +42,5 @@ async def get_tasks_with_properties_repo() -> List[dict]:
         }
     ]
 
-    result = await db.tasks.aggregate(pipeline).to_list(length=None)
+    result = await db[collection_name].aggregate(pipeline).to_list(length=None)
     return result
