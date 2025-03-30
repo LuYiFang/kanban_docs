@@ -1,6 +1,9 @@
+from typing import List
+
 from pydantic import BaseModel, Field
 
 from models.base import BaseResponse
+from models.properties import PropertyResponse
 
 
 class TaskBase(BaseModel):
@@ -16,3 +19,7 @@ class TaskUpdate(TaskBase):
 
 class TaskResponse(TaskBase, BaseResponse):
     pass
+
+
+class TaskWithPropertiesResponse(BaseResponse, TaskBase):
+    properties: List[PropertyResponse] = []
