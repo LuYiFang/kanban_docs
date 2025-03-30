@@ -1,23 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-
-export interface Task {
-  id: string;
-  title: string;
-  content: string;
-  properties: {
-    [key: string]: string;
-  };
-}
-
-export interface Column {
-  id: string;
-  name: string;
-  tasks: Task[];
-}
-
-export interface KanbanState {
-  columns: Column[];
-}
+import { Column, KanbanState } from "../../types/kanban";
+import { TaskCreate, TaskWithProperties } from "../../types/task";
+import { propertyDefinitions } from "../../types/property";
 
 const initialState: KanbanState = {
   columns: [
@@ -29,22 +13,42 @@ const initialState: KanbanState = {
           id: "task-1",
           title: "Setup Project",
           content: "Setup the project structure and tools.",
-          properties: {
-            Priority: "High",
-            Status: "To Do",
-            Deadline: "2025-04-01",
-            Assignee: "Alice",
-          },
+          properties: [
+            { id: "prop-1", name: "Priority", value: "high", taskId: "task-1" },
+            { id: "prop-2", name: "Status", value: "todo", taskId: "task-1" },
+            {
+              id: "prop-3",
+              name: "Deadline",
+              value: "2025-04-01",
+              taskId: "task-1",
+            },
+            {
+              id: "prop-4",
+              name: "Assignee",
+              value: "Alice",
+              taskId: "task-1",
+            },
+          ],
         },
         {
           id: "task-2",
           title: "Install Dependencies",
           content: "Install all required project dependencies.",
-          properties: {
-            Priority: "Medium",
-            Status: "To Do",
-            Deadline: "2025-04-02",
-          },
+          properties: [
+            {
+              id: "prop-5",
+              name: "Priority",
+              value: "medium",
+              taskId: "task-2",
+            },
+            { id: "prop-6", name: "Status", value: "todo", taskId: "task-2" },
+            {
+              id: "prop-7",
+              name: "Deadline",
+              value: "2025-04-02",
+              taskId: "task-2",
+            },
+          ],
         },
       ],
     },
@@ -56,12 +60,22 @@ const initialState: KanbanState = {
           id: "task-3",
           title: "UI Design",
           content: "Design the user interface for the Kanban board.",
-          properties: {
-            Priority: "High",
-            Status: "In Progress",
-            Deadline: "2025-04-03",
-            Assignee: "Bob",
-          },
+          properties: [
+            { id: "prop-8", name: "Priority", value: "high", taskId: "task-3" },
+            {
+              id: "prop-9",
+              name: "Status",
+              value: "todo",
+              taskId: "task-3",
+            },
+            {
+              id: "prop-10",
+              name: "Deadline",
+              value: "2025-04-03",
+              taskId: "task-3",
+            },
+            { id: "prop-11", name: "Assignee", value: "Bob", taskId: "task-3" },
+          ],
         },
       ],
     },
@@ -73,29 +87,51 @@ const initialState: KanbanState = {
           id: "task-4",
           title: "Research Tools",
           content: "Research and finalize Tailwind CSS tools.",
-          properties: {
-            Priority: "Low",
-            Status: "Done",
-            Deadline: "2025-04-01",
-          },
+          properties: [
+            { id: "prop-12", name: "Priority", value: "low", taskId: "task-4" },
+            { id: "prop-13", name: "Status", value: "done", taskId: "task-4" },
+            {
+              id: "prop-14",
+              name: "Deadline",
+              value: "2025-04-01",
+              taskId: "task-4",
+            },
+          ],
         },
       ],
     },
   ],
 };
 
+export const getDefaultProperties = (id: string, taskId: string) =>
+  Object.entries(propertyDefinitions).map(([name, config]) => ({
+    id: "",
+    name,
+    value: config.defaultValue || "",
+    taskId: taskId,
+  }));
+
 const updateTaskProperties = (
-  task: Task,
-  property: string,
-  value: string,
+  task: TaskWithProperties,
+  propertyName: string,
+  propertyValue: string,
 ): void => {
-  task.properties[property] = value;
+  const property = task.properties.find((prop) => prop.name === propertyName);
+
+  if (!property) return;
+
+  property.value = propertyValue;
 
   const dateNow = new Date().toISOString().split("T")[0];
-  task.properties["Update Date"] = dateNow;
 
-  if (property === "Status" && value === "Done") {
-    task.properties["Finished Date"] = dateNow;
+  if (propertyName === "Status" && propertyValue === "done") {
+    const finishedDateProperty = task.properties.find(
+      (prop) => prop.name === "Finished Date",
+    );
+
+    if (finishedDateProperty) {
+      finishedDateProperty.value = dateNow;
+    }
   }
 };
 
@@ -117,27 +153,28 @@ const kanbanSlice = createSlice({
   reducers: {
     addTask: (
       state,
-      action: PayloadAction<{ columnId: string; task: Task }>,
+      action: PayloadAction<{ columnId: string; task: TaskCreate }>,
     ) => {
       const { columnId, task } = action.payload;
+
       const column = state.columns.find((col) => col.id === columnId);
       if (!column) return;
 
       const taskExists = column.tasks.some((_task) => _task.id === task.id);
       if (taskExists) return;
 
-      const dateNow = new Date().toISOString().split("T")[0];
-      const newTask: Task = {
+      const mergedProperties = [
+        ...getDefaultProperties("", task.id),
+        ...Object.entries(task.properties),
+      ];
+
+      const newTask: TaskWithProperties = {
         id: task.id,
         title: task.title,
         content: task.content,
-        properties: {
-          ...task.properties,
-          "Create Date": dateNow,
-          "Update Date": dateNow,
-          Status: "To Do",
-        },
+        properties: mergedProperties,
       };
+
       column.tasks.push(newTask);
     },
     updateTask: (

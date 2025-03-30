@@ -16,6 +16,8 @@ import EditDialog from "../Dialog/EditDialog";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faUser } from "@fortawesome/free-solid-svg-icons";
 import { v4 as uuidv4 } from "uuid";
+import { TaskWithProperties } from "../../types/task";
+import { priorityColor, priorityName } from "../../types/property";
 
 const generateId = () => uuidv4();
 
@@ -24,13 +26,9 @@ const KanbanBoard: React.FC = () => {
   const dispatch = useDispatch();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<{
-    columnId: string;
-    taskId: string;
-    title: string;
-    content: string;
-    properties: { [key: string]: string };
-  } | null>(null);
+  const [selectedTask, setSelectedTask] = useState<
+    (TaskWithProperties & { columnId: string }) | null
+  >(null);
 
   const handleDragEnd = (result: DropResult) => {
     const { source, destination } = result;
@@ -75,19 +73,11 @@ const KanbanBoard: React.FC = () => {
     );
   };
 
-  const handleEdit = (
-    columnId: string,
-    task: {
-      id: string;
-      title: string;
-      content: string;
-      properties: { [key: string]: string };
-    },
-  ) => {
+  const handleEdit = (columnId: string, task: TaskWithProperties) => {
     setIsDialogOpen(true);
     setSelectedTask({
       columnId,
-      taskId: task.id,
+      id: task.id,
       title: task.title,
       content: task.content,
       properties: task.properties,
@@ -113,7 +103,7 @@ const KanbanBoard: React.FC = () => {
 
     setSelectedTask({
       columnId,
-      taskId: newTask.id,
+      id: newTask.id,
       title: newTask.title,
       content: newTask.content,
       properties: newTask.properties,
@@ -161,36 +151,44 @@ const KanbanBoard: React.FC = () => {
                           </div>
 
                           {/* Priority Chip */}
-                          {task.properties.Priority && (
-                            <span
-                              className={`inline-block px-2 py-1 text-xs font-semibold rounded-md ${
-                                task.properties.Priority === "High"
-                                  ? "bg-red-500 text-white"
-                                  : task.properties.Priority === "Medium"
-                                    ? "bg-orange-400 text-gray-900"
-                                    : "bg-green-500 text-white"
-                              }`}
-                            >
-                              {task.properties.Priority}
-                            </span>
-                          )}
+                          {task.properties.map((property) => {
+                            if (property.name === "Priority") {
+                              return (
+                                <span
+                                  key={`property-${property.id}`}
+                                  className={`inline-block px-2 py-1 text-xs font-semibold rounded-md ${priorityColor[property.value]}`}
+                                >
+                                  {priorityName[property.value]}
+                                </span>
+                              );
+                            }
 
-                          {/* Deadline 顯示為文字 */}
-                          {task.properties.Deadline && (
-                            <div className="text-sm text-gray-400 mt-2">
-                              {task.properties.Deadline}
-                            </div>
-                          )}
+                            if (property.name === "Deadline") {
+                              return (
+                                <div
+                                  key={`property-${property.id}`}
+                                  className="text-sm text-gray-400 mt-2"
+                                >
+                                  {property.value}
+                                </div>
+                              );
+                            }
 
-                          {task.properties.Assignee && (
-                            <div className="flex items-center text-sm text-gray-400 mt-2">
-                              <FontAwesomeIcon
-                                icon={faUser}
-                                className="w-4 h-4 text-gray-400 mr-2"
-                              />
-                              {task.properties.Assignee}
-                            </div>
-                          )}
+                            if (property.name === "Assignee") {
+                              return (
+                                <div
+                                  key={`property-${property.id}`}
+                                  className="flex items-center text-sm text-gray-400 mt-2"
+                                >
+                                  <FontAwesomeIcon
+                                    icon={faUser}
+                                    className="w-4 h-4 text-gray-400 mr-2"
+                                  />
+                                  {property.value}
+                                </div>
+                              );
+                            }
+                          })}
                         </div>
                       )}
                     </Draggable>
@@ -207,7 +205,7 @@ const KanbanBoard: React.FC = () => {
           isOpen={isDialogOpen}
           onClose={() => setIsDialogOpen(false)}
           columnId={selectedTask.columnId}
-          taskId={selectedTask.taskId}
+          taskId={selectedTask.id}
           initialTitle={selectedTask.title}
           initialContent={selectedTask.content}
           initialProperties={selectedTask.properties}

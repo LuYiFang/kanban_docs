@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
   updateTask,
@@ -8,9 +8,10 @@ import {
 import ReactMarkdown from "react-markdown";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faEllipsisH } from "@fortawesome/free-solid-svg-icons";
-import { propertyDefinitions } from "../../types/kanban";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
+import { propertyDefinitions } from "../../types/property";
+import _ from "lodash";
 
 interface EditDialogProps {
   isOpen: boolean;
@@ -61,6 +62,10 @@ const EditDialog: React.FC<EditDialogProps> = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen]);
+
+  const propertyMap = useMemo(() => {
+    return _.mapValues(_.groupBy(properties, "name"), _.first);
+  }, [properties]);
 
   const handlePropertyChange = (property: string, value: string) => {
     setProperties({ ...properties, [property]: value });
@@ -140,7 +145,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
                 {config.type === "select" && (
                   <select
                     className="w-1/3 text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
-                    value={properties[key] || ""}
+                    value={propertyMap[key]?.value || ""}
                     onChange={(e) => handlePropertyChange(key, e.target.value)}
                   >
                     {config.options?.map((option) => (
@@ -159,7 +164,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
                     <input
                       type="text"
                       className="w-full text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
-                      value={properties[key] || ""}
+                      value={propertyMap[key]?.value || ""}
                       onChange={(e) =>
                         handlePropertyChange(key, e.target.value)
                       }
@@ -170,13 +175,13 @@ const EditDialog: React.FC<EditDialogProps> = ({
                   <input
                     type="date"
                     className="w-1/3 text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
-                    value={properties[key] || ""}
+                    value={propertyMap[key]?.value || ""}
                     onChange={(e) => handlePropertyChange(key, e.target.value)}
                   />
                 )}
                 {config.type === "readonly" && (
                   <span className="w-1/3 text-sm text-gray-400">
-                    {properties[key] || "N/A"}
+                    {propertyMap[key]?.value || ""}
                   </span>
                 )}
               </div>
