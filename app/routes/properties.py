@@ -1,41 +1,33 @@
-from typing import List, Dict
-
 from fastapi import APIRouter, HTTPException
-
-from database import db
-from models import Property
+from models.properties import PropertyResponse, PropertyUpdate, PropertyCreate
+from services.properties import (upsert_property_service,
+                                 delete_property_service)
 
 router = APIRouter()
 
 
-@router.post("/properties", response_model=Property)
-async def create_update_properties(task_id: str, properties: List[Property]):
-    for item in properties:
-        result = await db.properties.update_one(
-            {"_id": item.id, "taskId": task_id},
-            {"$set": {"value": item.value, "name": item.name}},
-            upsert=True
-        )
-        if result.matched_count == 0 and not result.upserted_id:
-            raise HTTPException(status_code=400,
-                                detail=f"Failed to update property {item.id}")
-    return {"message": "Properties updated successfully"}
+@router.post("/", response_model=PropertyResponse)
+async def create_property(property: PropertyCreate):
+    try:
+        property = await upsert_property_service('', property.model_dump())
+        return property
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.delete("/properties")
-async def delete_properties(ids: List[str]):
-    result = await db.properties.delete_many({"_id": {"$in": ids}})
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404,
-                            detail="No properties found to delete")
-    return {
-        "message": f"{result.deleted_count} properties deleted successfully"}
+@router.put("/", response_model=PropertyResponse)
+async def upsert_property_endpoint(property_id: str, updates: PropertyUpdate):
+    try:
+        property = await upsert_property_service(property_id,
+                                                 updates.model_dump())
+        return property
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.get("/tasks/{task_id}/properties", response_model=Dict[str, Property])
-async def get_task_properties(task_id: str):
-    properties = await db.properties.find({"taskId": task_id}).to_list()
-    if not properties:
-        raise HTTPException(status_code=404,
-                            detail="No properties found for the task")
-    return {prop["name"]: prop["value"] for prop in properties}
+@router.delete("/{property_id}")
+async def delete_property_endpoint(property_id: str):
+    success = await delete_property_service(property_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Property not found")
+    return {"message": "Property deleted successfully"}

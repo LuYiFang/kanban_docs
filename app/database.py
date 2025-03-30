@@ -22,3 +22,9 @@ async def initialize_collections():
         await db.create_collection(collection_name)
         print(f"Collection '{collection_name}' initialized.")
 
+    db.properties.create_index(
+        [("taskId", 1), ("name", 1)],
+        unique=True
+    )
+
+
