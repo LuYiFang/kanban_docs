@@ -1,5 +1,6 @@
 from typing import List, Dict, Any
 
+from database import db
 from repositories.base import (upsert_document, delete_document_by_id,
                                batch_insert_documents)
 
@@ -16,3 +17,8 @@ async def batch_insert_properties(properties: List[Dict[str, Any]]) -> list:
 
 async def delete_property_by_id(property_id: str) -> bool:
     return await delete_document_by_id(collection_name, property_id)
+
+
+async def delete_properties_by_task_id(task_id: str) -> bool:
+    result = await db[collection_name].delete_many({'taskId': task_id})
+    return result.deleted_count > 0

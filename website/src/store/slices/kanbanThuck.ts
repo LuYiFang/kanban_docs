@@ -2,7 +2,8 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
   createTaskApi,
   createTPropertiesApi,
-  deleteTaskApi,
+  deletePropertiesApi,
+  deleteTaskWithPropertiesApi,
   getAllTaskWithPropertiesApi,
   updateTaskApi,
 } from "../../hooks/useApi";
@@ -66,11 +67,20 @@ export const updateTask = createAsyncThunk(
   },
 );
 
-export const deleteTask = createAsyncThunk(
+export const removeTask = createAsyncThunk(
   "kanban/deleteTask",
-  async ({ columnId, taskId }, thunkAPI) => {
+  async (
+    {
+      columnId,
+      taskId,
+    }: {
+      columnId: string;
+      taskId: string;
+    },
+    thunkAPI,
+  ) => {
     try {
-      await deleteTaskApi(taskId);
+      await deleteTaskWithPropertiesApi(taskId);
       return { columnId, taskId };
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);

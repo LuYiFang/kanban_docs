@@ -24,7 +24,12 @@ export const updateTaskApi = async (taskId: string, taskData: TaskUpdate) => {
   return response.data;
 };
 
-export const deleteTaskApi = async (taskId: string) => {
-  const response = await apiClient.delete(`/task/${taskId}`);
+export const deleteTaskWithPropertiesApi = async (taskId: string) => {
+  const response = await apiClient.delete(`/task/${taskId}/properties`);
+  return response.data;
+};
+
+export const deletePropertiesApi = async (taskId: string) => {
+  const response = await apiClient.delete(`/property/task/${taskId}`);
   return response.data;
 };

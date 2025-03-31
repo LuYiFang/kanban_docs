@@ -1,7 +1,8 @@
 from typing import List
 
 from repositories.properties import (upsert_property, delete_property_by_id,
-                                     batch_insert_properties)
+                                     batch_insert_properties,
+                                     delete_properties_by_task_id)
 from models.properties import PropertyResponse, PropertyCreate
 from services.base import upsert_service, delete_service
 
@@ -18,3 +19,7 @@ async def upsert_properties_service(properties: List[PropertyCreate]) -> list:
 
 async def delete_property_service(property_id: str) -> bool:
     return await delete_service(delete_property_by_id, property_id)
+
+
+async def delete_property_by_task(task_id: str) -> bool:
+    return await delete_properties_by_task_id(task_id)

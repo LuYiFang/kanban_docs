@@ -4,7 +4,7 @@ import { TaskCreate, TaskWithProperties } from "../../types/task";
 import { propertyDefinitions, statusName } from "../../types/property";
 import {
   createTaskWithDefaultProperties,
-  deleteTask,
+  removeTask,
   getAllTaskWithProperties,
   updateTask,
 } from "./kanbanThuck";
@@ -149,16 +149,6 @@ const kanbanSlice = createSlice({
 
       updateTaskProperties(task, "Status", destinationColumn.name);
     },
-    removeTask: (
-      state,
-      action: PayloadAction<{ columnId: string; taskId: string }>,
-    ) => {
-      const { columnId, taskId } = action.payload;
-      const column = state.columns.find((col) => col.id === columnId);
-      if (!column) return;
-
-      column.tasks = column.tasks.filter((task) => task.id !== taskId);
-    },
   },
   extraReducers: (builder) => {
     builder
@@ -183,7 +173,9 @@ const kanbanSlice = createSlice({
         const task = action.payload;
         const status = task.properties.find((p) => p.name === "status").value;
         const column = state.columns.find((col) => col.id === status);
-        if (column) column.tasks.push(task);
+        if (!column) return;
+
+        column.tasks.push(task);
       })
       .addCase(updateTask.fulfilled, (state, action) => {
         const { columnId, task } = action.payload;
@@ -196,14 +188,15 @@ const kanbanSlice = createSlice({
 
         column.tasks[taskIndex] = task;
       })
-      .addCase(deleteTask.fulfilled, (state, action) => {
+      .addCase(removeTask.fulfilled, (state, action) => {
         const { columnId, taskId } = action.payload;
         const column = state.columns.find((col) => col.id === columnId);
-        if (column)
-          column.tasks = column.tasks.filter((task) => task.id !== taskId);
+        if (!column) return;
+
+        column.tasks = column.tasks.filter((task) => task.id !== taskId);
       });
   },
 });
 
-export const { moveTask, updateProperty, removeTask } = kanbanSlice.actions;
+export const { moveTask, updateProperty } = kanbanSlice.actions;
 export default kanbanSlice.reducer;

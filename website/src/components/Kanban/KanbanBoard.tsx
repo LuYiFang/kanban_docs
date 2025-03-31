@@ -7,23 +7,16 @@ import {
 } from "react-beautiful-dnd";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
-import {
-  addTask,
-  moveTask,
-  updateProperty,
-} from "../../store/slices/kanbanSlice";
+import { moveTask, updateProperty } from "../../store/slices/kanbanSlice";
 import EditDialog from "../Dialog/EditDialog";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faUser } from "@fortawesome/free-solid-svg-icons";
-import { v4 as uuidv4 } from "uuid";
 import { TaskWithProperties } from "../../types/task";
 import { priorityColor, priorityName } from "../../types/property";
 import {
   createTaskWithDefaultProperties,
   getAllTaskWithProperties,
 } from "../../store/slices/kanbanThuck";
-
-const generateId = () => uuidv4();
 
 const KanbanBoard: React.FC = () => {
   const columns = useSelector((state: RootState) => state.kanban.columns);
@@ -94,23 +87,27 @@ const KanbanBoard: React.FC = () => {
 
   const handleAddTask = () => {
     const newTask = {
-      id: generateId(),
       title: "",
       content: "",
       properties: {},
     };
     const columnId = "todo";
 
-    dispatch(createTaskWithDefaultProperties(newTask));
-    setIsDialogOpen(true);
-
-    setSelectedTask({
-      columnId,
-      id: newTask.id,
-      title: newTask.title,
-      content: newTask.content,
-      properties: newTask.properties,
-    });
+    dispatch(createTaskWithDefaultProperties(newTask))
+      .unwrap()
+      .then((createdTask) => {
+        setIsDialogOpen(true);
+        setSelectedTask({
+          columnId,
+          id: createdTask.id,
+          title: createdTask.title,
+          content: createdTask.content,
+          properties: createdTask.properties,
+        });
+      })
+      .catch((error) => {
+        console.error("Error creating task:", error);
+      });
   };
 
   return (

@@ -43,3 +43,11 @@ async def delete_property_endpoint(property_id: str):
     if not success:
         raise HTTPException(status_code=404, detail="Property not found")
     return {"message": "Property deleted successfully"}
+
+
+@router.delete("/task/{task_id}")
+async def delete_property_by_task_endpoint(property_id: str):
+    success = await delete_property_service(property_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Property not found")
+    return {"message": "Property deleted successfully"}

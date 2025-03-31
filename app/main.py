@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from database import initialize_collections
-from routes import tasks, properties
+from routes import tasks, properties, tasks_with_properties
 
 app = FastAPI()
 
@@ -22,6 +22,8 @@ prefix = '/api'
 app.include_router(tasks.router, prefix=prefix + '/task', tags=["tasks"])
 app.include_router(properties.router, prefix=prefix + '/property',
                    tags=["properties"])
+app.include_router(tasks_with_properties.router, prefix=prefix,
+                   tags=["tasks_with_properties"])
 
 
 @app.on_event("startup")
