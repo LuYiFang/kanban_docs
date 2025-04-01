@@ -92,7 +92,6 @@ const KanbanBoard: React.FC = () => {
       content: "",
       properties: {},
     };
-    const columnId = "todo";
 
     dispatch(createTaskWithDefaultProperties(newTask))
       .unwrap()
@@ -147,7 +146,7 @@ const KanbanBoard: React.FC = () => {
 
                           {/* Priority Chip */}
                           {task.properties.map((property) => {
-                            if (property.name === "Priority") {
+                            if (property.name === "priority") {
                               return (
                                 <span
                                   key={`property-${property.id}`}

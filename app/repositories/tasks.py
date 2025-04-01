@@ -30,7 +30,20 @@ async def get_tasks_with_properties_repo() -> List[dict]:
                 "title": 1,
                 "content": 1,
                 "createdAt": 1,
-                "updatedAt": 1,
+                "updatedAt": {
+                    "$max": {
+                        "$concatArrays": [
+                            ["$updatedAt"],
+                            {
+                                "$map": {
+                                    "input": "$properties",
+                                    "as": "property",
+                                    "in": "$$property.updatedAt"
+                                }
+                            }
+                        ]
+                    }
+                },
                 "properties": {
                     "$map": {
                         "input": "$properties",
@@ -43,7 +56,6 @@ async def get_tasks_with_properties_repo() -> List[dict]:
                             "updatedAt": "$$property.updatedAt"
                         }
                     }
-
                 }
             }
         }

@@ -7,6 +7,8 @@ import {
   updateProperty,
   updateTask,
 } from "./kanbanThuck";
+import { convertUtcToLocal } from "../../utils/tools";
+import _ from "lodash";
 
 const initialState: Tasks = {
   tasks: [
@@ -60,6 +62,18 @@ const kanbanSlice = createSlice({
     builder
       .addCase(getAllTaskWithProperties.fulfilled, (state, action) => {
         const tasks = action.payload;
+        const timeName = ["createdAt", "updatedAt"];
+        _.each(tasks, (task) => {
+          _.each(timeName, (tn) => {
+            task[tn] = convertUtcToLocal(task[tn]);
+          });
+
+          _.each(task.properties, (prop) => {
+            _.each(timeName, (tn) => {
+              prop[tn] = convertUtcToLocal(prop[tn]);
+            });
+          });
+        });
         state.tasks = tasks;
       })
       .addCase(createTaskWithDefaultProperties.fulfilled, (state, action) => {

@@ -18,7 +18,7 @@ async def upsert_document(collection_name: str, doc_id: str,
     if not doc_id:
         doc_id = str(uuid.uuid4())
         update_data["$setOnInsert"] = {
-            "createdAt": datetime.datetime.now()
+            "createdAt": datetime.datetime.utcnow()
         }
 
     result = await db[collection_name].find_one_and_update(
@@ -41,7 +41,7 @@ async def batch_insert_documents(
     通用的批量 upsert 方法，用於插入或更新文檔
     """
     for doc in documents:
-        data_now = datetime.datetime.now()
+        data_now = datetime.datetime.utcnow()
         doc['_id'] = str(uuid.uuid4())
         doc['updatedAt'] = data_now
         doc['createdAt'] = data_now
