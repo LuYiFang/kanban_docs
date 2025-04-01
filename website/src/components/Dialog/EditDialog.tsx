@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ReactMarkdown from "react-markdown";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faEllipsisH } from "@fortawesome/free-solid-svg-icons";
+import { faEllipsisH, faUser } from "@fortawesome/free-solid-svg-icons";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { propertyDefinitions } from "../../types/property";
@@ -21,18 +21,13 @@ interface EditDialogProps {
   taskId: string;
 }
 
-const EditDialog: React.FC<EditDialogProps> = ({
-  isOpen,
-  onClose,
-  taskId,
-}) => {
+const EditDialog: React.FC<EditDialogProps> = ({ isOpen, onClose, taskId }) => {
   const dispatch = useDispatch();
   const task = useSelector((state: RootState) => {
     return state.kanban.tasks.find((t) => t.id === taskId) || {};
   });
   const [title, setTitle] = useState(task.title);
   const [content, setContent] = useState(task.content);
-  const [properties, setProperties] = useState(task.properties);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -40,7 +35,6 @@ const EditDialog: React.FC<EditDialogProps> = ({
     if (isOpen) {
       setTitle(task.title);
       setContent(task.content);
-      setProperties(task.properties);
     }
   }, [isOpen, task]);
 
@@ -61,12 +55,12 @@ const EditDialog: React.FC<EditDialogProps> = ({
   }, [isOpen]);
 
   const propertyMap = useMemo(() => {
-    return _.mapValues(_.groupBy(properties, "name"), _.first);
-  }, [properties]);
+    return _.mapValues(_.groupBy(task.properties, "name"), _.first);
+  }, [task.properties]);
 
   const handlePropertyChange = (property: string, value: string) => {
-    setProperties({ ...properties, [property]: value });
     const propertyId = propertyMap[property.toLowerCase()]?.id;
+    if (!propertyId) return;
     dispatch(updateProperty({ taskId: task.id, propertyId, property, value }));
   };
 

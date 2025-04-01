@@ -11,47 +11,7 @@ import { convertUtcToLocal } from "../../utils/tools";
 import _ from "lodash";
 
 const initialState: Tasks = {
-  tasks: [
-    {
-      id: "1",
-      title: "",
-      content: "",
-      properties: [
-        {
-          id: "1",
-          name: "status",
-          value: "todo",
-          taskId: "1",
-        },
-      ],
-    },
-    {
-      id: "2",
-      title: "",
-      content: "",
-      properties: [
-        {
-          id: "2",
-          name: "status",
-          value: "in-progress",
-          taskId: "2",
-        },
-      ],
-    },
-    {
-      id: "3",
-      title: "",
-      content: "",
-      properties: [
-        {
-          id: "3",
-          name: "status",
-          value: "done",
-          taskId: "3",
-        },
-      ],
-    },
-  ],
+  tasks: [],
 };
 
 const kanbanSlice = createSlice({
@@ -84,6 +44,10 @@ const kanbanSlice = createSlice({
         const { task } = action.payload;
         const taskIndex = state.tasks.findIndex((t) => t.id === task.id);
         if (taskIndex < 0) return;
+        const timeName = ["createdAt", "updatedAt"];
+        _.each(timeName, (tn) => {
+          task[tn] = convertUtcToLocal(task[tn]);
+        });
 
         state.tasks[taskIndex] = {
           ...task,

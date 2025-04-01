@@ -113,7 +113,7 @@ const KanbanBoard: React.FC = () => {
         <FontAwesomeIcon icon={faPlus} className="w-6 h-6" />
       </button>
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-3 gap-4 p-4">
+        <div className="grid grid-cols-5 gap-4 p-4">
           {_.map(columns, (column) => (
             <Droppable droppableId={column.id} key={column.id}>
               {(provided) => (

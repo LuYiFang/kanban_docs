@@ -44,8 +44,20 @@ export const propertyDefinitions: Record<string, PropertyConfig> = {
       { id: "todo", name: "To Do" },
       { id: "in-progress", name: "In Progress" },
       { id: "done", name: "Done" },
+      { id: "cancelled", name: "Cancelled" },
+      { id: "deferred", name: "Deferred" },
     ],
     defaultValue: "todo",
+  },
+  Level: {
+    type: "select",
+    options: [
+      { id: "a-level", name: "A Level" },
+      { id: "b-level", name: "B Level" },
+      { id: "c-level", name: "C Level" },
+      { id: "d-level", name: "D Level" },
+    ],
+    defaultValue: "c-level",
   },
   Assignee: { type: "member", defaultValue: "" },
   Deadline: { type: "date" },
@@ -79,4 +91,5 @@ export const statusName = propertyDefinitions.Status.options.reduce(
 export const defaultProperties = [
   { name: "priority", value: "low" },
   { name: "status", value: "todo" },
+  { name: "level", value: "c-level" },
 ];

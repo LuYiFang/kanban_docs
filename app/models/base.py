@@ -1,6 +1,6 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
-from pydantic import BaseModel, field_validator, Field
+from pydantic import BaseModel, field_validator
 
 
 class TransformDate(BaseModel):
@@ -22,5 +22,6 @@ class BaseResponse(BaseModel):
     @field_validator("createdAt", "updatedAt", mode="before")
     def parse_datetime(cls, value):
         if isinstance(value, datetime):
-            return value.strftime("%Y/%m/%d %H:%M:%S")
+            utc_time = value.replace(tzinfo=timezone.utc)
+            return utc_time.isoformat()
         return value
