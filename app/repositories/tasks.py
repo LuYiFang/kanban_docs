@@ -32,11 +32,18 @@ async def get_tasks_with_properties_repo() -> List[dict]:
                 "createdAt": 1,
                 "updatedAt": 1,
                 "properties": {
-                    "id": "$_id",
-                    "name": 1,
-                    "value": 1,
-                    "createdAt": 1,
-                    "updatedAt": 1
+                    "$map": {
+                        "input": "$properties",
+                        "as": "property",
+                        "in": {
+                            "id": "$$property._id",
+                            "name": "$$property.name",
+                            "value": "$$property.value",
+                            "createdAt": "$$property.createdAt",
+                            "updatedAt": "$$property.updatedAt"
+                        }
+                    }
+
                 }
             }
         }

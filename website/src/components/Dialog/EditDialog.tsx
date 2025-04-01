@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useDispatch } from "react-redux";
-import { updateProperty } from "../../store/slices/kanbanSlice";
+import { useDispatch, useSelector } from "react-redux";
 import ReactMarkdown from "react-markdown";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser, faEllipsisH } from "@fortawesome/free-solid-svg-icons";
@@ -8,41 +7,42 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { propertyDefinitions } from "../../types/property";
 import _ from "lodash";
-import { removeTask, updateTask } from "../../store/slices/kanbanThuck";
+import {
+  deleteTask,
+  updateProperty,
+  updateTask,
+} from "../../store/slices/kanbanThuck";
+import { RootState } from "../../store/store";
 
 interface EditDialogProps {
   isOpen: boolean;
   onClose: () => void;
   columnId: string;
   taskId: string;
-  initialTitle: string;
-  initialContent: string;
-  initialProperties: { [key: string]: string };
 }
 
 const EditDialog: React.FC<EditDialogProps> = ({
   isOpen,
   onClose,
-  columnId,
   taskId,
-  initialTitle,
-  initialContent,
-  initialProperties,
 }) => {
   const dispatch = useDispatch();
-  const [title, setTitle] = useState(initialTitle);
-  const [content, setContent] = useState(initialContent);
-  const [properties, setProperties] = useState(initialProperties);
+  const task = useSelector((state: RootState) => {
+    return state.kanban.tasks.find((t) => t.id === taskId) || {};
+  });
+  const [title, setTitle] = useState(task.title);
+  const [content, setContent] = useState(task.content);
+  const [properties, setProperties] = useState(task.properties);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen) {
-      setTitle(initialTitle);
-      setContent(initialContent);
-      setProperties(initialProperties);
+      setTitle(task.title);
+      setContent(task.content);
+      setProperties(task.properties);
     }
-  }, [isOpen, initialTitle, initialContent, initialProperties]);
+  }, [isOpen, task]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -66,13 +66,14 @@ const EditDialog: React.FC<EditDialogProps> = ({
 
   const handlePropertyChange = (property: string, value: string) => {
     setProperties({ ...properties, [property]: value });
-    dispatch(updateProperty({ columnId, taskId, property, value }));
+    const propertyId = propertyMap[property.toLowerCase()]?.id;
+    dispatch(updateProperty({ taskId: task.id, propertyId, property, value }));
   };
 
   const handleDeleteTask = () => {
-    dispatch(removeTask({ columnId, taskId }));
     onClose();
     setIsMenuOpen(false);
+    dispatch(deleteTask({ taskId }));
   };
 
   if (!isOpen) return null;
@@ -80,7 +81,6 @@ const EditDialog: React.FC<EditDialogProps> = ({
   const handleOverlayClick = () => {
     dispatch(
       updateTask({
-        columnId,
         taskId,
         task: {
           title,
@@ -138,53 +138,55 @@ const EditDialog: React.FC<EditDialogProps> = ({
         <div>
           <h3 className="text-lg font-bold text-gray-200 mb-2">Properties</h3>
           <div className="flex flex-col space-y-1">
-            {Object.entries(propertyDefinitions).map(([key, config]) => (
-              <div key={key} className="flex items-center space-x-2">
-                <span className="w-24 text-sm text-gray-300">{key}:</span>{" "}
-                {config.type === "select" && (
-                  <select
-                    className="w-1/3 text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
-                    value={propertyMap[key]?.value || ""}
-                    onChange={(e) => handlePropertyChange(key, e.target.value)}
-                  >
-                    {config.options?.map((option) => (
-                      <option key={option.id} value={option.id}>
-                        {option.name}
-                      </option>
-                    ))}
-                  </select>
-                )}
-                {config.type === "member" && (
-                  <div className="flex items-center space-x-2 w-1/3">
-                    <FontAwesomeIcon
-                      icon={faUser}
-                      className="w-4 h-4 text-gray-300"
-                    />
+            {Object.entries(propertyDefinitions).map(([_key, config]) => {
+              const key = _key.toLowerCase();
+              const value = propertyMap[key]?.value || "";
+              const onChange = (e) => handlePropertyChange(key, e.target.value);
+
+              return (
+                <div key={key} className="flex items-center space-x-2">
+                  <span className="w-24 text-sm text-gray-300">{key}:</span>{" "}
+                  {config.type === "select" && (
+                    <select
+                      className="w-1/3 text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
+                      value={value}
+                      onChange={onChange}
+                    >
+                      {config.options?.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  {config.type === "member" && (
+                    <div className="flex items-center space-x-2 w-1/3">
+                      <FontAwesomeIcon
+                        icon={faUser}
+                        className="w-4 h-4 text-gray-300"
+                      />
+                      <input
+                        type="text"
+                        className="w-full text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
+                        value={value}
+                        onChange={onChange}
+                      />
+                    </div>
+                  )}
+                  {config.type === "date" && (
                     <input
-                      type="text"
-                      className="w-full text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
-                      value={propertyMap[key]?.value || ""}
-                      onChange={(e) =>
-                        handlePropertyChange(key, e.target.value)
-                      }
+                      type="date"
+                      className="w-1/3 text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
+                      value={value}
+                      onChange={onChange}
                     />
-                  </div>
-                )}
-                {config.type === "date" && (
-                  <input
-                    type="date"
-                    className="w-1/3 text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
-                    value={propertyMap[key]?.value || ""}
-                    onChange={(e) => handlePropertyChange(key, e.target.value)}
-                  />
-                )}
-                {config.type === "readonly" && (
-                  <span className="w-1/3 text-sm text-gray-400">
-                    {propertyMap[key]?.value || ""}
-                  </span>
-                )}
-              </div>
-            ))}
+                  )}
+                  {config.type === "readonly" && (
+                    <span className="w-1/3 text-sm text-gray-400">{value}</span>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 

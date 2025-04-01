@@ -27,7 +27,7 @@ async def create_batch_property(properties: List[PropertyCreate]):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.put("/", response_model=PropertyResponse)
+@router.put("/{property_id}", response_model=PropertyResponse)
 async def upsert_property_endpoint(property_id: str, updates: PropertyUpdate):
     try:
         property = await upsert_property_service(property_id,

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   DragDropContext,
   Draggable,
@@ -7,20 +7,39 @@ import {
 } from "react-beautiful-dnd";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
-import { moveTask, updateProperty } from "../../store/slices/kanbanSlice";
+import { moveTask } from "../../store/slices/kanbanSlice";
 import EditDialog from "../Dialog/EditDialog";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faUser } from "@fortawesome/free-solid-svg-icons";
 import { TaskWithProperties } from "../../types/task";
-import { priorityColor, priorityName } from "../../types/property";
+import { priorityColor, priorityName, statusName } from "../../types/property";
 import {
   createTaskWithDefaultProperties,
   getAllTaskWithProperties,
+  updateProperty,
 } from "../../store/slices/kanbanThuck";
+import _ from "lodash";
 
 const KanbanBoard: React.FC = () => {
-  const columns = useSelector((state: RootState) => state.kanban.columns);
+  const tasks = useSelector((state: RootState) => state.kanban.tasks);
   const dispatch = useDispatch();
+
+  const columns = useMemo(() => {
+    const colGroup = _.groupBy(tasks, (task) => {
+      return task.properties.find((prop) => prop.name === "status").value;
+    });
+
+    const defaultGroup = {};
+    _.each(statusName, (colTitle, colId) => {
+      defaultGroup[colId] = {
+        id: colId,
+        name: colTitle,
+        tasks: colGroup[colId] || [],
+      };
+    });
+
+    return _.values(defaultGroup);
+  }, [tasks]);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<
@@ -46,43 +65,25 @@ const KanbanBoard: React.FC = () => {
     const taskId = result.draggableId;
     if (!taskId) return;
 
-    dispatch(
-      moveTask({
-        sourceColumnId: source.droppableId,
-        destinationColumnId: destination.droppableId,
-        sourceIndex: source.index,
-        destinationIndex: destination.index,
-      }),
-    );
+    const task = tasks.find((task) => task.id === taskId);
+    if (!task) return;
 
-    const columnStatusMap: { [key: string]: string } = {
-      todo: "To Do",
-      "in-progress": "In Progress",
-      done: "Done",
-    };
-
-    const newStatus = columnStatusMap[destination.droppableId];
-    if (!newStatus) return;
+    const property = task.properties.find((p) => p.name === "status");
+    if (!property) return;
 
     dispatch(
       updateProperty({
-        columnId: destination.droppableId,
         taskId,
-        property: "Status",
-        value: newStatus,
+        property: "status",
+        propertyId: property.id,
+        value: destination.droppableId,
       }),
     );
   };
 
-  const handleEdit = (columnId: string, task: TaskWithProperties) => {
+  const handleEdit = (task: TaskWithProperties) => {
     setIsDialogOpen(true);
-    setSelectedTask({
-      columnId,
-      id: task.id,
-      title: task.title,
-      content: task.content,
-      properties: task.properties,
-    });
+    setSelectedTask(task);
   };
 
   const handleAddTask = () => {
@@ -97,13 +98,7 @@ const KanbanBoard: React.FC = () => {
       .unwrap()
       .then((createdTask) => {
         setIsDialogOpen(true);
-        setSelectedTask({
-          columnId,
-          id: createdTask.id,
-          title: createdTask.title,
-          content: createdTask.content,
-          properties: createdTask.properties,
-        });
+        setSelectedTask(createdTask);
       })
       .catch((error) => {
         console.error("Error creating task:", error);
@@ -120,7 +115,7 @@ const KanbanBoard: React.FC = () => {
       </button>
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="grid grid-cols-3 gap-4 p-4">
-          {columns.map((column) => (
+          {_.map(columns, (column) => (
             <Droppable droppableId={column.id} key={column.id}>
               {(provided) => (
                 <div
@@ -143,7 +138,7 @@ const KanbanBoard: React.FC = () => {
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
                           className="p-4 mb-2 bg-gray-700 rounded shadow"
-                          onClick={() => handleEdit(column.id, task)}
+                          onClick={() => handleEdit(task)}
                         >
                           {/* 任務標題 */}
                           <div className="font-bold text-gray-100">
@@ -206,9 +201,6 @@ const KanbanBoard: React.FC = () => {
           onClose={() => setIsDialogOpen(false)}
           columnId={selectedTask.columnId}
           taskId={selectedTask.id}
-          initialTitle={selectedTask.title}
-          initialContent={selectedTask.content}
-          initialProperties={selectedTask.properties}
         />
       )}
     </>
