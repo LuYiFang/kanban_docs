@@ -132,14 +132,14 @@ const EditDialog: React.FC<EditDialogProps> = ({ isOpen, onClose, taskId }) => {
         <div>
           <h3 className="text-lg font-bold text-gray-200 mb-2">Properties</h3>
           <div className="flex flex-col space-y-1">
-            {Object.entries(propertyDefinitions).map(([_key, config]) => {
-              const key = _key.toLowerCase();
+            {Object.entries(propertyDefinitions).map(([key, config]) => {
+              const title = config.name || "";
               const value = propertyMap[key]?.value || "";
               const onChange = (e) => handlePropertyChange(key, e.target.value);
 
               return (
                 <div key={key} className="flex items-center space-x-2">
-                  <span className="w-24 text-sm text-gray-300">{key}:</span>{" "}
+                  <span className="w-24 text-sm text-gray-300">{title}:</span>{" "}
                   {config.type === "select" && (
                     <select
                       className="w-1/3 text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"

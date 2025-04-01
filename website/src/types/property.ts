@@ -7,6 +7,7 @@ export interface PropertyOption {
 }
 
 export interface PropertyConfig {
+  name: string;
   type: PropertyType;
   options?: PropertyOption[];
   defaultValue?: string;
@@ -26,7 +27,8 @@ export interface PropertyCreate {
 }
 
 export const propertyDefinitions: Record<string, PropertyConfig> = {
-  Priority: {
+  priority: {
+    name: "Priority",
     type: "select",
     options: [
       { id: "high", name: "High" },
@@ -38,7 +40,8 @@ export const propertyDefinitions: Record<string, PropertyConfig> = {
     ],
     defaultValue: "low",
   },
-  Status: {
+  status: {
+    name: "Status",
     type: "select",
     options: [
       { id: "todo", name: "To Do" },
@@ -49,7 +52,8 @@ export const propertyDefinitions: Record<string, PropertyConfig> = {
     ],
     defaultValue: "todo",
   },
-  Level: {
+  level: {
+    name: "Level",
     type: "select",
     options: [
       { id: "a-level", name: "A Level" },
@@ -59,11 +63,14 @@ export const propertyDefinitions: Record<string, PropertyConfig> = {
     ],
     defaultValue: "c-level",
   },
-  Assignee: { type: "member", defaultValue: "" },
-  Deadline: { type: "date" },
-  "Create Date": { type: "readonly" },
-  "Update Date": { type: "readonly" },
-  "Finished Date": { type: "date" },
+  assignee: {
+    name: "Assignee",
+    type: "member", defaultValue: "" },
+  deadline: {
+    name: "Deadline",type: "date" },
+  "createdAt": {name: "CreatedAt", type: "readonly" },
+  "updatedAt": { name: "UpdatedAt",type: "readonly" },
+  "finishedAt": { name: "FinishedAt",type: "date" },
 };
 
 export const priorityColor = {
@@ -72,7 +79,7 @@ export const priorityColor = {
   low: "bg-green-500 text-white",
 };
 
-export const priorityName = propertyDefinitions.Priority.options.reduce(
+export const priorityName = propertyDefinitions.priority.options.reduce(
   (acc, item) => {
     acc[item.id] = item.name;
     return acc;
@@ -80,7 +87,7 @@ export const priorityName = propertyDefinitions.Priority.options.reduce(
   {} as Record<string, string>,
 );
 
-export const statusName = propertyDefinitions.Status.options.reduce(
+export const statusName = propertyDefinitions.status.options.reduce(
   (acc, item) => {
     acc[item.id] = item.name;
     return acc;
@@ -92,4 +99,7 @@ export const defaultProperties = [
   { name: "priority", value: "low" },
   { name: "status", value: "todo" },
   { name: "level", value: "c-level" },
+  { name: "assignee", value: "" },
+  { name: "deadline", value: "" },
+  { name: "finishedAt", value: "" },
 ];

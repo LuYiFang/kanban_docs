@@ -1,18 +1,12 @@
-import React, { useEffect, useMemo, useState } from "react";
-import {
-  DragDropContext,
-  Draggable,
-  Droppable,
-  DropResult,
-} from "react-beautiful-dnd";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../store/store";
-import { moveTask } from "../../store/slices/kanbanSlice";
+import React, {useEffect, useMemo, useState} from "react";
+import {DragDropContext, Draggable, Droppable, DropResult,} from "react-beautiful-dnd";
+import {useDispatch, useSelector} from "react-redux";
+import {RootState} from "../../store/store";
 import EditDialog from "../Dialog/EditDialog";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faUser } from "@fortawesome/free-solid-svg-icons";
-import { TaskWithProperties } from "../../types/task";
-import { priorityColor, priorityName, statusName } from "../../types/property";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faPlus, faUser} from "@fortawesome/free-solid-svg-icons";
+import {TaskWithProperties} from "../../types/task";
+import {priorityColor, priorityName, statusName} from "../../types/property";
 import {
   createTaskWithDefaultProperties,
   getAllTaskWithProperties,
@@ -139,13 +133,13 @@ const KanbanBoard: React.FC = () => {
                           className="p-4 mb-2 bg-gray-700 rounded shadow"
                           onClick={() => handleEdit(task)}
                         >
-                          {/* 任務標題 */}
                           <div className="font-bold text-gray-100">
                             {task.title}
                           </div>
 
                           {/* Priority Chip */}
                           {task.properties.map((property) => {
+                            if (!property.id) return ''
                             if (property.name === "priority") {
                               return (
                                 <span
@@ -157,7 +151,7 @@ const KanbanBoard: React.FC = () => {
                               );
                             }
 
-                            if (property.name === "Deadline") {
+                            if (property.name === "deadline") {
                               return (
                                 <div
                                   key={`property-${property.id}`}
@@ -168,7 +162,7 @@ const KanbanBoard: React.FC = () => {
                               );
                             }
 
-                            if (property.name === "Assignee") {
+                            if (property.name === "assignee") {
                               return (
                                 <div
                                   key={`property-${property.id}`}
@@ -182,6 +176,7 @@ const KanbanBoard: React.FC = () => {
                                 </div>
                               );
                             }
+                            return ''
                           })}
                         </div>
                       )}
