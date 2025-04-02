@@ -68,8 +68,6 @@ export const propertyDefinitions: Record<string, PropertyConfig> = {
     type: "member", defaultValue: "" },
   deadline: {
     name: "Deadline",type: "date" },
-  "createdAt": {name: "CreatedAt", type: "readonly" },
-  "updatedAt": { name: "UpdatedAt",type: "readonly" },
   "finishedAt": { name: "FinishedAt",type: "date" },
 };
 
