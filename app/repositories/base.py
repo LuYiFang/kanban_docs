@@ -2,11 +2,11 @@ import datetime
 import uuid
 from typing import Dict, List, Any
 
-from database import db
+from motor.core import AgnosticDatabase
 
 
 async def upsert_document(collection_name: str, doc_id: str,
-                          updates: dict) -> dict:
+                          updates: dict, db: AgnosticDatabase) -> dict:
     """
     通用的 upsert 方法，用於插入或更新文檔
     """
@@ -35,7 +35,8 @@ async def upsert_document(collection_name: str, doc_id: str,
 
 async def batch_insert_documents(
         collection_name: str,
-        documents: List[Dict[str, Any]]
+        documents: List[Dict[str, Any]],
+        db: AgnosticDatabase
 ) -> list:
     """
     通用的批量 upsert 方法，用於插入或更新文檔
@@ -50,7 +51,8 @@ async def batch_insert_documents(
     return result.inserted_ids
 
 
-async def delete_document_by_id(collection_name: str, doc_id: str) -> bool:
+async def delete_document_by_id(collection_name: str, doc_id: str,
+                                db: AgnosticDatabase) -> bool:
     """
     通用的 delete 方法，用於刪除文檔
     """

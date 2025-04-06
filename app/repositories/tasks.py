@@ -1,20 +1,21 @@
 from typing import List
 
-from database import db
+from motor.core import AgnosticDatabase
+
 from repositories.base import upsert_document, delete_document_by_id
 
 collection_name = "tasks"
 
 
-async def upsert_task(task_id: str, updates: dict) -> dict:
-    return await upsert_document(collection_name, task_id, updates)
+async def upsert_task(task_id: str, updates: dict, db: AgnosticDatabase) -> dict:
+    return await upsert_document(collection_name, task_id, updates, db)
 
 
-async def delete_task_by_id(task_id: str) -> bool:
-    return await delete_document_by_id(collection_name, task_id)
+async def delete_task_by_id(task_id: str, db: AgnosticDatabase) -> bool:
+    return await delete_document_by_id(collection_name, task_id, db)
 
 
-async def get_tasks_with_properties_repo() -> List[dict]:
+async def get_tasks_with_properties_repo(db: AgnosticDatabase) -> List[dict]:
     pipeline = [
         {
             "$lookup": {
@@ -60,6 +61,5 @@ async def get_tasks_with_properties_repo() -> List[dict]:
             }
         }
     ]
-
     result = await db[collection_name].aggregate(pipeline).to_list(length=None)
     return result

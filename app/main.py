@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from database import initialize_collections
+from database import mongodb
 from routes import tasks, properties, tasks_with_properties
 
 app = FastAPI()
@@ -27,8 +27,14 @@ app.include_router(tasks_with_properties.router, prefix=prefix,
 
 
 @app.on_event("startup")
-async def on_startup():
-    await initialize_collections()
+async def startup_event():
+    await mongodb.connect()
+    await mongodb.initialize_collections()
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    await mongodb.disconnect()
 
 
 @app.get("/")
