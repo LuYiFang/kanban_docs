@@ -1,11 +1,14 @@
 from datetime import datetime, timezone
 
-from pydantic import BaseModel, field_validator
+from fastapi import FastAPI
+from pydantic import BaseModel, Field, field_validator
+
+app = FastAPI()
 
 
 class TransformDate(BaseModel):
-    createdAt: datetime
-    updatedAt: datetime
+    createdAt: datetime = Field(..., example="2025-04-06T12:00:00")
+    updatedAt: datetime = Field(..., example="2025-04-06T15:30:00")
 
     @field_validator("createdAt", "updatedAt", mode="before")
     def parse_datetime(cls, value):
@@ -15,9 +18,9 @@ class TransformDate(BaseModel):
 
 
 class BaseResponse(BaseModel):
-    id: str
-    createdAt: str
-    updatedAt: str
+    id: str = Field(..., example="550e8400-e29b-41d4-a716-446655440000")
+    createdAt: str = Field(..., example="2025-04-06T12:00:00Z")
+    updatedAt: str = Field(..., example="2025-04-06T15:30:00Z")
 
     @field_validator("createdAt", "updatedAt", mode="before")
     def parse_datetime(cls, value):

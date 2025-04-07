@@ -44,6 +44,12 @@ const KanbanBoard: React.FC = () => {
     dispatch(getAllTaskWithProperties());
   }, []);
 
+  useEffect(() => {
+    // for test
+    window.reactBeautifulDndContext = { handleDragEnd };
+  }, [tasks]);
+
+
   const handleDragEnd = (result: DropResult) => {
     const { source, destination } = result;
 
@@ -103,6 +109,7 @@ const KanbanBoard: React.FC = () => {
       <button
         className="fixed bottom-4 right-4 w-12 h-12 bg-blue-500 text-white rounded-full shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 flex items-center justify-center"
         onClick={handleAddTask}
+        id="add-task-button"
       >
         <FontAwesomeIcon icon={faPlus} className="w-6 h-6" />
       </button>
@@ -115,6 +122,8 @@ const KanbanBoard: React.FC = () => {
                   ref={provided.innerRef}
                   {...provided.droppableProps}
                   className="p-4 bg-gray-800 rounded shadow"
+                  data-cy="kanban-column"
+                  id={column.id}
                 >
                   <h2 className="text-lg font-bold text-gray-300 mb-2">
                     {column.name}
@@ -131,9 +140,11 @@ const KanbanBoard: React.FC = () => {
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
                           className="p-4 mb-2 bg-gray-700 rounded shadow"
+                          data-cy="kanban-task"
+                          id={task.id}
                           onClick={() => handleEdit(task)}
                         >
-                          <div className="font-bold text-gray-100">
+                          <div className="font-bold text-gray-100" data-cy="kanban-task-title">
                             {task.title}
                           </div>
 

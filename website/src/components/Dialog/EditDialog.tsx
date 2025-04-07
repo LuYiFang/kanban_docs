@@ -90,25 +90,30 @@ const EditDialog: React.FC<EditDialogProps> = ({ isOpen, onClose, taskId }) => {
     <div
       className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center"
       onClick={handleOverlayClick}
+      data-cy="edit-dialog-backdrop"
     >
       <div
         className="bg-gray-900 p-6 rounded shadow-lg w-3/4 h-4/5 flex flex-col space-y-4 relative"
         onClick={(e) => e.stopPropagation()}
+        data-cy="edit-dialog"
       >
         <div className="absolute top-4 right-4">
           <FontAwesomeIcon
             icon={faEllipsisH}
             className="text-gray-400 cursor-pointer"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
+            data-cy="edit-menu-trigger"
           />
           {isMenuOpen && (
             <div
               ref={menuRef}
               className="absolute top-8 right-0 bg-gray-800 shadow rounded p-1 text-sm whitespace-nowrap"
+              data-cy="edit-menu"
             >
               <button
                 className="text-gray-200 hover:text-red-600"
                 onClick={handleDeleteTask}
+                data-cy="delete-task-button"
               >
                 Delete Task
               </button>
@@ -125,6 +130,7 @@ const EditDialog: React.FC<EditDialogProps> = ({ isOpen, onClose, taskId }) => {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Task Title"
+            data-cy="title-input"
           />
         </div>
 
@@ -139,12 +145,13 @@ const EditDialog: React.FC<EditDialogProps> = ({ isOpen, onClose, taskId }) => {
 
               return (
                 <div key={key} className="flex items-center space-x-2">
-                  <span className="w-24 text-sm text-gray-300">{title}:</span>{" "}
+                  <span className="w-24 text-sm text-gray-300" data-cy="property-select-title">{title}:</span>{" "}
                   {config.type === "select" && (
                     <select
                       className="w-1/3 text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
                       value={value}
                       onChange={onChange}
+                      data-cy="property-select-input"
                     >
                       {config.options?.map((option) => (
                         <option key={option.id} value={option.id}>
@@ -164,6 +171,7 @@ const EditDialog: React.FC<EditDialogProps> = ({ isOpen, onClose, taskId }) => {
                         className="w-full text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
                         value={value}
                         onChange={onChange}
+                        data-cy="property-member-input"
                       />
                     </div>
                   )}
@@ -173,10 +181,11 @@ const EditDialog: React.FC<EditDialogProps> = ({ isOpen, onClose, taskId }) => {
                       className="w-1/3 text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
                       value={value}
                       onChange={onChange}
+                      data-cy="property-date-input"
                     />
                   )}
                   {config.type === "readonly" && (
-                    <span className="w-1/3 text-sm text-gray-400">{value}</span>
+                    <span className="w-1/3 text-sm text-gray-400" data-cy="property-readonly" >{value}</span>
                   )}
                 </div>
               );
@@ -192,6 +201,7 @@ const EditDialog: React.FC<EditDialogProps> = ({ isOpen, onClose, taskId }) => {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder="Enter Markdown content here..."
+            data-cy="property-content-input"
           />
 
           {/* Markdown Preview */}

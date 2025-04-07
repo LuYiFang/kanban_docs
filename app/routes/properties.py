@@ -21,7 +21,7 @@ async def create_property(property: PropertyCreate, db=Depends(get_db)):
 
 
 @router.post("/batch", response_model=list)
-async def create_batch_property(properties: List[PropertyCreate],
+async def create_batch_property(properties: List[PropertyResponse],
                                 db=Depends(get_db)):
     try:
         properties = await upsert_properties_service(properties, db)

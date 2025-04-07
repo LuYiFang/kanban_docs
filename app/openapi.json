@@ -1,1 +1,714 @@
-{"openapi":"3.1.0","info":{"title":"FastAPI","version":"0.1.0"},"paths":{"/api/task/":{"post":{"tags":["tasks"],"summary":"Create Task","operationId":"create_task_api_task__post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/TaskUpdate"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/TaskResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/task/{task_id}":{"put":{"tags":["tasks"],"summary":"Upsert Task Endpoint","operationId":"upsert_task_endpoint_api_task__task_id__put","parameters":[{"name":"task_id","in":"path","required":true,"schema":{"type":"string","title":"Task Id"}}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/TaskUpdate"}}}},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/TaskResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}},"delete":{"tags":["tasks"],"summary":"Delete Task Endpoint","operationId":"delete_task_endpoint_api_task__task_id__delete","parameters":[{"name":"task_id","in":"path","required":true,"schema":{"type":"string","title":"Task Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/property/":{"post":{"tags":["properties"],"summary":"Create Property","operationId":"create_property_api_property__post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/PropertyCreate"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/PropertyResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/property/batch":{"post":{"tags":["properties"],"summary":"Create Batch Property","operationId":"create_batch_property_api_property_batch_post","requestBody":{"content":{"application/json":{"schema":{"items":{"$ref":"#/components/schemas/PropertyCreate"},"type":"array","title":"Properties"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"items":{},"type":"array","title":"Response Create Batch Property Api Property Batch Post"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/property/{property_id}":{"put":{"tags":["properties"],"summary":"Upsert Property Endpoint","operationId":"upsert_property_endpoint_api_property__property_id__put","parameters":[{"name":"property_id","in":"path","required":true,"schema":{"type":"string","title":"Property Id"}}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/PropertyUpdate"}}}},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/PropertyResponse"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}},"delete":{"tags":["properties"],"summary":"Delete Property Endpoint","operationId":"delete_property_endpoint_api_property__property_id__delete","parameters":[{"name":"property_id","in":"path","required":true,"schema":{"type":"string","title":"Property Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/property/task/{task_id}":{"delete":{"tags":["properties"],"summary":"Delete Property By Task Endpoint","operationId":"delete_property_by_task_endpoint_api_property_task__task_id__delete","parameters":[{"name":"property_id","in":"query","required":true,"schema":{"type":"string","title":"Property Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/task/properties":{"get":{"tags":["tasks_with_properties"],"summary":"Get Tasks With Properties","operationId":"get_tasks_with_properties_api_task_properties_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"items":{"$ref":"#/components/schemas/TaskWithPropertiesResponse"},"type":"array","title":"Response Get Tasks With Properties Api Task Properties Get"}}}}}}},"/api/task/{task_id}/properties":{"delete":{"tags":["tasks_with_properties"],"summary":"Delete Tasks With Properties","operationId":"delete_tasks_with_properties_api_task__task_id__properties_delete","parameters":[{"name":"task_id","in":"path","required":true,"schema":{"type":"string","title":"Task Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/":{"get":{"summary":"Root","operationId":"root__get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}}},"components":{"schemas":{"HTTPValidationError":{"properties":{"detail":{"items":{"$ref":"#/components/schemas/ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"},"PropertyCreate":{"properties":{"name":{"type":"string","maxLength":100,"minLength":0,"title":"Name","description":"Property name"},"value":{"type":"string","minLength":0,"title":"Value","description":"Property value"},"taskId":{"type":"string","title":"Taskid","description":"Associated Task ID"}},"type":"object","required":["name","value","taskId"],"title":"PropertyCreate"},"PropertyResponse":{"properties":{"id":{"type":"string","title":"Id"},"createdAt":{"type":"string","title":"Createdat"},"updatedAt":{"type":"string","title":"Updatedat"},"name":{"type":"string","maxLength":100,"minLength":0,"title":"Name","description":"Property name"},"value":{"type":"string","minLength":0,"title":"Value","description":"Property value"}},"type":"object","required":["id","createdAt","updatedAt","name","value"],"title":"PropertyResponse"},"PropertyUpdate":{"properties":{"name":{"type":"string","maxLength":100,"minLength":0,"title":"Name","description":"Property name"},"value":{"type":"string","minLength":0,"title":"Value","description":"Property value"}},"type":"object","required":["name","value"],"title":"PropertyUpdate"},"TaskResponse":{"properties":{"id":{"type":"string","title":"Id"},"createdAt":{"type":"string","title":"Createdat"},"updatedAt":{"type":"string","title":"Updatedat"},"title":{"type":"string","maxLength":100,"minLength":0,"title":"Title","description":"Task title"},"content":{"type":"string","minLength":0,"title":"Content","description":"Detailed content of the task"}},"type":"object","required":["id","createdAt","updatedAt","title","content"],"title":"TaskResponse"},"TaskUpdate":{"properties":{"title":{"type":"string","maxLength":100,"minLength":0,"title":"Title","description":"Task title"},"content":{"type":"string","minLength":0,"title":"Content","description":"Detailed content of the task"}},"type":"object","required":["title","content"],"title":"TaskUpdate"},"TaskWithPropertiesResponse":{"properties":{"title":{"type":"string","maxLength":100,"minLength":0,"title":"Title","description":"Task title"},"content":{"type":"string","minLength":0,"title":"Content","description":"Detailed content of the task"},"id":{"type":"string","title":"Id"},"createdAt":{"type":"string","title":"Createdat"},"updatedAt":{"type":"string","title":"Updatedat"},"properties":{"items":{"$ref":"#/components/schemas/PropertyResponse"},"type":"array","title":"Properties","default":[]}},"type":"object","required":["title","content","id","createdAt","updatedAt"],"title":"TaskWithPropertiesResponse"},"ValidationError":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"}}}}
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "FastAPI",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/task/": {
+      "post": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Create Task",
+        "operationId": "create_task_api_task__post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/task/{task_id}": {
+      "put": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Upsert Task Endpoint",
+        "operationId": "upsert_task_endpoint_api_task__task_id__put",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Task Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "tasks"
+        ],
+        "summary": "Delete Task Endpoint",
+        "operationId": "delete_task_endpoint_api_task__task_id__delete",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Task Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/property/": {
+      "post": {
+        "tags": [
+          "properties"
+        ],
+        "summary": "Create Property",
+        "operationId": "create_property_api_property__post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PropertyCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropertyResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/property/batch": {
+      "post": {
+        "tags": [
+          "properties"
+        ],
+        "summary": "Create Batch Property",
+        "operationId": "create_batch_property_api_property_batch_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "items": {
+                  "$ref": "#/components/schemas/PropertyCreate"
+                },
+                "type": "array",
+                "title": "Properties"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {},
+                  "type": "array",
+                  "title": "Response Create Batch Property Api Property Batch Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/property/{property_id}": {
+      "put": {
+        "tags": [
+          "properties"
+        ],
+        "summary": "Upsert Property Endpoint",
+        "operationId": "upsert_property_endpoint_api_property__property_id__put",
+        "parameters": [
+          {
+            "name": "property_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Property Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PropertyUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropertyResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "properties"
+        ],
+        "summary": "Delete Property Endpoint",
+        "operationId": "delete_property_endpoint_api_property__property_id__delete",
+        "parameters": [
+          {
+            "name": "property_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Property Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/property/task/{task_id}": {
+      "delete": {
+        "tags": [
+          "properties"
+        ],
+        "summary": "Delete Property By Task Endpoint",
+        "operationId": "delete_property_by_task_endpoint_api_property_task__task_id__delete",
+        "parameters": [
+          {
+            "name": "property_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Property Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/task/properties": {
+      "get": {
+        "tags": [
+          "tasks_with_properties"
+        ],
+        "summary": "Get Tasks With Properties",
+        "operationId": "get_tasks_with_properties_api_task_properties_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TaskWithPropertiesResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Get Tasks With Properties Api Task Properties Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/task/{task_id}/properties": {
+      "delete": {
+        "tags": [
+          "tasks_with_properties"
+        ],
+        "summary": "Delete Tasks With Properties",
+        "operationId": "delete_tasks_with_properties_api_task__task_id__properties_delete",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Task Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Root",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "PropertyCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0,
+            "title": "Name",
+            "description": "Property name",
+            "example": "location"
+          },
+          "value": {
+            "type": "string",
+            "minLength": 0,
+            "title": "Value",
+            "description": "property value",
+            "example": "Taipei"
+          },
+          "taskId": {
+            "type": "string",
+            "title": "Taskid",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "value",
+          "taskId"
+        ],
+        "title": "PropertyCreate"
+      },
+      "PropertyResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Unique Property ID",
+            "example": "550e8400-e29b-41d4-a716-446655440001"
+          },
+          "createdAt": {
+            "type": "string",
+            "title": "Createdat",
+            "description": "Creation timestamp",
+            "example": "2025-04-06T12:00:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "title": "Updatedat",
+            "description": "Last update timestamp",
+            "example": "2025-04-06T15:30:00Z"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0,
+            "title": "Name",
+            "description": "Property name",
+            "example": "location"
+          },
+          "value": {
+            "type": "string",
+            "minLength": 0,
+            "title": "Value",
+            "description": "property value",
+            "example": "Taipei"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "createdAt",
+          "updatedAt",
+          "name",
+          "value"
+        ],
+        "title": "PropertyResponse"
+      },
+      "PropertyUpdate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0,
+            "title": "Name",
+            "description": "Property name",
+            "example": "location"
+          },
+          "value": {
+            "type": "string",
+            "minLength": 0,
+            "title": "Value",
+            "description": "property value",
+            "example": "Taipei"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "value"
+        ],
+        "title": "PropertyUpdate"
+      },
+      "TaskResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Unique Task ID",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "createdAt": {
+            "type": "string",
+            "title": "Createdat",
+            "description": "Creation timestamp",
+            "example": "2025-04-06T12:00:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "title": "Updatedat",
+            "description": "Last update timestamp",
+            "example": "2025-04-06T15:30:00Z"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0,
+            "title": "Title",
+            "description": "Task title",
+            "example": "Complete testing workflow"
+          },
+          "content": {
+            "type": "string",
+            "minLength": 0,
+            "title": "Content",
+            "description": "Detailed content of the task",
+            "example": "Implement and validate Cypress interceptors."
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "createdAt",
+          "updatedAt",
+          "title",
+          "content"
+        ],
+        "title": "TaskResponse"
+      },
+      "TaskUpdate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0,
+            "title": "Title",
+            "description": "Task title",
+            "example": "Complete testing workflow"
+          },
+          "content": {
+            "type": "string",
+            "minLength": 0,
+            "title": "Content",
+            "description": "Detailed content of the task",
+            "example": "Implement and validate Cypress interceptors."
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "content"
+        ],
+        "title": "TaskUpdate"
+      },
+      "TaskWithPropertiesResponse": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0,
+            "title": "Title",
+            "description": "Task title",
+            "example": "Complete testing workflow"
+          },
+          "content": {
+            "type": "string",
+            "minLength": 0,
+            "title": "Content",
+            "description": "Detailed content of the task",
+            "example": "Implement and validate Cypress interceptors."
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "createdAt": {
+            "type": "string",
+            "title": "Createdat",
+            "example": "2025-04-06T12:00:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "title": "Updatedat",
+            "example": "2025-04-06T15:30:00Z"
+          },
+          "properties": {
+            "items": {
+              "$ref": "#/components/schemas/PropertyResponse"
+            },
+            "type": "array",
+            "title": "Properties",
+            "description": "List of associated properties"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "content",
+          "id",
+          "createdAt",
+          "updatedAt",
+          "properties"
+        ],
+        "title": "TaskWithPropertiesResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
