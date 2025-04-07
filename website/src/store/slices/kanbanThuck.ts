@@ -31,9 +31,9 @@ export const createTaskWithDefaultProperties = createAsyncThunk(
         ...v,
         taskId: createdTask.id,
       }));
-      await createTPropertiesApi(properties);
+      const createdProperties = await createTPropertiesApi(properties);
 
-      createdTask.properties = properties;
+      createdTask.properties = createdProperties;
       return createdTask;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);

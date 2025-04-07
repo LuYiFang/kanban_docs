@@ -2,10 +2,10 @@ from typing import List
 
 from motor.core import AgnosticDatabase
 
+from models.properties import PropertyResponse, PropertyUpdate
 from repositories.properties import (upsert_property, delete_property_by_id,
                                      batch_insert_properties,
                                      delete_properties_by_task_id)
-from models.properties import PropertyResponse, PropertyCreate
 from services.base import upsert_service, delete_service
 
 
@@ -16,8 +16,8 @@ async def upsert_property_service(property_id: str,
                                 PropertyResponse, db)
 
 
-async def upsert_properties_service(properties: List[PropertyCreate],
-                                    db: AgnosticDatabase) -> list:
+async def upsert_properties_service(properties: List[PropertyUpdate],
+                                    db: AgnosticDatabase) -> List[PropertyResponse]:
     return await batch_insert_properties([p.model_dump() for p in properties],
                                          db)
 

@@ -2,6 +2,7 @@ from typing import List, Dict, Any
 
 from motor.core import AgnosticDatabase
 
+from models.properties import PropertyResponse
 from repositories.base import (upsert_document, delete_document_by_id,
                                batch_insert_documents)
 
@@ -14,7 +15,7 @@ async def upsert_property(property_id: str, updates: dict,
 
 
 async def batch_insert_properties(properties: List[Dict[str, Any]],
-                                  db: AgnosticDatabase) -> list:
+                                  db: AgnosticDatabase) -> List[PropertyResponse]:
     return await batch_insert_documents(collection_name, properties, db)
 
 
