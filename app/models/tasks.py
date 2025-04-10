@@ -3,7 +3,7 @@ from typing import List
 from pydantic import BaseModel, Field
 
 from models.base import BaseResponse
-from models.properties import PropertyResponse
+from models.properties import TaskPropertyResponse
 
 
 class TaskBase(BaseModel):
@@ -29,6 +29,6 @@ class TaskResponse(TaskBase, BaseResponse):
 
 
 class TaskWithPropertiesResponse(BaseResponse, TaskBase):
-    properties: List[PropertyResponse] = Field(
+    properties: List[TaskPropertyResponse] = Field(
         ..., description="List of associated properties",
     )

@@ -45,7 +45,7 @@ class AsyncMongoCollectionMock:
             if "updatedAt" in doc and doc["updatedAt"] is not None:
                 updated_at_values.append(doc["updatedAt"])
 
-            properties = self.db['properties'].find({'taskId': doc['_id']})
+            properties = self.db['task_properties'].find({'taskId': doc['_id']})
             properties = [prop for prop in properties]
 
             for prop in properties:

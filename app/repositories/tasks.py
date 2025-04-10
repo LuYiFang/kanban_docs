@@ -19,7 +19,7 @@ async def get_tasks_with_properties_repo(db: AgnosticDatabase) -> List[dict]:
     pipeline = [
         {
             "$lookup": {
-                "from": "properties",
+                "from": "task_properties",
                 "localField": "_id",
                 "foreignField": "taskId",
                 "as": "properties"
