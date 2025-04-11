@@ -1,5 +1,3 @@
-export type PropertyType = "select" | "member" | "date" | "readonly";
-
 export interface PropertyOption {
   id: string;
   name: string;
@@ -60,15 +58,20 @@ export const propertyDefinitions: Record<string, PropertyConfig> = {
       { id: "b-level", name: "B Level" },
       { id: "c-level", name: "C Level" },
       { id: "d-level", name: "D Level" },
+      { id: "other", name: "Other" },
     ],
     defaultValue: "c-level",
   },
   assignee: {
     name: "Assignee",
-    type: "member", defaultValue: "" },
+    type: "member",
+    defaultValue: "",
+  },
   deadline: {
-    name: "Deadline",type: "date" },
-  "finishedAt": { name: "FinishedAt",type: "date" },
+    name: "Deadline",
+    type: "date",
+  },
+  finishedAt: { name: "FinishedAt", type: "date" },
 };
 
 export const priorityColor = {
@@ -101,3 +104,21 @@ export const defaultProperties = [
   { name: "deadline", value: "" },
   { name: "finishedAt", value: "" },
 ];
+
+export interface PropertyType {
+  id: string;
+  name: string;
+}
+
+export interface PropertyOption {
+  propertyId: string;
+  name: string;
+}
+
+export interface PropertyConfig {
+  id: string;
+  name: string;
+  type: PropertyType;
+  options?: PropertyOption[];
+  defaultValue?: string;
+}

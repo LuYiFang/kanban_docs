@@ -4,6 +4,7 @@ import {
   createTaskWithDefaultProperties,
   deleteTask,
   getAllTaskWithProperties,
+  getPropertiesAndOptions,
   updateProperty,
   updateTask,
 } from "./kanbanThuck";
@@ -12,12 +13,18 @@ import _ from "lodash";
 
 const initialState: Tasks = {
   tasks: [],
+  propertySetting: [],
 };
 
 const kanbanSlice = createSlice({
   name: "kanban",
   initialState,
-  reducers: {},
+  reducers: {
+    updateTaskOrder(state, action) {
+      const updatedTasks = action.payload;
+      state.tasks = updatedTasks;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(getAllTaskWithProperties.fulfilled, (state, action) => {
@@ -71,8 +78,12 @@ const kanbanSlice = createSlice({
         if (propertyIndex < 0) return;
 
         task.properties[propertyIndex] = updatedProperty;
+      })
+      .addCase(getPropertiesAndOptions.fulfilled, (state, action) => {
+        state.propertySetting = action.payload;
       });
   },
 });
 
+export const { updateTaskOrder } = kanbanSlice.actions;
 export default kanbanSlice.reducer;

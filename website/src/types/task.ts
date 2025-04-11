@@ -6,10 +6,6 @@ export interface Task {
   content: string;
 }
 
-export interface Tasks {
-  tasks: TaskWithProperties[];
-}
-
 export interface TaskCreate {
   id: string;
   title: string;

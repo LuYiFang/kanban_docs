@@ -36,10 +36,10 @@ async def get_all_property_option(db: AgnosticDatabase) -> List[dict]:
     pipeline = [
         {
             "$lookup": {
-                "from": "options",
+                "from": "property_options",
                 "localField": "_id",
                 "foreignField": "propertyId",
-                "as": "options"
+                "as": "options",
             }
         },
         {
@@ -47,13 +47,13 @@ async def get_all_property_option(db: AgnosticDatabase) -> List[dict]:
                 "from": "property_types",
                 "localField": "typeId",
                 "foreignField": "_id",
-                "as": "type"
+                "as": "type",
             }
         },
         {
             "$unwind": {
                 "path": "$type",
-                "preserveNullAndEmptyArrays": True
+                "preserveNullAndEmptyArrays": False,
             }
         },
         {
@@ -61,12 +61,7 @@ async def get_all_property_option(db: AgnosticDatabase) -> List[dict]:
                 "id": "$_id",
                 "name": 1,
                 "typeId": 1,
-                "type": {
-                    "id": "$type._id",
-                    "name": "$type.name",
-                    "createdAt": "$type.createdAt",
-                    "updatedAt": "$type.updatedAt"
-                },
+                "type": "$type.name",
                 "options": {
                     "$map": {
                         "input": "$options",
@@ -76,15 +71,16 @@ async def get_all_property_option(db: AgnosticDatabase) -> List[dict]:
                             "propertyId": "$$option.propertyId",
                             "name": "$$option.name",
                             "createdAt": "$$option.createdAt",
-                            "updatedAt": "$$option.updatedAt"
-                        }
-                    }
+                            "updatedAt": "$$option.updatedAt",
+                        },
+                    },
                 },
                 "createdAt": 1,
-                "updatedAt": 1
+                "updatedAt": 1,
             }
-        }
+        },
     ]
+
     result = await db["property_configs"].aggregate(pipeline).to_list(
         length=None)
     return result

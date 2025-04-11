@@ -4,9 +4,10 @@ import {
   createTPropertiesApi,
   deleteTaskWithPropertiesApi,
   getAllTaskWithPropertiesApi,
+  getPropertiesAndOptionsApi,
   updatePropertyApi,
   updateTaskApi,
-} from "../../hooks/useApi";
+} from "../../utils/fetchApi";
 import { TaskUpdate } from "../../types/task";
 import { defaultProperties } from "../../types/property";
 
@@ -109,6 +110,18 @@ export const updateProperty = createAsyncThunk(
       return { taskId, updatedProperty };
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
+    }
+  },
+);
+
+export const getPropertiesAndOptions = createAsyncThunk(
+  "kanban/getPropertiesAndOptions",
+  async (_, thunkAPI) => {
+    try {
+      const propertiesWithOptions = await getPropertiesAndOptionsApi();
+      return propertiesWithOptions;
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(error.response?.data);
     }
   },
 );

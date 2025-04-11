@@ -68,6 +68,15 @@ const KanbanBoard: React.FC = () => {
     const task = tasks.find((task) => task.id === taskId);
     if (!task) return;
 
+    if (source.droppableId === destination.droppableId) {
+      const updatedTasks = [...tasks];
+      const [movedTask] = updatedTasks.splice(source.index, 1);
+      updatedTasks.splice(destination.index, 0, movedTask);
+
+      dispatch(updateTaskOrder(updatedTasks));
+      return;
+    }
+
     const property = task.properties.find((p) => p.name === "status");
     if (!property) return;
 
@@ -144,13 +153,16 @@ const KanbanBoard: React.FC = () => {
                           id={task.id}
                           onClick={() => handleEdit(task)}
                         >
-                          <div className="font-bold text-gray-100" data-cy="kanban-task-title">
+                          <div
+                            className="font-bold text-gray-100"
+                            data-cy="kanban-task-title"
+                          >
                             {task.title}
                           </div>
 
                           {/* Priority Chip */}
                           {task.properties.map((property) => {
-                            if (!property.id) return ''
+                            if (!property.id) return "";
                             if (property.name === "priority") {
                               return (
                                 <span
@@ -173,7 +185,10 @@ const KanbanBoard: React.FC = () => {
                               );
                             }
 
-                            if (property.name === "assignee") {
+                            if (
+                              property.name === "assignee" &&
+                              property.value
+                            ) {
                               return (
                                 <div
                                   key={`property-${property.id}`}
@@ -187,7 +202,7 @@ const KanbanBoard: React.FC = () => {
                                 </div>
                               );
                             }
-                            return ''
+                            return "";
                           })}
                         </div>
                       )}

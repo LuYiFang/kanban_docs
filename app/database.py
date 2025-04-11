@@ -98,13 +98,13 @@ class MongoDB:
     async def insert_property_configs(self, property_type_results):
         """插入屬性配置"""
         property_config_info = [
-            {"name": "Priority", "type": "select"},
-            {"name": "Status", "type": "select"},
-            {"name": "Level", "type": "select"},
-            {"name": "Assignee", "type": "select"},
-            {"name": "Deadline", "type": "date"},
-            {"name": "FinishedAt", "type": "date"},
-            {"name": "Project", "type": "select"}
+            {"name": "priority", "type": "select"},
+            {"name": "status", "type": "select"},
+            {"name": "level", "type": "select"},
+            {"name": "assignee", "type": "select"},
+            {"name": "deadline", "type": "date"},
+            {"name": "finishedAt", "type": "date"},
+            {"name": "project", "type": "select"}
         ]
 
         property_config_info = await self.exclude_exists(
@@ -134,21 +134,21 @@ class MongoDB:
     async def insert_property_options(self, property_config_results):
         """插入選項"""
         option_info = [
-            {"propertyName": "Priority", "name": "High"},
-            {"propertyName": "Priority", "name": "Medium"},
-            {"propertyName": "Priority", "name": "Low"},
-            {"propertyName": "Status", "name": "Todo"},
-            {"propertyName": "Status", "name": "In Progress"},
-            {"propertyName": "Status", "name": "Done"},
-            {"propertyName": "Level", "name": "A Level"},
-            {"propertyName": "Level", "name": "B Level"},
-            {"propertyName": "Level", "name": "C Level"},
-            {"propertyName": "Deadline", "name": "2025-01-01"},
-            {"propertyName": "Deadline", "name": "2025-12-31"},
-            {"propertyName": "FinishedAt", "name": "Complete"},
-            {"propertyName": "FinishedAt", "name": "Incomplete"},
-            {"propertyName": "Project", "name": "Project A"},
-            {"propertyName": "Project", "name": "Project B"}
+            {"propertyName": "priority", "name": "High"},
+            {"propertyName": "priority", "name": "Medium"},
+            {"propertyName": "priority", "name": "Low"},
+            {"propertyName": "status", "name": "Todo"},
+            {"propertyName": "status", "name": "In Progress"},
+            {"propertyName": "status", "name": "Done"},
+            {"propertyName": "level", "name": "A Level"},
+            {"propertyName": "level", "name": "B Level"},
+            {"propertyName": "level", "name": "C Level"},
+            {"propertyName": "deadline", "name": "2025-01-01"},
+            {"propertyName": "deadline", "name": "2025-12-31"},
+            {"propertyName": "finishedAt", "name": "Complete"},
+            {"propertyName": "finishedAt", "name": "Incomplete"},
+            {"propertyName": "project", "name": "Project A"},
+            {"propertyName": "project", "name": "Project B"}
         ]
 
         option_info = await self.exclude_exists(

@@ -13,6 +13,7 @@ import {
   updateTask,
 } from "../../store/slices/kanbanThuck";
 import { RootState } from "../../store/store";
+import InteractiveSelect from "../Select/InteractiveSelect";
 
 interface EditDialogProps {
   isOpen: boolean;
@@ -145,20 +146,14 @@ const EditDialog: React.FC<EditDialogProps> = ({ isOpen, onClose, taskId }) => {
 
               return (
                 <div key={key} className="flex items-center space-x-2">
-                  <span className="w-24 text-sm text-gray-300" data-cy="property-select-title">{title}:</span>{" "}
+                  <span
+                    className="w-24 text-sm text-gray-300"
+                    data-cy="property-select-title"
+                  >
+                    {title}:
+                  </span>{" "}
                   {config.type === "select" && (
-                    <select
-                      className="w-1/3 text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
-                      value={value}
-                      onChange={onChange}
-                      data-cy="property-select-input"
-                    >
-                      {config.options?.map((option) => (
-                        <option key={option.id} value={option.id}>
-                          {option.name}
-                        </option>
-                      ))}
-                    </select>
+                    <InteractiveSelect taskId={taskId} propertyName={key} />
                   )}
                   {config.type === "member" && (
                     <div className="flex items-center space-x-2 w-1/3">
@@ -185,7 +180,12 @@ const EditDialog: React.FC<EditDialogProps> = ({ isOpen, onClose, taskId }) => {
                     />
                   )}
                   {config.type === "readonly" && (
-                    <span className="w-1/3 text-sm text-gray-400" data-cy="property-readonly" >{value}</span>
+                    <span
+                      className="w-1/3 text-sm text-gray-400"
+                      data-cy="property-readonly"
+                    >
+                      {value}
+                    </span>
                   )}
                 </div>
               );

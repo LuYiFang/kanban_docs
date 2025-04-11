@@ -10,8 +10,6 @@ class TaskPropertyBase(BaseModel):
                       description="Property name", example="location")
     value: str = Field(..., min_length=0, description="property value",
                        example="Taipei")
-    propertyId: str = Field(...,
-                            example="550e8400-e29b-41d4-a716-446655440000")
 
 
 class TaskPropertyCreate(TaskPropertyBase):
@@ -68,8 +66,9 @@ class OptionResponse(OptionBase, BaseISODate):
 
 
 class PropertyConfigWithOptions(PropertyConfigBase):
-    type: PropertyTypeBase = Field(...,
-                                   description="The type of the property, resolved from typeId")
+    type: str = Field(..., description="The type of the property, resolved from typeId")
 
-    options: Optional[List[OptionResponse]] = Field(...,
-                                                    description="List of options associated with this property (only for select type)")
+    options: Optional[List[OptionResponse]] = Field(
+        ...,
+        description="List of options associated with this property (only for select type)"
+    )

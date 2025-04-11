@@ -1,6 +1,7 @@
 import { TaskUpdate } from "../types/task";
-import apiClient from "../utils/apiClient";
+import apiClient from "./apiClient";
 import { PropertyCreate } from "../types/property";
+import { useState } from "react";
 
 export const getAllTaskWithPropertiesApi = async () => {
   const response = await apiClient.get("/task/properties");
@@ -43,5 +44,20 @@ export const updatePropertyApi = async (
 
 export const deletePropertiesApi = async (taskId: string) => {
   const response = await apiClient.delete(`/property/task/${taskId}`);
+  return response.data;
+};
+
+export const createPropertyOptionApi = async (
+  propertyId: string,
+  name: string,
+) => {
+  const response = await apiClient.post(`/property/${propertyId}/options`, {
+    name,
+  });
+  return response.data;
+};
+
+export const getPropertiesAndOptionsApi = async () => {
+  const response = await apiClient.get("/property/properties/options");
   return response.data;
 };
