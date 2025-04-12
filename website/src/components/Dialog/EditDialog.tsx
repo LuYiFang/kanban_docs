@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisH, faUser } from "@fortawesome/free-solid-svg-icons";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
+import remarkBreaks from "remark-breaks";
 import { propertyOrder } from "../../types/property";
 import _ from "lodash";
 import {
@@ -96,6 +97,33 @@ const EditDialog: React.FC<EditDialogProps> = ({ isOpen, onClose, taskId }) => {
     onClose();
   };
 
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const inputValue = e.target.value;
+    const formattedValue = inputValue.replace(/\n{2,}/g, (match) => {
+      return "\n" + "<br/>".repeat(match.length - 1);
+    });
+    setContent(formattedValue);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Tab") {
+      e.preventDefault();
+      const target = e.target as HTMLTextAreaElement;
+      const start = target.selectionStart;
+      const end = target.selectionEnd;
+
+      // 插入制表符
+      const value = target.value;
+      const newValue = value.substring(0, start) + "\t" + value.substring(end);
+
+      // 更新內容並調整光標位置
+      setContent(newValue);
+      setTimeout(() => {
+        target.selectionStart = target.selectionEnd = start + 1;
+      }, 0);
+    }
+  };
+
   return (
     <div
       className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center"
@@ -103,7 +131,7 @@ const EditDialog: React.FC<EditDialogProps> = ({ isOpen, onClose, taskId }) => {
       data-cy="edit-dialog-backdrop"
     >
       <div
-        className="bg-gray-900 p-6 rounded shadow-lg w-3/4 h-4/5 flex flex-col space-y-4 relative"
+        className="bg-gray-900 p-6 rounded shadow-lg w-3/4 max-h-[90vh] flex flex-col space-y-4 relative overflow-auto"
         onClick={(e) => e.stopPropagation()}
         data-cy="edit-dialog"
       >
@@ -197,20 +225,21 @@ const EditDialog: React.FC<EditDialogProps> = ({ isOpen, onClose, taskId }) => {
         </div>
 
         {/* Markdown Input & Preview (side-by-side) */}
-        <div className="flex space-x-4 flex-1">
+        <div className="flex space-x-4 flex-1 min-h-[350px] h-full">
           {/* Markdown Input */}
           <textarea
-            className="flex-1 h-full border border-gray-700 bg-gray-800 text-gray-300 p-3 rounded text-sm resize-none"
+            className="flex-1 min-h-[350px] h-full border border-gray-700 bg-gray-800 text-gray-300 p-3 rounded text-sm resize-none"
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={handleContentChange}
+            onKeyDown={handleKeyDown}
             placeholder="Enter Markdown content here..."
             data-cy="property-content-input"
           />
 
           {/* Markdown Preview */}
-          <div className="flex-1 h-full border border-gray-700 bg-gray-800 text-gray-300 p-3 rounded overflow-auto">
+          <div className="flex-1 min-h-[350px] h-full border border-gray-700 bg-gray-800 text-gray-300 p-3 rounded overflow-auto">
             <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
+              remarkPlugins={[remarkGfm, remarkBreaks]}
               rehypePlugins={[rehypeRaw]}
             >
               {content}
