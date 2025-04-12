@@ -11,26 +11,40 @@ import EditDialog from "../Dialog/EditDialog";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faUser } from "@fortawesome/free-solid-svg-icons";
 import { TaskWithProperties } from "../../types/task";
-import { priorityColor, priorityName, statusName } from "../../types/property";
+import { priorityColor, statusOrder } from "../../types/property";
 import {
   createTaskWithDefaultProperties,
   getAllTaskWithProperties,
+  getPropertiesAndOptions,
   updateProperty,
 } from "../../store/slices/kanbanThuck";
 import _ from "lodash";
 import { updateTaskOrder } from "../../store/slices/kanbanSlice";
+import { convertToKebabCase, formatToCapitalCase } from "../../utils/tools";
 
 const KanbanBoard: React.FC = () => {
   const tasks = useSelector((state: RootState) => state.kanban.tasks);
   const dispatch = useDispatch();
+
+  const propertyConfig = useSelector(
+    (state: RootState) => state.kanban.propertySetting,
+  );
 
   const columns = useMemo(() => {
     const colGroup = _.groupBy(tasks, (task) => {
       return task.properties.find((prop) => prop.name === "status").value;
     });
 
+    const statusProperty = _.find(propertyConfig, { name: "status" });
+    if (!statusProperty) return [];
+
     const defaultGroup = {};
-    _.each(statusName, (colTitle, colId) => {
+    const sortedOptions = _.sortBy(statusProperty.options, (option) => {
+      return statusOrder.indexOf(convertToKebabCase(option.name));
+    });
+    _.each(sortedOptions, (option) => {
+      const colTitle = option.name;
+      const colId = convertToKebabCase(colTitle);
       defaultGroup[colId] = {
         id: colId,
         name: colTitle,
@@ -39,7 +53,7 @@ const KanbanBoard: React.FC = () => {
     });
 
     return _.values(defaultGroup);
-  }, [tasks]);
+  }, [tasks, propertyConfig]);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<
@@ -48,6 +62,7 @@ const KanbanBoard: React.FC = () => {
 
   useEffect(() => {
     dispatch(getAllTaskWithProperties());
+    dispatch(getPropertiesAndOptions());
   }, []);
 
   useEffect(() => {
@@ -173,7 +188,7 @@ const KanbanBoard: React.FC = () => {
                                   key={`property-${property.id}`}
                                   className={`inline-block px-2 py-1 text-xs font-semibold rounded-md ${priorityColor[property.value]}`}
                                 >
-                                  {priorityName[property.value]}
+                                  {formatToCapitalCase(property.value)}
                                 </span>
                               );
                             }

@@ -25,14 +25,6 @@ const InteractiveSelect: React.FC<{ taskId: string; propertyName: string }> = ({
   const [filteredOptions, setFilteredOptions] = useState<PropertyOption[]>([]);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!propertyConfig) {
-      dispatch(getPropertiesAndOptions());
-    } else {
-      setFilteredOptions(propertyConfig.options || []);
-    }
-  }, [dispatch, propertyConfig]);
-
   // 展開選單處理邏輯
   const handleExpand = () => {
     setIsExpanded(true);

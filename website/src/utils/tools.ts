@@ -18,3 +18,7 @@ export const formatToCapitalCase = (value: string) => {
 
   return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
 };
+
+export function convertToKebabCase(value: string): string {
+  return value.toLowerCase().replace(/\s+/g, "-");
+}

@@ -30,7 +30,6 @@ app.include_router(tasks_with_properties.router, prefix=prefix,
 async def startup_event():
     await mongodb.connect()
     await mongodb.initialize_collections()
-    await mongodb.insert_default_data()
 
 
 @app.on_event("shutdown")

@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisH, faUser } from "@fortawesome/free-solid-svg-icons";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
-import { propertyDefinitions } from "../../types/property";
+import { propertyOrder } from "../../types/property";
 import _ from "lodash";
 import {
   deleteTask,
@@ -14,6 +14,7 @@ import {
 } from "../../store/slices/kanbanThuck";
 import { RootState } from "../../store/store";
 import InteractiveSelect from "../Select/InteractiveSelect";
+import { formatToCapitalCase } from "../../utils/tools";
 
 interface EditDialogProps {
   isOpen: boolean;
@@ -58,6 +59,14 @@ const EditDialog: React.FC<EditDialogProps> = ({ isOpen, onClose, taskId }) => {
   const propertyMap = useMemo(() => {
     return _.mapValues(_.groupBy(task.properties, "name"), _.first);
   }, [task.properties]);
+
+  const propertyConfig = useSelector(
+    (state: RootState) => state.kanban.propertySetting,
+  );
+
+  const propertyConfigMap = useMemo(() => {
+    return _.mapValues(_.groupBy(propertyConfig, "name"), _.first);
+  }, [propertyConfig]);
 
   const handlePropertyChange = (property: string, value: string) => {
     const propertyId = propertyMap[property.toLowerCase()]?.id;
@@ -139,54 +148,48 @@ const EditDialog: React.FC<EditDialogProps> = ({ isOpen, onClose, taskId }) => {
         <div>
           <h3 className="text-lg font-bold text-gray-200 mb-2">Properties</h3>
           <div className="flex flex-col space-y-1">
-            {Object.entries(propertyDefinitions).map(([key, config]) => {
-              const title = config.name || "";
+            {_.map(propertyOrder, (key) => {
+              const title = formatToCapitalCase(key) || "";
               const value = propertyMap[key]?.value || "";
+              const propertyType = propertyConfigMap[key]?.type || "";
               const onChange = (e) => handlePropertyChange(key, e.target.value);
 
               return (
                 <div key={key} className="flex items-center space-x-2">
+                  {title.toLowerCase() === "assignee" && (
+                    <FontAwesomeIcon
+                      icon={faUser}
+                      className="w-4 h-4 text-gray-300"
+                    />
+                  )}
                   <span
                     className="w-24 text-sm text-gray-300"
                     data-cy="property-select-title"
                   >
                     {title}:
                   </span>{" "}
-                  {config.type === "select" && (
-                    <InteractiveSelect taskId={taskId} propertyName={key} />
-                  )}
-                  {config.type === "member" && (
-                    <div className="flex items-center space-x-2 w-1/3">
-                      <FontAwesomeIcon
-                        icon={faUser}
-                        className="w-4 h-4 text-gray-300"
-                      />
+                  <div className="flex items-center flex-1">
+                    {propertyType === "select" && (
+                      <InteractiveSelect taskId={taskId} propertyName={key} />
+                    )}
+                    {propertyType === "date" && (
                       <input
-                        type="text"
-                        className="w-full text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
+                        type="date"
+                        className="w-1/3 text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
                         value={value}
                         onChange={onChange}
-                        data-cy="property-member-input"
+                        data-cy="property-date-input"
                       />
-                    </div>
-                  )}
-                  {config.type === "date" && (
-                    <input
-                      type="date"
-                      className="w-1/3 text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
-                      value={value}
-                      onChange={onChange}
-                      data-cy="property-date-input"
-                    />
-                  )}
-                  {config.type === "readonly" && (
-                    <span
-                      className="w-1/3 text-sm text-gray-400"
-                      data-cy="property-readonly"
-                    >
-                      {value}
-                    </span>
-                  )}
+                    )}
+                    {propertyType === "readonly" && (
+                      <span
+                        className="w-1/3 text-sm text-gray-400"
+                        data-cy="property-readonly"
+                      >
+                        {value}
+                      </span>
+                    )}
+                  </div>
                 </div>
               );
             })}

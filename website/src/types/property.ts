@@ -24,77 +24,28 @@ export interface PropertyCreate {
   taskId: string;
 }
 
-export const propertyDefinitions: Record<string, PropertyConfig> = {
-  priority: {
-    name: "Priority",
-    type: "select",
-    options: [
-      { id: "high", name: "High" },
-      {
-        id: "medium",
-        name: "Medium",
-      },
-      { id: "low", name: "Low" },
-    ],
-    defaultValue: "low",
-  },
-  status: {
-    name: "Status",
-    type: "select",
-    options: [
-      { id: "todo", name: "To Do" },
-      { id: "in-progress", name: "In Progress" },
-      { id: "done", name: "Done" },
-      { id: "cancelled", name: "Cancelled" },
-      { id: "deferred", name: "Deferred" },
-    ],
-    defaultValue: "todo",
-  },
-  level: {
-    name: "Level",
-    type: "select",
-    options: [
-      { id: "a-level", name: "A Level" },
-      { id: "b-level", name: "B Level" },
-      { id: "c-level", name: "C Level" },
-      { id: "d-level", name: "D Level" },
-      { id: "other", name: "Other" },
-    ],
-    defaultValue: "c-level",
-  },
-  assignee: {
-    name: "Assignee",
-    type: "member",
-    defaultValue: "",
-  },
-  deadline: {
-    name: "Deadline",
-    type: "date",
-  },
-  finishedAt: { name: "FinishedAt", type: "date" },
-};
+export const propertyOrder = [
+  "priority",
+  "status",
+  "level",
+  "assignee",
+  "deadline",
+  "finishedAt",
+];
+
+export const statusOrder = [
+  "todo",
+  "in-progress",
+  "done",
+  "cancelled",
+  "deferred",
+];
 
 export const priorityColor = {
   high: "bg-red-500 text-white",
   medium: "bg-orange-400 text-gray-900",
   low: "bg-green-500 text-white",
 };
-
-export const priorityName = propertyDefinitions.priority.options.reduce(
-  (acc, item) => {
-    acc[item.id] = item.name;
-    return acc;
-  },
-  {} as Record<string, string>,
-);
-
-export const statusName = propertyDefinitions.status.options.reduce(
-  (acc, item) => {
-    acc[item.id] = item.name;
-    return acc;
-  },
-  {} as Record<string, string>,
-);
 
 export const defaultProperties = [
   { name: "priority", value: "low" },
