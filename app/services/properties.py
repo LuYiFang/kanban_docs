@@ -43,13 +43,13 @@ async def get_all_property_option_service(db: AgnosticDatabase) \
         -> List[PropertyConfigWithOptions]:
     try:
         properties_with_options = await get_all_property_option(db)
-        return [PropertyConfigWithOptions(**prop) for prop in properties_with_options]
+        return [PropertyConfigWithOptions(**prop) for prop in
+                properties_with_options]
     except Exception as e:
         logging.exception(e)
 
 
-async def upsert_property_option_service(property_id: str,
-                                         updates: dict,
+async def upsert_property_option_service(updates: dict,
                                          db: AgnosticDatabase) -> OptionResponse:
-    return await upsert_service(upsert_property_option, property_id, updates,
+    return await upsert_service(upsert_property_option, '', updates,
                                 OptionResponse, db)

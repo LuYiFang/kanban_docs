@@ -88,7 +88,7 @@ async def get_all_property_option(db: AgnosticDatabase) -> List[dict]:
 
 async def upsert_property_option(property_id: str, updates: dict,
                                  db: AgnosticDatabase) -> dict:
-    return await upsert_document('property_options', property_id, updates, db)
+    return await upsert_document('property_options', '', updates, db)
 
 
 async def batch_upsert_property_option(documents: List[OptionCreate],

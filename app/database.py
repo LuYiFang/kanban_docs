@@ -61,14 +61,18 @@ class MongoDB:
             name="unique_name_property_options"
         )
 
-    async def exclude_exists(self, table_name, documents):
-        existing = await self.db[table_name].find(
-            {"name": {"$in": [doc["name"] for doc in documents]}}
-        ).distinct("name")
+        await insert_default_data_to_db(self.db)
+
+
+async def insert_default_data_to_db(db):
+    async def exclude_exists(table_name, documents):
+        existing = await db[table_name].distinct(
+            "name", {"name": {"$in": [doc["name"] for doc in documents]}}
+        )
 
         return [doc for doc in documents if doc['name'] not in existing]
 
-    async def insert_property_types(self):
+    async def insert_property_types():
         """插入屬性類型"""
         property_types_names = [
             {"name": "select"},
@@ -77,7 +81,7 @@ class MongoDB:
             {"name": "read_only"}
         ]
 
-        property_types_names = await self.exclude_exists(
+        property_types_names = await exclude_exists(
             'property_types', property_types_names
         )
 
@@ -90,12 +94,12 @@ class MongoDB:
         if not property_types:
             return []
         property_type_results = await batch_upsert_property_types(
-            property_types, self.db
+            property_types, db
         )
         print(f"Inserted Property Types")
         return property_type_results
 
-    async def insert_property_configs(self, property_type_results):
+    async def insert_property_configs(property_type_results):
         """插入屬性配置"""
         property_config_info = [
             {"name": "priority", "type": "select"},
@@ -107,7 +111,7 @@ class MongoDB:
             {"name": "project", "type": "select"}
         ]
 
-        property_config_info = await self.exclude_exists(
+        property_config_info = await exclude_exists(
             'property_configs', property_config_info
         )
         if not property_config_info:
@@ -126,12 +130,12 @@ class MongoDB:
         ]
 
         property_config_results = await batch_upsert_property_config(
-            property_configs, self.db
+            property_configs, db
         )
         print(f"Inserted Property Configs")
         return property_config_results
 
-    async def insert_property_options(self, property_config_results):
+    async def insert_property_options(property_config_results):
         """插入選項"""
         option_info = [
             {"propertyName": "priority", "name": "High"},
@@ -151,7 +155,7 @@ class MongoDB:
             {"propertyName": "project", "name": "Project B"}
         ]
 
-        option_info = await self.exclude_exists(
+        option_info = await exclude_exists(
             'property_options',
             option_info
         )
@@ -170,22 +174,22 @@ class MongoDB:
             for i in option_info
         ]
         property_options_results = await batch_upsert_property_option(
-            options, self.db
+            options, db
         )
 
         print(f"Inserted Options")
         return property_options_results
 
-    async def insert_default_data(self):
-        try:
-            property_type_results = await self.insert_property_types()
+    try:
+        property_type_results = await insert_property_types()
 
-            property_config_results = await self.insert_property_configs(
-                property_type_results)
+        property_config_results = await insert_property_configs(
+            property_type_results)
 
-            await self.insert_property_options(property_config_results)
-        except Exception as e:
-            logging.exception(e)
+        await insert_property_options(property_config_results)
+    except Exception as e:
+        logging.exception(e)
+        print('Error inserting default data:', e)
 
 
 mongodb = MongoDB("mongodb://localhost:27017")

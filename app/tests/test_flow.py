@@ -1,8 +1,9 @@
-import pytest
 import mongomock
+import pytest
 from httpx import AsyncClient
+
 from app.main import app
-from database import get_db
+from database import get_db, insert_default_data_to_db
 from tests.mongoAsyncMock import AsyncMongoMockWrapper
 
 
@@ -29,13 +30,51 @@ class TestFlowAPI:
         """測試任務的創建、更新、刪除以及屬性操作的完整流程"""
         async with AsyncClient(app=app,
                                base_url="http://test") as async_client:
+            await self.initialize_collections(mongo_mock)
+            propertyId = await self.verify_default_property_options(async_client)
             task_id = await self.create_task(async_client)
             await self.create_properties(async_client, task_id)
             await self.update_task(async_client, task_id)
             await self.varify_properties(async_client, task_id)
             await self.delete_task(async_client, task_id)
             await self.check_empty_task(async_client)
+            new_option_id = await self.create_property_option(async_client, propertyId)
+            await self.verify_property_options(async_client, propertyId, new_option_id)
 
+    @staticmethod
+    async def initialize_collections(mongo_mock):
+        await insert_default_data_to_db(mongo_mock)
+
+    @staticmethod
+    async def verify_default_property_options(async_client):
+        """Verify default property options using the /properties/options endpoint."""
+        response_property_options = await async_client.get("/api/property/properties/options")
+        assert response_property_options.status_code == 200
+        options_data = response_property_options.json()
+
+        assert len(options_data) > 0
+        expected_options = [
+            {"name": "Todo"},
+            {"name": "In Progress"},
+            {"name": "Done"}
+        ]
+
+        # Find the 'status' property
+        status_property = next(
+            (prop for prop in options_data if prop.get("name") == "status"),
+            None)
+        assert status_property is not None, "Property with name 'status' not found"
+        assert status_property[
+                   "type"] == "select", "Property type is not 'select'"
+
+        # Verify the options
+        for expected_option in expected_options:
+            matching_option = next(
+                (opt for opt in status_property["options"] if
+                 opt["name"] == expected_option["name"]), None
+            )
+            assert matching_option is not None, f"Option with name {expected_option['name']} not found"
+        return status_property['id']
     @staticmethod
     async def create_task(async_client):
         payload_create = {
@@ -106,3 +145,32 @@ class TestFlowAPI:
         data = response_check.json()
         assert response_check.status_code == 200
         assert len(data) == 0
+
+    @staticmethod
+    async def create_property_option(async_client, property_id):
+        """Create a property option for a specific property."""
+        option_data = {"name": "test_value", "propertyId": property_id}
+        response = await async_client.post(
+            f"/api/property/{property_id}/option", json=option_data
+        )
+        assert response.status_code == 200
+        response_data = response.json()
+        assert response_data["name"] == option_data["name"]
+        return response_data["id"]
+
+    @staticmethod
+    async def verify_property_options(async_client, property_id, new_option_id):
+        """Verify the created property options."""
+        response = await async_client.get(
+            f"/api/property/properties/options")
+        assert response.status_code == 200
+        options_data = response.json()
+        assert len(options_data) > 0
+
+        status_property = next(
+            (prop for prop in options_data if prop.get("id") == property_id),
+            None)
+        new_option = next(
+            (opt for opt in status_property['options'] if opt.get("id") == new_option_id),
+            None)
+        assert new_option["name"] == "test_value"

@@ -44,11 +44,13 @@ async def batch_insert_documents(
     for doc in documents:
         data_now = datetime.datetime.utcnow()
         doc['_id'] = str(uuid.uuid4())
-        doc['id'] = doc['_id']
         doc['updatedAt'] = data_now
         doc['createdAt'] = data_now
 
     await db[collection_name].insert_many(documents)
+
+    for doc in documents:
+        doc['id'] = doc['_id']
     return documents
 
 

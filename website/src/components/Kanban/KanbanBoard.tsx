@@ -1,18 +1,24 @@
-import React, {useEffect, useMemo, useState} from "react";
-import {DragDropContext, Draggable, Droppable, DropResult,} from "react-beautiful-dnd";
-import {useDispatch, useSelector} from "react-redux";
-import {RootState} from "../../store/store";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  DragDropContext,
+  Draggable,
+  Droppable,
+  DropResult,
+} from "react-beautiful-dnd";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 import EditDialog from "../Dialog/EditDialog";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faPlus, faUser} from "@fortawesome/free-solid-svg-icons";
-import {TaskWithProperties} from "../../types/task";
-import {priorityColor, priorityName, statusName} from "../../types/property";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus, faUser } from "@fortawesome/free-solid-svg-icons";
+import { TaskWithProperties } from "../../types/task";
+import { priorityColor, priorityName, statusName } from "../../types/property";
 import {
   createTaskWithDefaultProperties,
   getAllTaskWithProperties,
   updateProperty,
 } from "../../store/slices/kanbanThuck";
 import _ from "lodash";
+import { updateTaskOrder } from "../../store/slices/kanbanSlice";
 
 const KanbanBoard: React.FC = () => {
   const tasks = useSelector((state: RootState) => state.kanban.tasks);
@@ -49,10 +55,8 @@ const KanbanBoard: React.FC = () => {
     window.reactBeautifulDndContext = { handleDragEnd };
   }, [tasks]);
 
-
   const handleDragEnd = (result: DropResult) => {
     const { source, destination } = result;
-
     if (!destination) return;
 
     if (

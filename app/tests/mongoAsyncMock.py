@@ -38,27 +38,66 @@ class AsyncMongoCollectionMock:
         return method
 
     def aggregate(self, pipeline):
-        documents = [doc for doc in self.collection.find({})]
-        updated_at_values = []
+        documents = []
+        for doc in self.collection.find({}):
+            doc['id'] = str(doc['_id'])
+            documents.append(doc)
 
-        for doc in documents:
-            if "updatedAt" in doc and doc["updatedAt"] is not None:
-                updated_at_values.append(doc["updatedAt"])
+        for stage in pipeline:
+            if "$lookup" in stage:
+                lookup = stage["$lookup"]
+                foreign_collection = self.db[lookup["from"]]
+                for doc in documents:
+                    local_field_value = doc.get(lookup["localField"])
+                    if local_field_value:
+                        matches = [
+                            foreign_doc
+                            for foreign_doc in foreign_collection.find({})
+                            if foreign_doc.get(
+                                lookup["foreignField"]) == local_field_value
+                        ]
+                        new_matches = []
+                        for match in matches:
+                            match['id'] = str(match['_id'])
+                            new_matches.append(match)
+                        doc[lookup["as"]] = new_matches
 
-            properties = self.db['task_properties'].find({'taskId': doc['_id']})
-            properties = [prop for prop in properties]
+            if "$unwind" in stage:
+                path = stage["$unwind"]["path"].lstrip("$")
+                preserve_null = stage["$unwind"].get(
+                    "preserveNullAndEmptyArrays", False)
+                new_documents = []
+                for doc in documents:
+                    if path in doc and isinstance(doc[path], list):
+                        for item in doc[path]:
+                            new_doc = doc.copy()
+                            new_doc[path] = item
+                            new_documents.append(new_doc)
+                    elif preserve_null:
+                        new_documents.append(doc)
+                documents = new_documents
 
-            for prop in properties:
-                if prop['name'] == 'updatedAt':
-                    updated_at_values.append(prop["updatedAt"])
-                prop['id'] = prop['_id']
-                del prop['_id']
-
-            max_updated_at = max(
-                updated_at_values) if updated_at_values else None
-            doc['updatedAt'] = max_updated_at
-            doc['properties'] = properties
-            doc['id'] = doc['_id']
-            del doc['_id']
+            if "$project" in stage:
+                projection = stage["$project"]
+                for doc in documents:
+                    for key in list(doc.keys()):
+                        if key not in projection or projection[key] == 0:
+                            doc.pop(key, None)
+                        elif isinstance(projection[key], str) and projection[
+                            key].startswith("$"):
+                            key_path = projection[key].lstrip("$")
+                            if key == 'id':
+                                key_path = 'id'
+                            doc[key] = get_nested(doc, key_path)
 
         return AsyncMongoCursorMock(documents)
+
+
+def get_nested(data, path, default=None):
+    keys = path.split('.')
+    for key in keys:
+        if isinstance(data, dict) and key in data:
+            data = data[key]
+        else:
+            return default
+    return data

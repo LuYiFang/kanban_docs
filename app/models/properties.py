@@ -66,6 +66,8 @@ class OptionResponse(OptionBase, BaseISODate):
 
 
 class PropertyConfigWithOptions(PropertyConfigBase):
+    id: str = Field(..., description="Unique ID for the property",
+                    example="550e8400-e29b-41d4-a716-446655440001")
     type: str = Field(..., description="The type of the property, resolved from typeId")
 
     options: Optional[List[OptionResponse]] = Field(
