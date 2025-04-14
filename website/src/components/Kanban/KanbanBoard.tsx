@@ -9,21 +9,36 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import EditDialog from "../Dialog/EditDialog";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faUser } from "@fortawesome/free-solid-svg-icons";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { TaskWithProperties } from "../../types/task";
-import { priorityColor, statusOrder } from "../../types/property";
+import { DefaultProperty } from "../../types/property";
 import {
   createTaskWithDefaultProperties,
-  getAllTaskWithProperties,
-  getPropertiesAndOptions,
   updateProperty,
 } from "../../store/slices/kanbanThuck";
 import _ from "lodash";
 import { updateTaskOrder } from "../../store/slices/kanbanSlice";
-import { convertToKebabCase, formatToCapitalCase } from "../../utils/tools";
+import { convertToKebabCase } from "../../utils/tools";
+import moment from "moment";
 
-const KanbanBoard: React.FC = () => {
-  const tasks = useSelector((state: RootState) => state.kanban.tasks);
+interface KanbanBoardProps {
+  type: string;
+  dataName: string;
+  groupPropertyName: string;
+  columnSort: string[];
+  defaultProperties: DefaultProperty[];
+  propertyOrder: string[];
+}
+
+const KanbanBoard: React.FC<KanbanBoardProps> = ({
+  type,
+  dataName,
+  groupPropertyName,
+  columnSort,
+  defaultProperties,
+  propertyOrder,
+}) => {
+  const tasks = useSelector((state: RootState) => state.kanban[dataName]);
   const dispatch = useDispatch();
 
   const propertyConfig = useSelector(
@@ -32,15 +47,16 @@ const KanbanBoard: React.FC = () => {
 
   const columns = useMemo(() => {
     const colGroup = _.groupBy(tasks, (task) => {
-      return task.properties.find((prop) => prop.name === "status").value;
+      return task.properties.find((prop) => prop.name === groupPropertyName)
+        .value;
     });
 
-    const statusProperty = _.find(propertyConfig, { name: "status" });
-    if (!statusProperty) return [];
+    const targetProperty = _.find(propertyConfig, { name: groupPropertyName });
+    if (!targetProperty) return [];
 
     const defaultGroup = {};
-    const sortedOptions = _.sortBy(statusProperty.options, (option) => {
-      return statusOrder.indexOf(convertToKebabCase(option.name));
+    const sortedOptions = _.sortBy(targetProperty.options, (option) => {
+      return columnSort.indexOf(convertToKebabCase(option.name));
     });
     _.each(sortedOptions, (option) => {
       const colTitle = option.name;
@@ -59,11 +75,6 @@ const KanbanBoard: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<
     (TaskWithProperties & { columnId: string }) | null
   >(null);
-
-  useEffect(() => {
-    dispatch(getAllTaskWithProperties());
-    dispatch(getPropertiesAndOptions());
-  }, []);
 
   useEffect(() => {
     // for test
@@ -96,13 +107,13 @@ const KanbanBoard: React.FC = () => {
       return;
     }
 
-    const property = task.properties.find((p) => p.name === "status");
+    const property = task.properties.find((p) => p.name === groupPropertyName);
     if (!property) return;
 
     dispatch(
       updateProperty({
         taskId,
-        property: "status",
+        property: groupPropertyName,
         propertyId: property.id,
         value: destination.droppableId,
       }),
@@ -118,10 +129,14 @@ const KanbanBoard: React.FC = () => {
     const newTask = {
       title: "",
       content: "",
-      properties: {},
+      type: type,
     };
-
-    dispatch(createTaskWithDefaultProperties(newTask))
+    dispatch(
+      createTaskWithDefaultProperties({
+        task: newTask,
+        properties: defaultProperties,
+      }),
+    )
       .unwrap()
       .then((createdTask) => {
         setIsDialogOpen(true);
@@ -156,77 +171,74 @@ const KanbanBoard: React.FC = () => {
                   <h2 className="text-lg font-bold text-gray-300 mb-2">
                     {column.name}
                   </h2>
-                  {column.tasks.map((task, index) => (
-                    <Draggable
-                      key={task.id}
-                      draggableId={task.id}
-                      index={index}
-                    >
-                      {(provided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className="p-4 mb-2 bg-gray-700 rounded shadow"
-                          data-cy="kanban-task"
-                          id={task.id}
-                          onClick={() => handleEdit(task)}
-                        >
+
+                  {column.tasks.map((task, index) => {
+                    const isDaily = task.type === "daily";
+                    const startDateValue =
+                      task.properties.find((p) => p.name === "start_date")
+                        ?.value || "";
+                    const endDateValue =
+                      task.properties.find((p) => p.name === "end_date")
+                        ?.value || "";
+
+                    const startDate = moment(startDateValue);
+                    const endDate = moment(endDateValue);
+
+                    if (!startDate.isValid() || !endDate.isValid()) {
+                      console.error("Invalid date:", {
+                        startDateValue,
+                        endDateValue,
+                      });
+                    }
+
+                    const hourDifference = endDate.diff(
+                      startDate,
+                      "hours",
+                      true,
+                    );
+                    const baseHeight = 50;
+                    const baseTop = 80 + 32;
+                    const startHour = startDate.hours();
+                    const cardHeight = isDaily
+                      ? Math.max(baseHeight * hourDifference, baseHeight)
+                      : "auto";
+                    const cardMargin = 20;
+                    const cardTop = isDaily
+                      ? baseTop * (startHour - 7) + (startHour - 7) * cardMargin
+                      : 0;
+
+                    return (
+                      <Draggable
+                        key={task.id}
+                        draggableId={task.id}
+                        index={index}
+                      >
+                        {(provided) => (
                           <div
-                            className="font-bold text-gray-100"
-                            data-cy="kanban-task-title"
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className="absolute p-4 mb-2 bg-gray-700 rounded shadow"
+                            style={{
+                              height: cardHeight,
+                              top: cardTop,
+                              position: isDaily ? "absolute" : "relative",
+                            }}
+                            data-cy="kanban-task"
+                            id={task.id}
+                            onClick={() => handleEdit(task)}
                           >
-                            {task.title}
+                            <div
+                              className="font-bold text-gray-100"
+                              data-cy="kanban-task-title"
+                            >
+                              {task.title}
+                            </div>
                           </div>
-
-                          {/* Priority Chip */}
-                          {task.properties.map((property) => {
-                            if (!property.id) return "";
-                            if (property.name === "priority") {
-                              return (
-                                <span
-                                  key={`property-${property.id}`}
-                                  className={`inline-block px-2 py-1 text-xs font-semibold rounded-md ${priorityColor[property.value]}`}
-                                >
-                                  {formatToCapitalCase(property.value)}
-                                </span>
-                              );
-                            }
-
-                            if (property.name === "deadline") {
-                              return (
-                                <div
-                                  key={`property-${property.id}`}
-                                  className="text-sm text-gray-400 mt-2"
-                                >
-                                  {property.value}
-                                </div>
-                              );
-                            }
-
-                            if (
-                              property.name === "assignee" &&
-                              property.value
-                            ) {
-                              return (
-                                <div
-                                  key={`property-${property.id}`}
-                                  className="flex items-center text-sm text-gray-400 mt-2"
-                                >
-                                  <FontAwesomeIcon
-                                    icon={faUser}
-                                    className="w-4 h-4 text-gray-400 mr-2"
-                                  />
-                                  {property.value}
-                                </div>
-                              );
-                            }
-                            return "";
-                          })}
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
+                        )}
+                      </Draggable>
+                    );
+                  })}
                   {provided.placeholder}
                 </div>
               )}
@@ -240,6 +252,9 @@ const KanbanBoard: React.FC = () => {
           onClose={() => setIsDialogOpen(false)}
           columnId={selectedTask.columnId}
           taskId={selectedTask.id}
+          dataName={dataName}
+          propertyOrder={propertyOrder}
+          type={type}
         />
       )}
     </>

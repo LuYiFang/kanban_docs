@@ -1,22 +1,21 @@
-import React, { useRef, useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import React, { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { PropertyOption } from "../../types/property";
-import { getPropertiesAndOptions } from "../../store/slices/kanbanThuck";
 import { formatToCapitalCase } from "../../utils/tools";
 
-const InteractiveSelect: React.FC<{ taskId: string; propertyName: string }> = ({
-  taskId,
-  propertyName,
-}) => {
-  const dispatch = useDispatch();
-
+const InteractiveSelect: React.FC<{
+  taskId: string;
+  propertyName: string;
+  dataName: string;
+  onChange: (value: string) => void;
+}> = ({ taskId, propertyName, dataName, onChange }) => {
   const propertyConfig = useSelector((state: RootState) =>
     state.kanban.propertySetting.find((prop) => prop.name === propertyName),
   );
 
   const taskProperty = useSelector((state: RootState) => {
-    const task = state.kanban.tasks.find((task) => task.id === taskId);
+    const task = state.kanban[dataName].find((task) => task.id === taskId);
     return task?.properties.find((prop) => prop.name === propertyName);
   });
 
@@ -51,6 +50,7 @@ const InteractiveSelect: React.FC<{ taskId: string; propertyName: string }> = ({
   const handleSelectOption = (option: PropertyOption) => {
     setInputValue(option.name); // 將選項名稱設為選中的值
     setIsExpanded(false); // 收起選單
+    onChange(option.name);
   };
 
   // 點擊外部關閉選單處理邏輯

@@ -1,7 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
-  createTaskApi,
-  createTPropertiesApi,
+  createTaskWithPropertiesApi,
   deleteTaskWithPropertiesApi,
   getAllTaskWithPropertiesApi,
   getPropertiesAndOptionsApi,
@@ -9,7 +8,7 @@ import {
   updateTaskApi,
 } from "../../utils/fetchApi";
 import { TaskUpdate } from "../../types/task";
-import { defaultProperties } from "../../types/property";
+import { PropertyCreate } from "../../types/property";
 
 export const getAllTaskWithProperties = createAsyncThunk(
   "kanban/getAllTaskWithProperties",
@@ -24,18 +23,12 @@ export const getAllTaskWithProperties = createAsyncThunk(
 
 export const createTaskWithDefaultProperties = createAsyncThunk(
   "kanban/createTaskWithDefaultProperties",
-  async (task: TaskUpdate, thunkAPI) => {
+  async (
+    { task, properties }: { task: TaskUpdate; properties: PropertyCreate },
+    thunkAPI,
+  ) => {
     try {
-      const createdTask = await createTaskApi(task);
-
-      const properties = defaultProperties.map((v) => ({
-        ...v,
-        taskId: createdTask.id,
-      }));
-      const createdProperties = await createTPropertiesApi(properties);
-
-      createdTask.properties = createdProperties;
-      return createdTask;
+      return await createTaskWithPropertiesApi(task, properties);
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }
@@ -93,11 +86,13 @@ export const updateProperty = createAsyncThunk(
       propertyId,
       property,
       value,
+      type,
     }: {
       taskId: string;
       propertyId: string;
       property: string;
       value: string;
+      type: string;
     },
     thunkAPI,
   ) => {
@@ -107,7 +102,7 @@ export const updateProperty = createAsyncThunk(
         property,
         value,
       );
-      return { taskId, updatedProperty };
+      return { taskId, updatedProperty, type };
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }

@@ -1,10 +1,20 @@
 import { TaskUpdate } from "../types/task";
 import apiClient from "./apiClient";
 import { PropertyCreate } from "../types/property";
-import { useState } from "react";
 
 export const getAllTaskWithPropertiesApi = async () => {
   const response = await apiClient.get("/task/properties");
+  return response.data;
+};
+
+export const createTaskWithPropertiesApi = async (
+  task: TaskUpdate,
+  properties: PropertyCreate[],
+) => {
+  const response = await apiClient.post("/task/properties", {
+    task,
+    properties,
+  });
   return response.data;
 };
 
@@ -13,9 +23,7 @@ export const createTaskApi = async (taskData: TaskUpdate) => {
   return response.data;
 };
 
-export const createTPropertiesApi = async (
-  propertiesData: PropertyCreate[],
-) => {
+export const createPropertiesApi = async (propertiesData: PropertyCreate[]) => {
   const response = await apiClient.post("/property/batch", propertiesData);
   return response.data;
 };

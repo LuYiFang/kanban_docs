@@ -1,3 +1,5 @@
+import moment from "moment";
+
 export interface PropertyOption {
   id: string;
   name: string;
@@ -24,7 +26,7 @@ export interface PropertyCreate {
   taskId: string;
 }
 
-export const propertyOrder = [
+export const taskPropertyOrder = [
   "priority",
   "status",
   "level",
@@ -32,6 +34,8 @@ export const propertyOrder = [
   "deadline",
   "finishedAt",
 ];
+
+export const dailyPropertyOrder = ["week_day", "start_date", "end_date"];
 
 export const statusOrder = [
   "todo",
@@ -47,13 +51,35 @@ export const priorityColor = {
   low: "bg-green-500 text-white",
 };
 
-export const defaultProperties = [
+export interface DefaultProperty {
+  name: string;
+  value: string;
+}
+
+export const defaultTaskProperties = [
   { name: "priority", value: "low" },
   { name: "status", value: "todo" },
   { name: "level", value: "c-level" },
   { name: "assignee", value: "" },
   { name: "deadline", value: "" },
   { name: "finishedAt", value: "" },
+];
+
+const timeFormat = "YYYY-MM-DDTHH:mm:ss";
+export const defaultDailyProperties = [
+  { name: "week_day", value: "一" },
+  {
+    name: "start_date",
+    value: moment()
+      .set({ hour: 8, minute: 0, second: 0, millisecond: 0 })
+      .format(timeFormat),
+  },
+  {
+    name: "end_date",
+    value: moment()
+      .set({ hour: 9, minute: 0, second: 0, millisecond: 0 })
+      .format(timeFormat),
+  },
 ];
 
 export interface PropertyType {

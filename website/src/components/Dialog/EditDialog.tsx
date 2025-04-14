@@ -6,7 +6,6 @@ import { faEllipsisH, faUser } from "@fortawesome/free-solid-svg-icons";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import remarkBreaks from "remark-breaks";
-import { propertyOrder } from "../../types/property";
 import _ from "lodash";
 import {
   deleteTask,
@@ -22,12 +21,22 @@ interface EditDialogProps {
   onClose: () => void;
   columnId: string;
   taskId: string;
+  dataName: string;
+  propertyOrder: [];
+  type: string;
 }
 
-const EditDialog: React.FC<EditDialogProps> = ({ isOpen, onClose, taskId }) => {
+const EditDialog: React.FC<EditDialogProps> = ({
+  isOpen,
+  onClose,
+  taskId,
+  dataName,
+  propertyOrder,
+  type,
+}) => {
   const dispatch = useDispatch();
   const task = useSelector((state: RootState) => {
-    return state.kanban.tasks.find((t) => t.id === taskId) || {};
+    return state.kanban[dataName].find((t) => t.id === taskId) || {};
   });
   const [title, setTitle] = useState(task.title);
   const [content, setContent] = useState(task.content);
@@ -72,7 +81,9 @@ const EditDialog: React.FC<EditDialogProps> = ({ isOpen, onClose, taskId }) => {
   const handlePropertyChange = (property: string, value: string) => {
     const propertyId = propertyMap[property.toLowerCase()]?.id;
     if (!propertyId) return;
-    dispatch(updateProperty({ taskId: task.id, propertyId, property, value }));
+    dispatch(
+      updateProperty({ taskId: task.id, propertyId, property, value, type }),
+    );
   };
 
   const handleDeleteTask = () => {
@@ -88,6 +99,7 @@ const EditDialog: React.FC<EditDialogProps> = ({ isOpen, onClose, taskId }) => {
       updateTask({
         taskId,
         task: {
+          ...task,
           title,
           content,
         },
@@ -180,7 +192,8 @@ const EditDialog: React.FC<EditDialogProps> = ({ isOpen, onClose, taskId }) => {
               const title = formatToCapitalCase(key) || "";
               const value = propertyMap[key]?.value || "";
               const propertyType = propertyConfigMap[key]?.type || "";
-              const onChange = (e) => handlePropertyChange(key, e.target.value);
+              const onChange = (newValue) =>
+                handlePropertyChange(key, newValue);
 
               return (
                 <div key={key} className="flex items-center space-x-2">
@@ -198,14 +211,19 @@ const EditDialog: React.FC<EditDialogProps> = ({ isOpen, onClose, taskId }) => {
                   </span>{" "}
                   <div className="flex items-center flex-1">
                     {propertyType === "select" && (
-                      <InteractiveSelect taskId={taskId} propertyName={key} />
+                      <InteractiveSelect
+                        taskId={taskId}
+                        propertyName={key}
+                        dataName={dataName}
+                        onChange={onChange}
+                      />
                     )}
                     {propertyType === "date" && (
                       <input
-                        type="date"
+                        type="datetime-local"
                         className="w-1/3 text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
                         value={value}
-                        onChange={onChange}
+                        onChange={(e) => onChange(e.target.value)}
                         data-cy="property-date-input"
                       />
                     )}
