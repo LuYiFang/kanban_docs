@@ -13,6 +13,9 @@ class TaskBase(BaseModel):
     content: str = Field(..., min_length=0,
                          description="Detailed content of the task",
                          example="Implement and validate Cypress interceptors.")
+    type: Optional[str] = Field("regular",
+                                description="Task type (e.g., regular or daily)",
+                                example="daily")
 
 
 class TaskUpdate(TaskBase):

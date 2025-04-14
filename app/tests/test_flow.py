@@ -32,14 +32,19 @@ class TestFlowAPI:
                                base_url="http://test") as async_client:
             await self.initialize_collections(mongo_mock)
             propertyId = await self.verify_default_property_options(async_client)
-            task_id = await self.create_task(async_client)
-            await self.create_properties(async_client, task_id)
+
+            task_id = await self.create_task_with_properties(async_client)
             await self.update_task(async_client, task_id)
+
             await self.varify_properties(async_client, task_id)
             await self.delete_task(async_client, task_id)
             await self.check_empty_task(async_client)
             new_option_id = await self.create_property_option(async_client, propertyId)
             await self.verify_property_options(async_client, propertyId, new_option_id)
+
+            # await self.test_daily_task(async_client)
+
+
 
     @staticmethod
     async def initialize_collections(mongo_mock):
@@ -75,6 +80,32 @@ class TestFlowAPI:
             )
             assert matching_option is not None, f"Option with name {expected_option['name']} not found"
         return status_property['id']
+
+    @staticmethod
+    async def create_task_with_properties(async_client):
+        payload_create = {
+            "title": "Test Task",
+            "content": "This is a test content",
+            "type": "regular",
+        }
+        properties = [
+            {"name": "priority", "value": "low"},
+            {"name": "status", "value": "todo"},
+            {"name": "level", "value": "c-level"},
+            {"name": "assignee", "value": ""},
+            {"name": "deadline", "value": ""},
+            {"name": "finishedAt", "value": ""}
+        ]
+        response = await async_client.post(
+            "/api/task/properties",
+            json={"task": payload_create, "properties": properties}
+        )
+        assert response.status_code == 200
+        task_with_properties = response.json()
+        assert task_with_properties["title"] == payload_create["title"]
+        assert len(task_with_properties["properties"]) == len(properties)
+        return task_with_properties["id"]
+
     @staticmethod
     async def create_task(async_client):
         payload_create = {
@@ -174,3 +205,34 @@ class TestFlowAPI:
             (opt for opt in status_property['options'] if opt.get("id") == new_option_id),
             None)
         assert new_option["name"] == "test_value"
+
+    @staticmethod
+    async def test_daily_task(async_client):
+        """Test the creation of a daily task with required fields."""
+        payload_create = {
+            "title": "Daily Task",
+            "content": "This is a daily task.",
+            "type": "daily",
+        }
+        properties = [
+            {"name": "start_date", "value": "2023-10-01T00:00:00"},
+            {"name": "end_date", "value": "2023-10-31T23:59:59"},
+            {"name": "week_day", "value": "一"}
+        ]
+
+        # Create the daily task
+        response = await async_client.post(
+            "/api/task/properties",
+            json={"task": payload_create, "properties": properties}
+        )
+        assert response.status_code == 200
+        task_with_properties = response.json()
+
+        # Verify the task details
+        assert task_with_properties["title"] == payload_create["title"]
+        assert task_with_properties["type"] == payload_create["type"]
+
+        # Verify the properties
+        property_map = {p['name']: p['value'] for p in properties}
+        for prop in task_with_properties["properties"]:
+            assert prop["value"] == property_map[prop["name"]]

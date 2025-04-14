@@ -30,6 +30,7 @@ async def get_tasks_with_properties_repo(db: AgnosticDatabase) -> List[dict]:
                 "id": "$_id",
                 "title": 1,
                 "content": 1,
+                "type": 1,
                 "createdAt": 1,
                 "updatedAt": {
                     "$max": {

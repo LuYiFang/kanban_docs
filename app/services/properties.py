@@ -3,7 +3,7 @@ from typing import List
 
 from motor.core import AgnosticDatabase
 
-from models.properties import (TaskPropertyResponse, PropertyUpdate,
+from models.properties import (TaskPropertyResponse, TaskPropertyUpdate,
                                OptionResponse, PropertyConfigWithOptions)
 from repositories.properties import (upsert_task_property,
                                      delete_task_property_by_id,
@@ -21,7 +21,7 @@ async def upsert_task_property_service(property_id: str,
                                 TaskPropertyResponse, db)
 
 
-async def upsert_task_properties_service(properties: List[PropertyUpdate],
+async def upsert_task_properties_service(properties: List[TaskPropertyUpdate],
                                          db: AgnosticDatabase) -> List[
     TaskPropertyResponse]:
     return await batch_insert_task_properties(

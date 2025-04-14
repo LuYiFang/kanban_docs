@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException, Depends
 
 from database import get_db
-from models.properties import (TaskPropertyResponse, PropertyUpdate,
+from models.properties import (TaskPropertyResponse, TaskPropertyUpdate,
                                TaskPropertyCreate,
                                TaskPropertyBase, OptionResponse,
                                OptionCreate, PropertyConfigWithOptions)
@@ -28,7 +28,7 @@ async def create_property(property: TaskPropertyCreate, db=Depends(get_db)):
 
 
 @router.post("/batch", response_model=List[TaskPropertyResponse])
-async def create_batch_property(properties: List[PropertyUpdate],
+async def create_batch_property(properties: List[TaskPropertyUpdate],
                                 db=Depends(get_db)):
     try:
         properties = await upsert_task_properties_service(properties, db)

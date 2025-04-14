@@ -108,7 +108,10 @@ async def insert_default_data_to_db(db):
             {"name": "assignee", "type": "select"},
             {"name": "deadline", "type": "date"},
             {"name": "finishedAt", "type": "date"},
-            {"name": "project", "type": "select"}
+            {"name": "project", "type": "select"},
+            {"name": "week_day", "type": "select"},
+            {"name": "start_date", "type": "date"},
+            {"name": "end_date", "type": "date"},
         ]
 
         property_config_info = await exclude_exists(
@@ -144,6 +147,8 @@ async def insert_default_data_to_db(db):
             {"propertyName": "status", "name": "Todo"},
             {"propertyName": "status", "name": "In Progress"},
             {"propertyName": "status", "name": "Done"},
+            {"propertyName": "status", "name": "Cancelled"},
+            {"propertyName": "status", "name": "Deferred"},
             {"propertyName": "level", "name": "A Level"},
             {"propertyName": "level", "name": "B Level"},
             {"propertyName": "level", "name": "C Level"},
@@ -152,7 +157,12 @@ async def insert_default_data_to_db(db):
             {"propertyName": "finishedAt", "name": "Complete"},
             {"propertyName": "finishedAt", "name": "Incomplete"},
             {"propertyName": "project", "name": "Project A"},
-            {"propertyName": "project", "name": "Project B"}
+            {"propertyName": "project", "name": "Project B"},
+            {"propertyName": "week_day", "name": "一"},
+            {"propertyName": "week_day", "name": "二"},
+            {"propertyName": "week_day", "name": "三"},
+            {"propertyName": "week_day", "name": "四"},
+            {"propertyName": "week_day", "name": "五"},
         ]
 
         option_info = await exclude_exists(
