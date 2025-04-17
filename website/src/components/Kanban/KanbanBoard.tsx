@@ -1,10 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  DragDropContext,
-  Draggable,
-  Droppable,
-  DropResult,
-} from "react-beautiful-dnd";
+import { DragDropContext, Droppable, DropResult } from "react-beautiful-dnd";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import EditDialog from "../Dialog/EditDialog";
@@ -20,6 +15,28 @@ import _ from "lodash";
 import { updateTaskOrder } from "../../store/slices/kanbanSlice";
 import { convertToKebabCase } from "../../utils/tools";
 import moment from "moment";
+import KanbanCard from "./KanbanCard";
+
+export interface KanbanStrategy {
+  calculateCardStyle(
+    task: TaskWithProperties,
+    cardPositions: Record<string, number>,
+  ): React.CSSProperties;
+  getColumnStyle(hasSpecialTask: boolean): React.CSSProperties;
+  updateTaskOnDrag(
+    task: TaskWithProperties,
+    destinationColumnId: string,
+    destinationIndex: number,
+  ): TaskWithProperties;
+  generateNextTask(tasks: TaskWithProperties[]): {
+    task: TaskWithProperties;
+    properties: DefaultProperty[];
+  };
+  getNextTaskPosition(
+    tasks: TaskWithProperties[],
+    weekDay: string,
+  ): { start_date: string; end_date: string };
+}
 
 interface KanbanBoardProps {
   type: string;
@@ -28,6 +45,7 @@ interface KanbanBoardProps {
   columnSort: string[];
   defaultProperties: DefaultProperty[];
   propertyOrder: string[];
+  strategy: KanbanStrategy;
 }
 
 const KanbanBoard: React.FC<KanbanBoardProps> = ({
@@ -37,6 +55,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
   columnSort,
   defaultProperties,
   propertyOrder,
+  strategy,
 }) => {
   const tasks = useSelector((state: RootState) => state.kanban[dataName]);
   const dispatch = useDispatch();
@@ -50,7 +69,6 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
       return task.properties.find((prop) => prop.name === groupPropertyName)
         .value;
     });
-
     const targetProperty = _.find(propertyConfig, { name: groupPropertyName });
     if (!targetProperty) return [];
 
@@ -75,6 +93,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
   const [selectedTask, setSelectedTask] = useState<
     (TaskWithProperties & { columnId: string }) | null
   >(null);
+  const cardPositions: Record<string, number> = {};
 
   useEffect(() => {
     // for test
@@ -97,6 +116,23 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
 
     const task = tasks.find((task) => task.id === taskId);
     if (!task) return;
+
+    if (type === "daily") {
+      const updatedTask = strategy.updateTaskOnDrag(
+        task,
+        destination.droppableId,
+        destination.index,
+      );
+      dispatch(
+        updateProperty({
+          taskId: updatedTask.id,
+          property: "daily",
+          propertyId: "",
+          value: updatedTask.properties,
+        }),
+      );
+      return;
+    }
 
     if (source.droppableId === destination.droppableId) {
       const updatedTasks = [...tasks];
@@ -126,15 +162,11 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
   };
 
   const handleAddTask = () => {
-    const newTask = {
-      title: "",
-      content: "",
-      type: type,
-    };
+    const { task, properties } = strategy.generateNextTask(tasks);
     dispatch(
       createTaskWithDefaultProperties({
-        task: newTask,
-        properties: defaultProperties,
+        task,
+        properties,
       }),
     )
       .unwrap()
@@ -160,88 +192,44 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
         <div className="grid grid-cols-5 gap-4 p-4">
           {_.map(columns, (column) => (
             <Droppable droppableId={column.id} key={column.id}>
-              {(provided) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className="p-4 bg-gray-800 rounded shadow"
-                  data-cy="kanban-column"
-                  id={column.id}
-                >
-                  <h2 className="text-lg font-bold text-gray-300 mb-2">
-                    {column.name}
-                  </h2>
+              {(provided) => {
+                const hasSpecialTask = column.tasks.some(
+                  (task) => task.type === "daily",
+                );
 
-                  {column.tasks.map((task, index) => {
-                    const isDaily = task.type === "daily";
-                    const startDateValue =
-                      task.properties.find((p) => p.name === "start_date")
-                        ?.value || "";
-                    const endDateValue =
-                      task.properties.find((p) => p.name === "end_date")
-                        ?.value || "";
+                return (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className="p-4 bg-gray-800 rounded shadow"
+                    style={strategy.getColumnStyle(hasSpecialTask)}
+                    data-cy="kanban-column"
+                    id={column.id}
+                  >
+                    <h2 className="text-lg font-bold text-gray-300 mb-2">
+                      {column.name}
+                    </h2>
 
-                    const startDate = moment(startDateValue);
-                    const endDate = moment(endDateValue);
+                    {column.tasks.map((task, index) => {
+                      const cardStyle = strategy.calculateCardStyle(
+                        task,
+                        cardPositions,
+                      );
 
-                    if (!startDate.isValid() || !endDate.isValid()) {
-                      console.error("Invalid date:", {
-                        startDateValue,
-                        endDateValue,
-                      });
-                    }
-
-                    const hourDifference = endDate.diff(
-                      startDate,
-                      "hours",
-                      true,
-                    );
-                    const baseHeight = 50;
-                    const baseTop = 80 + 32;
-                    const startHour = startDate.hours();
-                    const cardHeight = isDaily
-                      ? Math.max(baseHeight * hourDifference, baseHeight)
-                      : "auto";
-                    const cardMargin = 20;
-                    const cardTop = isDaily
-                      ? baseTop * (startHour - 7) + (startHour - 7) * cardMargin
-                      : 0;
-
-                    return (
-                      <Draggable
-                        key={task.id}
-                        draggableId={task.id}
-                        index={index}
-                      >
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className="absolute p-4 mb-2 bg-gray-700 rounded shadow"
-                            style={{
-                              height: cardHeight,
-                              top: cardTop,
-                              position: isDaily ? "absolute" : "relative",
-                            }}
-                            data-cy="kanban-task"
-                            id={task.id}
-                            onClick={() => handleEdit(task)}
-                          >
-                            <div
-                              className="font-bold text-gray-100"
-                              data-cy="kanban-task-title"
-                            >
-                              {task.title}
-                            </div>
-                          </div>
-                        )}
-                      </Draggable>
-                    );
-                  })}
-                  {provided.placeholder}
-                </div>
-              )}
+                      return (
+                        <KanbanCard
+                          key={task.id}
+                          task={task}
+                          index={index}
+                          cardStyle={cardStyle}
+                          onEdit={handleEdit}
+                        />
+                      );
+                    })}
+                    {provided.placeholder}
+                  </div>
+                );
+              }}
             </Droppable>
           ))}
         </div>

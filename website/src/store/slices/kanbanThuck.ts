@@ -91,7 +91,7 @@ export const updateProperty = createAsyncThunk(
       taskId: string;
       propertyId: string;
       property: string;
-      value: string;
+      value: any;
       type: string;
     },
     thunkAPI,

@@ -1,6 +1,7 @@
 import React from "react";
 import KanbanBoard from "../components/Kanban/KanbanBoard";
 import { dailyPropertyOrder, defaultDailyProperties } from "../types/property";
+import { DailyStrategy } from "../components/Kanban/strategies/DailyStrategy";
 
 const days = ["一", "二", "三", "四", "五"];
 const timeSlots = Array.from({ length: 12 }, (_, i) => `${7 + i}:00`);
@@ -36,6 +37,7 @@ const DailyPage: React.FC = () => {
             columnSort={days}
             defaultProperties={defaultDailyProperties}
             propertyOrder={dailyPropertyOrder}
+            strategy={new DailyStrategy()}
           />
         </div>
       </div>

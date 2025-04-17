@@ -7,6 +7,7 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import remarkBreaks from "remark-breaks";
 import _ from "lodash";
+import moment from "moment";
 import {
   deleteTask,
   updateProperty,
@@ -84,6 +85,10 @@ const EditDialog: React.FC<EditDialogProps> = ({
     dispatch(
       updateProperty({ taskId: task.id, propertyId, property, value, type }),
     );
+  };
+
+  const formatDateTimeLocal = (date: string) => {
+    return moment(date).format("YYYY-MM-DDTHH:mm");
   };
 
   const handleDeleteTask = () => {
@@ -222,7 +227,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
                       <input
                         type="datetime-local"
                         className="w-1/3 text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
-                        value={value}
+                        value={formatDateTimeLocal(value)} // 格式化為 datetime-local 可接受的格式
                         onChange={(e) => onChange(e.target.value)}
                         data-cy="property-date-input"
                       />
