@@ -20,7 +20,7 @@ export class RegularStrategy implements KanbanStrategy {
       task: {
         title: "",
         content: "",
-        type: "daily",
+        type: "",
       },
       properties: defaultProperties,
     };

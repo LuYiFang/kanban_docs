@@ -4,7 +4,6 @@ import { NavLink } from "react-router-dom";
 const Sidebar: React.FC = () => {
   const navItems = [
     { name: "Kanban", path: "/kanban" },
-    { name: "Daily", path: "/daily" },
     { name: "Weekly Report", path: "/weekly-report" },
     { name: "Docs", path: "/docs" },
   ];

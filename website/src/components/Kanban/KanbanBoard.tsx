@@ -14,29 +14,7 @@ import {
 import _ from "lodash";
 import { updateTaskOrder } from "../../store/slices/kanbanSlice";
 import { convertToKebabCase } from "../../utils/tools";
-import moment from "moment";
 import KanbanCard from "./KanbanCard";
-
-export interface KanbanStrategy {
-  calculateCardStyle(
-    task: TaskWithProperties,
-    cardPositions: Record<string, number>,
-  ): React.CSSProperties;
-  getColumnStyle(hasSpecialTask: boolean): React.CSSProperties;
-  updateTaskOnDrag(
-    task: TaskWithProperties,
-    destinationColumnId: string,
-    destinationIndex: number,
-  ): TaskWithProperties;
-  generateNextTask(tasks: TaskWithProperties[]): {
-    task: TaskWithProperties;
-    properties: DefaultProperty[];
-  };
-  getNextTaskPosition(
-    tasks: TaskWithProperties[],
-    weekDay: string,
-  ): { start_date: string; end_date: string };
-}
 
 interface KanbanBoardProps {
   type: string;
@@ -45,7 +23,6 @@ interface KanbanBoardProps {
   columnSort: string[];
   defaultProperties: DefaultProperty[];
   propertyOrder: string[];
-  strategy: KanbanStrategy;
 }
 
 const KanbanBoard: React.FC<KanbanBoardProps> = ({
@@ -55,7 +32,6 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
   columnSort,
   defaultProperties,
   propertyOrder,
-  strategy,
 }) => {
   const tasks = useSelector((state: RootState) => state.kanban[dataName]);
   const dispatch = useDispatch();
@@ -66,9 +42,12 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
 
   const columns = useMemo(() => {
     const colGroup = _.groupBy(tasks, (task) => {
-      return task.properties.find((prop) => prop.name === groupPropertyName)
-        .value;
+      const groupProperty = task.properties.find(
+        (prop) => prop.name === groupPropertyName,
+      );
+      return groupProperty ? convertToKebabCase(groupProperty.value) : null;
     });
+
     const targetProperty = _.find(propertyConfig, { name: groupPropertyName });
     if (!targetProperty) return [];
 
@@ -76,6 +55,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
     const sortedOptions = _.sortBy(targetProperty.options, (option) => {
       return columnSort.indexOf(convertToKebabCase(option.name));
     });
+
     _.each(sortedOptions, (option) => {
       const colTitle = option.name;
       const colId = convertToKebabCase(colTitle);
@@ -87,13 +67,12 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
     });
 
     return _.values(defaultGroup);
-  }, [tasks, propertyConfig]);
+  }, [tasks, propertyConfig, columnSort, groupPropertyName]);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<
     (TaskWithProperties & { columnId: string }) | null
   >(null);
-  const cardPositions: Record<string, number> = {};
 
   useEffect(() => {
     // for test
@@ -116,23 +95,6 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
 
     const task = tasks.find((task) => task.id === taskId);
     if (!task) return;
-
-    if (type === "daily") {
-      const updatedTask = strategy.updateTaskOnDrag(
-        task,
-        destination.droppableId,
-        destination.index,
-      );
-      dispatch(
-        updateProperty({
-          taskId: updatedTask.id,
-          property: "daily",
-          propertyId: "",
-          value: updatedTask.properties,
-        }),
-      );
-      return;
-    }
 
     if (source.droppableId === destination.droppableId) {
       const updatedTasks = [...tasks];
@@ -162,11 +124,10 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
   };
 
   const handleAddTask = () => {
-    const { task, properties } = strategy.generateNextTask(tasks);
     dispatch(
       createTaskWithDefaultProperties({
-        task,
-        properties,
+        task: { title: "", content: "", type: "" },
+        properties: defaultProperties,
       }),
     )
       .unwrap()
@@ -202,7 +163,6 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
                     ref={provided.innerRef}
                     {...provided.droppableProps}
                     className="p-4 bg-gray-800 rounded shadow"
-                    style={strategy.getColumnStyle(hasSpecialTask)}
                     data-cy="kanban-column"
                     id={column.id}
                   >
@@ -211,17 +171,11 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
                     </h2>
 
                     {column.tasks.map((task, index) => {
-                      const cardStyle = strategy.calculateCardStyle(
-                        task,
-                        cardPositions,
-                      );
-
                       return (
                         <KanbanCard
                           key={task.id}
                           task={task}
                           index={index}
-                          cardStyle={cardStyle}
                           onEdit={handleEdit}
                         />
                       );

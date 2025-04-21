@@ -86,13 +86,11 @@ export const updateProperty = createAsyncThunk(
       propertyId,
       property,
       value,
-      type,
     }: {
       taskId: string;
       propertyId: string;
       property: string;
       value: any;
-      type: string;
     },
     thunkAPI,
   ) => {
@@ -102,7 +100,7 @@ export const updateProperty = createAsyncThunk(
         property,
         value,
       );
-      return { taskId, updatedProperty, type };
+      return { taskId, updatedProperty };
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }

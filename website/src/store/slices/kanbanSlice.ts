@@ -15,13 +15,11 @@ import { PropertyConfig } from "../../types/property";
 interface Tasks {
   tasks: TaskWithProperties[];
   propertySetting: PropertyConfig[];
-  dailyTasks: TaskWithProperties[];
 }
 
 const initialState: Tasks = {
   tasks: [],
   propertySetting: [],
-  dailyTasks: [],
 };
 
 const kanbanSlice = createSlice({
@@ -32,10 +30,6 @@ const kanbanSlice = createSlice({
       const updatedTasks = action.payload;
       state.tasks = updatedTasks;
     },
-    updateDailyTaskOrder(state, action) {
-      const updatedTasks = action.payload;
-      state.dailyTasks = updatedTasks;
-    },
   },
   extraReducers: (builder) => {
     builder
@@ -43,7 +37,6 @@ const kanbanSlice = createSlice({
         const tasks = action.payload;
         const timeName = ["createdAt", "updatedAt"];
         const regularTasks: TaskWithProperties[] = [];
-        const dailyTasks: TaskWithProperties[] = [];
 
         _.each(tasks, (task) => {
           _.each(timeName, (tn) => {
@@ -56,28 +49,18 @@ const kanbanSlice = createSlice({
             });
           });
 
-          if (task.type === "daily") {
-            dailyTasks.push(task);
-          } else {
-            regularTasks.push(task);
-          }
+          regularTasks.push(task);
         });
 
         state.tasks = regularTasks;
-        state.dailyTasks = dailyTasks;
       })
       .addCase(createTaskWithDefaultProperties.fulfilled, (state, action) => {
         const task = action.payload;
-        if (task.type === "daily") {
-          state.dailyTasks.push(task);
-        } else {
-          state.tasks.push(task);
-        }
+        state.tasks.push(task);
       })
       .addCase(updateTask.fulfilled, (state, action) => {
         const { task } = action.payload;
-        const taskList = task.type === "daily" ? state.dailyTasks : state.tasks;
-        const taskIndex = taskList.findIndex((t) => t.id === task.id);
+        const taskIndex = state.tasks.findIndex((t) => t.id === task.id);
         if (taskIndex < 0) return;
 
         const timeName = ["createdAt", "updatedAt"];
@@ -85,26 +68,18 @@ const kanbanSlice = createSlice({
           task[tn] = convertUtcToLocal(task[tn]);
         });
 
-        taskList[taskIndex] = {
+        state.tasks[taskIndex] = {
           ...task,
-          properties: taskList[taskIndex].properties,
+          properties: state.tasks[taskIndex].properties,
         };
       })
       .addCase(deleteTask.fulfilled, (state, action) => {
-        const { taskId, type } = action.payload;
-        if (type === "daily") {
-          state.dailyTasks = state.dailyTasks.filter(
-            (task) => task.id !== taskId,
-          );
-        } else {
-          state.tasks = state.tasks.filter((task) => task.id !== taskId);
-        }
+        const { taskId } = action.payload;
+        state.tasks = state.tasks.filter((task) => task.id !== taskId);
       })
       .addCase(updateProperty.fulfilled, (state, action) => {
-        const { taskId, updatedProperty, type } = action.payload;
-        const taskList = type === "daily" ? state.dailyTasks : state.tasks;
-
-        const task = taskList.find((task) => task.id === taskId);
+        const { taskId, updatedProperty } = action.payload;
+        const task = state.tasks.find((task) => task.id === taskId);
         if (!task) return;
 
         const propertyIndex = task.properties.findIndex(

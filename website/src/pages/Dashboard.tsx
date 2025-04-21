@@ -4,7 +4,6 @@ import { Routes, Route } from "react-router-dom";
 import KanbanPage from "../pages/KanbanPage";
 import WeeklyReportPage from "../pages/WeeklyReportPage";
 import DocsPage from "../pages/DocsPage";
-import DailyPage from "./DailyPage";
 import {
   getAllTaskWithProperties,
   getPropertiesAndOptions,
@@ -25,7 +24,6 @@ const Dashboard: React.FC = () => {
       <div className="flex flex-col flex-grow h-full bg-gray-100">
         <Routes>
           <Route path="/kanban" element={<KanbanPage />} />
-          <Route path="/daily" element={<DailyPage />} />
           <Route path="/weekly-report" element={<WeeklyReportPage />} />
           <Route path="/docs" element={<DocsPage />} />
           <Route path="*" element={<div>Welcome to the Dashboard!</div>} />
