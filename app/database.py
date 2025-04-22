@@ -144,8 +144,10 @@ async def insert_default_data_to_db(db):
             {"propertyName": "priority", "name": "High"},
             {"propertyName": "priority", "name": "Medium"},
             {"propertyName": "priority", "name": "Low"},
+            {"propertyName": "status", "name": "Epic"},
             {"propertyName": "status", "name": "Todo"},
             {"propertyName": "status", "name": "In Progress"},
+            {"propertyName": "status", "name": "Waiting"},
             {"propertyName": "status", "name": "Done"},
             {"propertyName": "status", "name": "Cancelled"},
             {"propertyName": "status", "name": "Deferred"},
@@ -158,11 +160,6 @@ async def insert_default_data_to_db(db):
             {"propertyName": "finishedAt", "name": "Incomplete"},
             {"propertyName": "project", "name": "Project A"},
             {"propertyName": "project", "name": "Project B"},
-            {"propertyName": "week_day", "name": "一"},
-            {"propertyName": "week_day", "name": "二"},
-            {"propertyName": "week_day", "name": "三"},
-            {"propertyName": "week_day", "name": "四"},
-            {"propertyName": "week_day", "name": "五"},
         ]
 
         option_info = await exclude_exists(

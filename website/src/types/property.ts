@@ -36,8 +36,10 @@ export const taskPropertyOrder = [
 ];
 
 export const statusOrder = [
+  "epic",
   "todo",
   "in-progress",
+  "waiting",
   "done",
   "cancelled",
   "deferred",

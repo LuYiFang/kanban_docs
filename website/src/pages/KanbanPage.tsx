@@ -5,7 +5,6 @@ import {
   statusOrder,
   taskPropertyOrder,
 } from "../types/property";
-import { RegularStrategy } from "../components/Kanban/strategies/RegularStrategy";
 
 const KanbanPage: React.FC = () => {
   return (
@@ -18,7 +17,6 @@ const KanbanPage: React.FC = () => {
         columnSort={statusOrder}
         defaultProperties={defaultTaskProperties}
         propertyOrder={taskPropertyOrder}
-        strategy={new RegularStrategy()}
       />
     </div>
   );
