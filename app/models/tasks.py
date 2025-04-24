@@ -16,10 +16,17 @@ class TaskBase(BaseModel):
     type: Optional[str] = Field("regular",
                                 description="Task type (e.g., regular or daily)",
                                 example="daily")
+    order: int = Field(...,
+                       description="Order of the task",
+                       example=1)
 
 
 class TaskUpdate(TaskBase):
     pass
+
+
+class TaskBatch(TaskBase):
+    id: str = Field(..., description="Unique Task ID")
 
 
 class TaskResponse(TaskBase, BaseResponse):

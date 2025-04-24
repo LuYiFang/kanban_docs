@@ -18,16 +18,6 @@ export const createTaskWithPropertiesApi = async (
   return response.data;
 };
 
-export const createTaskApi = async (taskData: TaskUpdate) => {
-  const response = await apiClient.post("/task", taskData);
-  return response.data;
-};
-
-export const createPropertiesApi = async (propertiesData: PropertyCreate[]) => {
-  const response = await apiClient.post("/property/batch", propertiesData);
-  return response.data;
-};
-
 export const updateTaskApi = async (taskId: string, taskData: TaskUpdate) => {
   const response = await apiClient.put(`/task/${taskId}`, taskData);
   return response.data;
@@ -67,5 +57,10 @@ export const createPropertyOptionApi = async (
 
 export const getPropertiesAndOptionsApi = async () => {
   const response = await apiClient.get("/property/properties/options");
+  return response.data;
+};
+
+export const batchUpdateTasksApi = async (tasks: TaskUpdate[]) => {
+  const response = await apiClient.put("/task/batch", { tasks });
   return response.data;
 };

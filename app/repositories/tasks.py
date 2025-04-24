@@ -1,6 +1,7 @@
 from typing import List
 
 from motor.core import AgnosticDatabase
+from motor.motor_asyncio import AsyncIOMotorCollection
 
 from repositories.base import upsert_document, delete_document_by_id
 
@@ -31,6 +32,7 @@ async def get_tasks_with_properties_repo(db: AgnosticDatabase) -> List[dict]:
                 "title": 1,
                 "content": 1,
                 "type": 1,
+                "order": 1,
                 "createdAt": 1,
                 "updatedAt": {
                     "$max": {
@@ -64,3 +66,21 @@ async def get_tasks_with_properties_repo(db: AgnosticDatabase) -> List[dict]:
     ]
     result = await db[collection_name].aggregate(pipeline).to_list(length=None)
     return result
+
+
+async def update_multiple_tasks(updates: List[dict], db: AgnosticDatabase) -> List[dict]:
+    collection: AsyncIOMotorCollection = db[collection_name]
+    results = []
+    for update in updates:
+        task_id = update.get("id")
+        if not task_id:
+            continue
+        update_data = {k: v for k, v in update.items() if k != "id"}
+        result = await collection.find_one_and_update(
+            {"_id": task_id},
+            {"$set": update_data},
+            return_document=True
+        )
+        if result:
+            results.append(result)
+    return results

@@ -6,6 +6,7 @@ import {
   getPropertiesAndOptions,
   updateProperty,
   updateTask,
+  updateMultipleTasks,
 } from "./kanbanThuck";
 import { convertUtcToLocal } from "../../utils/tools";
 import _ from "lodash";
@@ -25,12 +26,7 @@ const initialState: Tasks = {
 const kanbanSlice = createSlice({
   name: "kanban",
   initialState,
-  reducers: {
-    updateTaskOrder(state, action) {
-      const updatedTasks = action.payload;
-      state.tasks = updatedTasks;
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(getAllTaskWithProperties.fulfilled, (state, action) => {
@@ -91,9 +87,19 @@ const kanbanSlice = createSlice({
       })
       .addCase(getPropertiesAndOptions.fulfilled, (state, action) => {
         state.propertySetting = action.payload;
+      })
+      .addCase(updateMultipleTasks.fulfilled, (state, action) => {
+        const updatedTasks = action.payload;
+        updatedTasks.forEach((updatedTask) => {
+          const index = state.tasks.findIndex(
+            (task) => task.id === updatedTask.id,
+          );
+          if (index !== -1) {
+            state.tasks[index] = { ...state.tasks[index], ...updatedTask };
+          }
+        });
       });
   },
 });
 
-export const { updateTaskOrder } = kanbanSlice.actions;
 export default kanbanSlice.reducer;

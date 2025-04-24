@@ -1,8 +1,11 @@
+from typing import List
+
 from fastapi import APIRouter, HTTPException, Depends
 
 from database import get_db
-from models.tasks import TaskResponse, TaskUpdate
-from services.tasks import (upsert_task_service, delete_task_service)
+from models.tasks import TaskResponse, TaskUpdate, TaskBatch
+from services.tasks import (upsert_task_service, delete_task_service,
+                            update_multiple_tasks_service)
 
 router = APIRouter()
 
@@ -31,3 +34,12 @@ async def delete_task_endpoint(task_id: str, db=Depends(get_db)):
     if not success:
         raise HTTPException(status_code=404, detail="Task not found")
     return {"message": "Task deleted successfully"}
+
+
+@router.post("/batch", response_model=List[TaskUpdate])
+async def update_multiple_tasks_endpoint(updates: List[TaskBatch], db=Depends(get_db)):
+    try:
+        updated_tasks = await update_multiple_tasks_service(updates, db)
+        return updated_tasks
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))

@@ -1,5 +1,8 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import { TaskUpdate } from "../../types/task";
+import { PropertyCreate } from "../../types/property";
 import {
+  batchUpdateTasksApi,
   createTaskWithPropertiesApi,
   deleteTaskWithPropertiesApi,
   getAllTaskWithPropertiesApi,
@@ -7,8 +10,6 @@ import {
   updatePropertyApi,
   updateTaskApi,
 } from "../../utils/fetchApi";
-import { TaskUpdate } from "../../types/task";
-import { PropertyCreate } from "../../types/property";
 
 export const getAllTaskWithProperties = createAsyncThunk(
   "kanban/getAllTaskWithProperties",
@@ -53,6 +54,18 @@ export const updateTask = createAsyncThunk(
       return {
         task: updatedTask,
       };
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
+    }
+  },
+);
+
+export const updateMultipleTasks = createAsyncThunk(
+  "kanban/updateMultipleTasks",
+  async (tasks: TaskUpdate[], thunkAPI) => {
+    try {
+      const updatedTasks = await batchUpdateTasksApi(tasks);
+      return updatedTasks;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.response.data);
     }

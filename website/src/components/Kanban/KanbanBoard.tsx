@@ -10,6 +10,7 @@ import { DefaultProperty } from "../../types/property";
 import {
   createTaskWithDefaultProperties,
   updateProperty,
+  updateMultipleTasks,
 } from "../../store/slices/kanbanThuck";
 import _ from "lodash";
 import { updateTaskOrder } from "../../store/slices/kanbanSlice";
@@ -62,7 +63,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
       defaultGroup[colId] = {
         id: colId,
         name: colTitle,
-        tasks: colGroup[colId] || [],
+        tasks: _.sortBy(colGroup[colId] || [], "order"),
       };
     });
 
@@ -75,6 +76,8 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
         title: "",
         content: "",
         type: "",
+        order:
+          columns.find((column) => column.id === "todo")?.tasks.length || 0,
       },
       properties: defaultProperties,
     };
@@ -122,26 +125,65 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
     const task = tasks.find((task) => task.id === taskId);
     if (!task) return;
 
-    if (source.droppableId === destination.droppableId) {
-      const updatedTasks = [...tasks];
-      const [movedTask] = updatedTasks.splice(source.index, 1);
-      updatedTasks.splice(destination.index, 0, movedTask);
-
-      dispatch(updateTaskOrder(updatedTasks));
-      return;
-    }
-
-    const property = task.properties.find((p) => p.name === groupPropertyName);
-    if (!property) return;
-
-    dispatch(
-      updateProperty({
-        taskId,
-        property: groupPropertyName,
-        propertyId: property.id,
-        value: destination.droppableId,
-      }),
+    const sourceColumn = columns.find((col) => col.id === source.droppableId);
+    const destinationColumn = columns.find(
+      (col) => col.id === destination.droppableId,
     );
+
+    if (!sourceColumn || !destinationColumn) return;
+
+    // 更新 source 列任務順序
+    const sourceTasks = [...sourceColumn.tasks];
+    const [movedTask] = sourceTasks.splice(source.index, 1);
+
+    // 更新 destination 列任務順序
+    const destinationTasks =
+      source.droppableId === destination.droppableId
+        ? sourceTasks
+        : [...destinationColumn.tasks];
+    destinationTasks.splice(destination.index, 0, movedTask);
+
+    // 創建新的任務列表，避免直接修改只讀屬性
+    const updatedSourceTasks = sourceTasks.map((task, index) => ({
+      id: task.id,
+      title: task.title,
+      content: task.content,
+      order: index,
+    }));
+    const updatedDestinationTasks = destinationTasks.map((task, index) => ({
+      id: task.id,
+      title: task.title,
+      content: task.content,
+      order: index,
+    }));
+
+    if (source.droppableId === destination.droppableId) {
+      // 同列拖放
+      dispatch(updateMultipleTasks(updatedSourceTasks));
+    } else {
+      // 跨列拖放
+      const property = task.properties.find(
+        (p) => p.name === groupPropertyName,
+      );
+      if (!property) return;
+
+      dispatch(
+        updateProperty({
+          taskId,
+          property: groupPropertyName,
+          propertyId: property.id,
+          value: destination.droppableId,
+        }),
+      );
+
+      // 更新 source 和 destination 列的任務
+      dispatch(
+        updateMultipleTasks([
+          ...updatedSourceTasks,
+          ...updatedDestinationTasks,
+        ]),
+      );
+    }
   };
 
   const handleEdit = (task: TaskWithProperties) => {
