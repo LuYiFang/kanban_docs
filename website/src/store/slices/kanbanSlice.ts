@@ -1,12 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
+  createPropertyOption,
   createTaskWithDefaultProperties,
   deleteTask,
   getAllTaskWithProperties,
   getPropertiesAndOptions,
+  updateMultipleTasks,
   updateProperty,
   updateTask,
-  updateMultipleTasks,
 } from "./kanbanThuck";
 import { convertUtcToLocal } from "../../utils/tools";
 import _ from "lodash";
@@ -98,6 +99,18 @@ const kanbanSlice = createSlice({
             state.tasks[index] = { ...state.tasks[index], ...updatedTask };
           }
         });
+      })
+      .addCase(createPropertyOption.fulfilled, (state, action) => {
+        const { propertyId, name } = action.payload;
+        const property = state.propertySetting.find(
+          (prop) => prop.id === propertyId,
+        );
+        if (property) {
+          property.options = [
+            ...(property.options || []),
+            { name, propertyId },
+          ];
+        }
       });
   },
 });

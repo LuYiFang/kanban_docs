@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { PropertyOption } from "../../types/property";
 import { formatToCapitalCase } from "../../utils/tools";
+import { createPropertyOption } from "../../store/slices/kanbanThuck";
 
 const InteractiveSelect: React.FC<{
   taskId: string;
@@ -10,6 +11,7 @@ const InteractiveSelect: React.FC<{
   dataName: string;
   onChange: (value: string) => void;
 }> = ({ taskId, propertyName, dataName, onChange }) => {
+  const dispatch = useDispatch();
   const propertyConfig = useSelector((state: RootState) =>
     state.kanban.propertySetting.find((prop) => prop.name === propertyName),
   );
@@ -43,6 +45,39 @@ const InteractiveSelect: React.FC<{
         option.name.toLowerCase().includes(value.toLowerCase()),
       );
       setFilteredOptions(filtered);
+    }
+  };
+
+  // 按下 Enter 鍵新增選項
+  const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && inputValue.trim()) {
+      e.preventDefault();
+      const newOptionName = inputValue.trim();
+
+      // 檢查是否已存在該選項
+      const isOptionExists = propertyConfig?.options.some(
+        (option) => option.name.toLowerCase() === newOptionName.toLowerCase(),
+      );
+      if (isOptionExists) {
+        setIsExpanded(false);
+        return;
+      }
+
+      // 調用 Redux action 新增選項
+      try {
+        const newOption = await dispatch(
+          createPropertyOption({
+            propertyId: propertyConfig.id,
+            name: newOptionName,
+          }),
+        ).unwrap();
+
+        // 更新選項列表並選中新增的選項
+        setFilteredOptions((prev) => [...prev, newOption]);
+        handleSelectOption(newOption);
+      } catch (error) {
+        console.error("Failed to create property option:", error);
+      }
     }
   };
 
@@ -91,8 +126,10 @@ const InteractiveSelect: React.FC<{
             type="text"
             value={inputValue}
             onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
             placeholder="Search or add an option"
             className="w-full border-b border-gray-700 p-2 bg-gray-800 text-gray-300 placeholder-gray-500 rounded-t-md"
+            data-cy="property-select-search"
           />
 
           {/* 選項列表 */}

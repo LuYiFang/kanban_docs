@@ -3,6 +3,7 @@ import { TaskUpdate } from "../../types/task";
 import { PropertyCreate } from "../../types/property";
 import {
   batchUpdateTasksApi,
+  createPropertyOptionApi,
   createTaskWithPropertiesApi,
   deleteTaskWithPropertiesApi,
   getAllTaskWithPropertiesApi,
@@ -128,6 +129,21 @@ export const getPropertiesAndOptions = createAsyncThunk(
       return propertiesWithOptions;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(error.response?.data);
+    }
+  },
+);
+
+export const createPropertyOption = createAsyncThunk(
+  "kanban/createPropertyOption",
+  async (
+    { propertyId, name }: { propertyId: string; name: string },
+    thunkAPI,
+  ) => {
+    try {
+      const newOption = await createPropertyOptionApi(propertyId, name);
+      return { propertyId, name: newOption.name }; // 确保返回包含 propertyId 和 name
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response.data);
     }
   },
 );

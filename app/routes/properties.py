@@ -78,7 +78,7 @@ async def get_properties_and_options(db=Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.post("/{property_id}/option", response_model=OptionResponse)
+@router.post("/properties/option", response_model=OptionResponse)
 async def create_property_option(option: OptionCreate,
                                  db=Depends(get_db)):
     """

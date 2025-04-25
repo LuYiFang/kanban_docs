@@ -1,5 +1,3 @@
-import moment from "moment";
-
 export interface PropertyOption {
   id: string;
   name: string;
@@ -27,6 +25,7 @@ export interface PropertyCreate {
 }
 
 export const taskPropertyOrder = [
+  "project",
   "priority",
   "status",
   "level",
@@ -60,6 +59,7 @@ export const defaultTaskProperties = [
   { name: "priority", value: "low" },
   { name: "status", value: "todo" },
   { name: "level", value: "c-level" },
+  { name: "project", value: "" },
   { name: "assignee", value: "" },
   { name: "deadline", value: "" },
   { name: "finishedAt", value: "" },

@@ -136,6 +136,59 @@ describe("Kanban Page Workflow Tests", () => {
         ]);
       });
   });
+
+  it("should add a new project option and verify it exists in the options list", () => {
+    const newProjectName = "New Project";
+
+    // 打開任務對話框
+    cy.get(
+      '[data-rbd-draggable-id="550e8400-e29b-41d4-a716-446655440001"]',
+    ).click();
+
+    // 確保 Edit Dialog 打開
+    cy.get('[data-cy="edit-dialog"]').should("exist");
+
+    // 找到屬性選擇器並展開
+    cy.get('[data-cy="edit-dialog"]')
+      .find('[data-cy="property-select-input"]')
+      .first()
+      .click();
+
+    // 在搜索框中輸入新選項名稱
+    cy.get('[data-cy="property-select-search"]').type(newProjectName);
+
+    // 按下 Enter 鍵
+    cy.get('[data-cy="property-select-search"]').type("{enter}");
+
+    // 再次點開
+    cy.get('[data-cy="edit-dialog"]')
+      .find('[data-cy="property-select-input"]')
+      .first()
+      .click();
+
+    // 確認新選項是否出現在選項列表中
+    cy.get('[data-cy="property-select-search"]')
+      .parent()
+      .find("ul")
+      .contains(newProjectName)
+      .should("exist");
+
+    // 關閉 Edit Dialog，點開另一個任務，點開第一個選項，確定新選項有出現在選項列表中
+    cy.get("body").click(0, 0);
+    cy.get(
+      '[data-rbd-draggable-id="550e8400-e29b-41d4-a716-446655440002"]',
+    ).click();
+    cy.get('[data-cy="edit-dialog"]').should("exist");
+    cy.get('[data-cy="edit-dialog"]')
+      .find('[data-cy="property-select-input"]')
+      .first()
+      .click();
+    cy.get('[data-cy="property-select-search"]')
+      .parent()
+      .find("ul")
+      .contains(newProjectName)
+      .should("exist");
+  });
 });
 
 const simulateDragDrop = (draggableSelector, destinationSelector) => {

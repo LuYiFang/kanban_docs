@@ -49,7 +49,8 @@ export const createPropertyOptionApi = async (
   propertyId: string,
   name: string,
 ) => {
-  const response = await apiClient.post(`/property/${propertyId}/options`, {
+  const response = await apiClient.post(`/property/properties/option`, {
+    propertyId,
     name,
   });
   return response.data;

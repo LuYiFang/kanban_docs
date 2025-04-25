@@ -255,6 +255,18 @@ export const setupInterceptors = () => {
     ],
   }).as("getPropertiesOptions");
 
+  // Create Property Option
+  cy.intercept("POST", "**/property/properties/option", {
+    statusCode: 200,
+    body: {
+      createdAt: "2025-04-06T16:00:00Z",
+      updatedAt: "2025-04-06T16:05:00Z",
+      propertyId: "fake-property-id-2",
+      name: "New Project",
+      id: "fake-id-11",
+    },
+  }).as("createPropertyOption");
+
   // Batch Update Tasks
   cy.intercept(
     {

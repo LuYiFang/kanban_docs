@@ -158,8 +158,6 @@ async def insert_default_data_to_db(db):
             {"propertyName": "deadline", "name": "2025-12-31"},
             {"propertyName": "finishedAt", "name": "Complete"},
             {"propertyName": "finishedAt", "name": "Incomplete"},
-            {"propertyName": "project", "name": "Project A"},
-            {"propertyName": "project", "name": "Project B"},
         ]
 
         option_info = await exclude_exists(
