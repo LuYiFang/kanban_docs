@@ -49,7 +49,7 @@ async def delete_tasks_with_properties(task_id: str, db=Depends(get_db)):
         if not success:
             raise HTTPException(status_code=404, detail="Task not found")
 
-        success = await delete_task_property_by_task(task_id)
+        success = await delete_task_property_by_task(task_id, db)
         if not success:
             raise HTTPException(status_code=404, detail="Property not found")
     except ValueError as e:
