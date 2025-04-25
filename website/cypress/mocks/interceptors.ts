@@ -9,6 +9,7 @@ export const setupInterceptors = () => {
         updatedAt: "2025-04-06T15:30:00Z",
         title: "This is default task",
         content: "default",
+        order: 0,
         properties: [
           {
             id: "550e8400-e29b-41d4-a716-446655440004",
@@ -33,6 +34,7 @@ export const setupInterceptors = () => {
         updatedAt: "2025-04-06T15:45:00Z",
         title: "Second task",
         content: "This is the second task content.",
+        order: 1,
         properties: [
           {
             id: "550e8400-e29b-41d4-a716-446655440010",
@@ -51,11 +53,36 @@ export const setupInterceptors = () => {
           },
         ],
       },
+      {
+        id: "550e8400-e29b-41d4-a716-446655440003",
+        createdAt: "2025-04-06T16:00:00Z",
+        updatedAt: "2025-04-06T17:00:00Z",
+        title: "Third task",
+        content: "This is the third task content.",
+        order: 0,
+        properties: [
+          {
+            id: "550e8400-e29b-41d4-a716-446655440013",
+            name: "priority",
+            value: "medium",
+          },
+          {
+            id: "550e8400-e29b-41d4-a716-446655440014",
+            name: "status",
+            value: "done",
+          },
+          {
+            id: "550e8400-e29b-41d4-a716-446655440015",
+            name: "level",
+            value: "a-level",
+          },
+        ],
+      },
     ],
   }).as("getAllTaskWithProperties");
 
-  // Create Task
-  cy.intercept("POST", "**/task", {
+  // Create Task With Properties
+  cy.intercept("POST", "**/task/properties", {
     statusCode: 200,
     body: {
       id: "550e8400-e29b-41d4-a716-446655440000",
@@ -63,21 +90,16 @@ export const setupInterceptors = () => {
       updatedAt: "2025-04-06T15:30:00Z",
       title: "",
       content: "",
+      properties: [
+        { name: "priority", value: "low" },
+        { name: "status", value: "todo" },
+        { name: "level", value: "c-level" },
+        { name: "assignee", value: "" },
+        { name: "deadline", value: "" },
+        { name: "finishedAt", value: "" },
+      ],
     },
-  }).as("createTask");
-
-  // Create Batch Properties
-  cy.intercept("POST", "**/property/batch", {
-    statusCode: 200,
-    body: [
-      { name: "priority", value: "low" },
-      { name: "status", value: "todo" },
-      { name: "level", value: "c-level" },
-      { name: "assignee", value: "" },
-      { name: "deadline", value: "" },
-      { name: "finishedAt", value: "" },
-    ],
-  }).as("createBatchProperties");
+  }).as("createTaskWithProperties");
 
   // Update Task
   cy.intercept("PUT", "**/task/*", {
@@ -172,6 +194,34 @@ export const setupInterceptors = () => {
             name: "Done",
             id: "fake-id-6",
           },
+          {
+            createdAt: "2025-04-06T12:00:00Z",
+            updatedAt: "2025-04-06T15:30:00Z",
+            propertyId: "fake-property-id-2",
+            name: "Epic",
+            id: "fake-id-7",
+          },
+          {
+            createdAt: "2025-04-06T12:00:00Z",
+            updatedAt: "2025-04-06T15:30:00Z",
+            propertyId: "fake-property-id-2",
+            name: "Waiting",
+            id: "fake-id-8",
+          },
+          {
+            createdAt: "2025-04-06T12:00:00Z",
+            updatedAt: "2025-04-06T15:30:00Z",
+            propertyId: "fake-property-id-2",
+            name: "Cancelled",
+            id: "fake-id-9",
+          },
+          {
+            createdAt: "2025-04-06T12:00:00Z",
+            updatedAt: "2025-04-06T15:30:00Z",
+            propertyId: "fake-property-id-2",
+            name: "Deferred",
+            id: "fake-id-10",
+          },
         ],
       },
       {
@@ -204,4 +254,74 @@ export const setupInterceptors = () => {
       },
     ],
   }).as("getPropertiesOptions");
+
+  // Batch Update Tasks
+  cy.intercept(
+    {
+      method: "POST",
+      url: "**/api/task/batch",
+      times: 1, // 此回應僅使用一次
+    },
+    {
+      statusCode: 200,
+      body: [
+        {
+          id: "550e8400-e29b-41d4-a716-446655440001",
+          updatedAt: "2025-04-06T16:00:00Z",
+          title: "This is default task",
+          content: "default",
+          order: 0,
+        },
+        {
+          id: "550e8400-e29b-41d4-a716-446655440002",
+          updatedAt: "2025-04-06T16:05:00Z",
+          title: "Second task",
+          content: "This is the second task content.",
+          order: 0,
+        },
+        {
+          id: "550e8400-e29b-41d4-a716-446655440003",
+          updatedAt: "2025-04-06T16:05:00Z",
+          title: "Third task",
+          content: "This is the third task content.",
+          order: 1,
+        },
+      ],
+    },
+  ).as("batchUpdateTasks");
+
+  // Batch Update Tasks - 用於 "move a task within the same column"
+  cy.intercept(
+    {
+      method: "POST",
+      url: "**/api/task/batch",
+      times: 1, // 此回應僅使用一次
+    },
+    {
+      statusCode: 200,
+      body: [
+        {
+          id: "550e8400-e29b-41d4-a716-446655440001",
+          updatedAt: "2025-04-06T16:00:00Z",
+          title: "This is default task",
+          content: "default",
+          order: 1,
+        },
+        {
+          id: "550e8400-e29b-41d4-a716-446655440002",
+          updatedAt: "2025-04-06T16:05:00Z",
+          title: "Second task",
+          content: "This is the second task content.",
+          order: 0,
+        },
+        {
+          id: "550e8400-e29b-41d4-a716-446655440003",
+          updatedAt: "2025-04-06T16:05:00Z",
+          title: "Third task",
+          content: "This is the third task content.",
+          order: 0,
+        },
+      ],
+    },
+  ).as("batchUpdateTasksWithinColumn");
 };

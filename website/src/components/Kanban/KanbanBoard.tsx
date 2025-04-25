@@ -4,16 +4,15 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import EditDialog from "../Dialog/EditDialog";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faMinus } from "@fortawesome/free-solid-svg-icons";
+import { faMinus, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { TaskWithProperties } from "../../types/task";
 import { DefaultProperty } from "../../types/property";
 import {
   createTaskWithDefaultProperties,
-  updateProperty,
   updateMultipleTasks,
+  updateProperty,
 } from "../../store/slices/kanbanThuck";
 import _ from "lodash";
-import { updateTaskOrder } from "../../store/slices/kanbanSlice";
 import { convertToKebabCase } from "../../utils/tools";
 import KanbanCard from "./KanbanCard";
 
@@ -106,7 +105,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
   useEffect(() => {
     // for test
     window.reactBeautifulDndContext = { handleDragEnd };
-  }, [tasks]);
+  }, [tasks, columns]);
 
   const handleDragEnd = (result: DropResult) => {
     const { source, destination } = result;
@@ -243,7 +242,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
                     </div>
 
                     {!isCollapsed && (
-                      <div>
+                      <div data-cy="kanban-column-cards">
                         {column.tasks.map((task, index) => (
                           <KanbanCard
                             key={task.id}

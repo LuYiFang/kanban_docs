@@ -33,6 +33,11 @@ describe("Kanban Page Workflow Tests", () => {
       '[data-rbd-draggable-id="550e8400-e29b-41d4-a716-446655440001"]';
     const destinationSelector = '[data-rbd-droppable-id="done"]';
 
+    // 展開 "done" 列
+    cy.get('[data-cy="kanban-column"][id="done"]')
+      .find(".flex.justify-between.items-center.cursor-pointer")
+      .click();
+
     // 模擬拖放
     simulateDragDrop(draggableSelector, destinationSelector);
 
@@ -94,7 +99,6 @@ describe("Kanban Page Workflow Tests", () => {
       '[data-rbd-draggable-id="550e8400-e29b-41d4-a716-446655440001"]'; // 第一個任務
     const draggableSelector2 =
       '[data-rbd-draggable-id="550e8400-e29b-41d4-a716-446655440002"]'; // 第二個任務
-    const destinationIndex = 0; // 將第二個任務移動到第一個位置
 
     // 模擬拖放
     cy.get(draggableSelector2).then(($el) => {
@@ -109,26 +113,28 @@ describe("Kanban Page Workflow Tests", () => {
           },
           destination: {
             droppableId: "todo",
-            index: destinationIndex,
+            index: 0,
           },
         };
 
         win["reactBeautifulDndContext"].handleDragEnd(event);
       });
-
-      // 驗證 task 排序是否正確
-      cy.get('[data-rbd-droppable-id="todo"]')
-        .find("[data-rbd-draggable-id]")
-        .then((tasks) => {
-          console.log("tasks", tasks);
-          expect(tasks[0].getAttribute("data-rbd-draggable-id")).to.eq(
-            "550e8400-e29b-41d4-a716-446655440002",
-          );
-          expect(tasks[1].getAttribute("data-rbd-draggable-id")).to.eq(
-            "550e8400-e29b-41d4-a716-446655440001",
-          );
-        });
     });
+
+    // 驗證 task 排序是否正確
+    cy.wait(500);
+    cy.get('[data-rbd-droppable-id="todo"] [data-cy="kanban-column-cards"]')
+      .children("[data-rbd-draggable-id]") // 確保只選取直接子元素
+      .then((tasks) => {
+        const taskIds = tasks
+          .toArray()
+          .map((task) => task.getAttribute("data-rbd-draggable-id"));
+        console.log("taskIds", taskIds);
+        expect(taskIds).to.deep.eq([
+          "550e8400-e29b-41d4-a716-446655440002", // 預期第一個任務
+          "550e8400-e29b-41d4-a716-446655440001", // 預期第二個任務
+        ]);
+      });
   });
 });
 

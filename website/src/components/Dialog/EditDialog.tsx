@@ -88,6 +88,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
   };
 
   const formatDateTimeLocal = (date: string) => {
+    if (!date) return "";
     return moment(date).format("YYYY-MM-DDTHH:mm");
   };
 
