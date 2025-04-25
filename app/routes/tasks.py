@@ -36,7 +36,7 @@ async def delete_task_endpoint(task_id: str, db=Depends(get_db)):
     return {"message": "Task deleted successfully"}
 
 
-@router.post("/batch", response_model=List[TaskUpdate])
+@router.post("/batch", response_model=List[TaskBatch])
 async def update_multiple_tasks_endpoint(updates: List[TaskBatch], db=Depends(get_db)):
     try:
         updated_tasks = await update_multiple_tasks_service(updates, db)

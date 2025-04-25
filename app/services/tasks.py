@@ -2,7 +2,7 @@ from typing import List
 
 from motor.core import AgnosticDatabase
 
-from models.tasks import TaskUpdate
+from models.tasks import TaskBatch
 from repositories.tasks import (upsert_task, delete_task_by_id,
                                 update_multiple_tasks)
 from routes.tasks import TaskResponse
@@ -17,7 +17,7 @@ async def delete_task_service(task_id: str, db: AgnosticDatabase) -> bool:
     return await delete_service(delete_task_by_id, task_id, db)
 
 
-async def update_multiple_tasks_service(updates: List[TaskUpdate], db: AgnosticDatabase) -> List[dict]:
+async def update_multiple_tasks_service(updates: List[TaskBatch], db: AgnosticDatabase) -> List[dict]:
     if not updates:
         raise ValueError("No updates provided")
     updates_data = [update.model_dump() for update in updates]

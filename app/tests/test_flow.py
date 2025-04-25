@@ -31,29 +31,78 @@ class TestFlowAPI:
         async with AsyncClient(app=app,
                                base_url="http://test") as async_client:
             await self.initialize_collections(mongo_mock)
-            propertyId = await self.verify_default_property_options(async_client)
+            propertyId = await self.verify_default_property_options(
+                async_client)
 
-            task_id = await self.create_task_with_properties(async_client)
+            payload_create1, properties1 = await self.get_task1_payload()
+            task_id = await self.create_task_with_properties(async_client,
+                                                             payload_create1,
+                                                             properties1)
             await self.update_task(async_client, task_id)
 
             await self.varify_properties(async_client, task_id)
             await self.delete_task(async_client, task_id)
             await self.check_empty_task(async_client)
-            new_option_id = await self.create_property_option(async_client, propertyId)
-            await self.verify_property_options(async_client, propertyId, new_option_id)
+            new_option_id = await self.create_property_option(async_client,
+                                                              propertyId)
+            await self.verify_property_options(async_client, propertyId,
+                                               new_option_id)
 
-            # await self.test_daily_task(async_client)
-
-
+            payload_create1, properties1 = await self.get_task1_payload()
+            task_id = await self.create_task_with_properties(async_client,
+                                                             payload_create1,
+                                                             properties1)
+            payload_create2, properties2 = await self.get_task2_payload()
+            task_id2 = await self.create_task_with_properties(async_client,
+                                                              payload_create2,
+                                                              properties2)
+            await self.swap_task_order(async_client, task_id, task_id2)
 
     @staticmethod
     async def initialize_collections(mongo_mock):
         await insert_default_data_to_db(mongo_mock)
 
     @staticmethod
+    async def get_task1_payload():
+        payload_create = {
+            "title": "Test Task",
+            "content": "This is a test content",
+            "order": 0,
+            "type": "regular",
+        }
+        properties = [
+            {"name": "priority", "value": "low"},
+            {"name": "status", "value": "todo"},
+            {"name": "level", "value": "c-level"},
+            {"name": "assignee", "value": ""},
+            {"name": "deadline", "value": ""},
+            {"name": "finishedAt", "value": ""}
+        ]
+        return payload_create, properties
+
+    @staticmethod
+    async def get_task2_payload():
+        payload_create = {
+            "title": "New Task",
+            "content": "Content for New Task",
+            "order": 1,
+            "type": "regular",
+        }
+        properties = [
+            {"name": "priority", "value": "low"},
+            {"name": "status", "value": "todo"},
+            {"name": "level", "value": "c-level"},
+            {"name": "assignee", "value": ""},
+            {"name": "deadline", "value": ""},
+            {"name": "finishedAt", "value": ""}
+        ]
+        return payload_create, properties
+
+    @staticmethod
     async def verify_default_property_options(async_client):
         """Verify default property options using the /properties/options endpoint."""
-        response_property_options = await async_client.get("/api/property/properties/options")
+        response_property_options = await async_client.get(
+            "/api/property/properties/options")
         assert response_property_options.status_code == 200
         options_data = response_property_options.json()
 
@@ -82,20 +131,9 @@ class TestFlowAPI:
         return status_property['id']
 
     @staticmethod
-    async def create_task_with_properties(async_client):
-        payload_create = {
-            "title": "Test Task",
-            "content": "This is a test content",
-            "type": "regular",
-        }
-        properties = [
-            {"name": "priority", "value": "low"},
-            {"name": "status", "value": "todo"},
-            {"name": "level", "value": "c-level"},
-            {"name": "assignee", "value": ""},
-            {"name": "deadline", "value": ""},
-            {"name": "finishedAt", "value": ""}
-        ]
+    async def create_task_with_properties(async_client, payload_create,
+                                          properties):
+        """Create a task with properties."""
         response = await async_client.post(
             "/api/task/properties",
             json={"task": payload_create, "properties": properties}
@@ -105,20 +143,6 @@ class TestFlowAPI:
         assert task_with_properties["title"] == payload_create["title"]
         assert len(task_with_properties["properties"]) == len(properties)
         return task_with_properties["id"]
-
-    @staticmethod
-    async def create_task(async_client):
-        payload_create = {
-            "title": "Test Task",
-            "content": "This is a test content"
-        }
-        response_create = await async_client.post("/api/task/",
-                                                  json=payload_create)
-        assert response_create.status_code == 200
-        task_data = response_create.json()
-        task_id = task_data["id"]
-        assert task_data["title"] == payload_create["title"]
-        return task_id
 
     @staticmethod
     async def create_properties(async_client, task_id):
@@ -140,7 +164,8 @@ class TestFlowAPI:
     async def update_task(async_client, task_id):
         payload_update = {
             "title": "Updated Task",
-            "content": "Updated task content"
+            "content": "Updated task content",
+            "order": 0
         }
         response_update = await async_client.put(f"/api/task/{task_id}",
                                                  json=payload_update)
@@ -190,7 +215,8 @@ class TestFlowAPI:
         return response_data["id"]
 
     @staticmethod
-    async def verify_property_options(async_client, property_id, new_option_id):
+    async def verify_property_options(async_client, property_id,
+                                      new_option_id):
         """Verify the created property options."""
         response = await async_client.get(
             f"/api/property/properties/options")
@@ -202,37 +228,31 @@ class TestFlowAPI:
             (prop for prop in options_data if prop.get("id") == property_id),
             None)
         new_option = next(
-            (opt for opt in status_property['options'] if opt.get("id") == new_option_id),
+            (opt for opt in status_property['options'] if
+             opt.get("id") == new_option_id),
             None)
         assert new_option["name"] == "test_value"
 
     @staticmethod
-    async def test_daily_task(async_client):
-        """Test the creation of a daily task with required fields."""
-        payload_create = {
-            "title": "Daily Task",
-            "content": "This is a daily task.",
-            "type": "daily",
-        }
-        properties = [
-            {"name": "start_date", "value": "2023-10-01T00:00:00"},
-            {"name": "end_date", "value": "2023-10-31T23:59:59"},
-            {"name": "week_day", "value": "一"}
+    async def swap_task_order(async_client,
+                              task_id1, task_id2):
+        """Swap the order of two tasks."""
+        # Swap the order of the existing task and the new task
+        payload_swap_order = [
+            {"id": task_id1, "order": 1, "title": "Test Task",
+             "content": "This is a test content"},
+            {"id": task_id2, "order": 0, "title": "New Task",
+             "content": "Content for New Task", }
         ]
+        response_swap = await async_client.post("/api/task/batch",
+                                                json=payload_swap_order)
+        assert response_swap.status_code == 200
+        updated_tasks = response_swap.json()
 
-        # Create the daily task
-        response = await async_client.post(
-            "/api/task/properties",
-            json={"task": payload_create, "properties": properties}
-        )
-        assert response.status_code == 200
-        task_with_properties = response.json()
-
-        # Verify the task details
-        assert task_with_properties["title"] == payload_create["title"]
-        assert task_with_properties["type"] == payload_create["type"]
-
-        # Verify the properties
-        property_map = {p['name']: p['value'] for p in properties}
-        for prop in task_with_properties["properties"]:
-            assert prop["value"] == property_map[prop["name"]]
+        # Verify the orders are swapped
+        existing_task_updated = next(
+            task for task in updated_tasks if task["id"] == task_id1)
+        new_task_updated = next(
+            task for task in updated_tasks if task["id"] == task_id2)
+        assert existing_task_updated["order"] == 1
+        assert new_task_updated["order"] == 0

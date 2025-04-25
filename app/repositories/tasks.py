@@ -82,5 +82,6 @@ async def update_multiple_tasks(updates: List[dict], db: AgnosticDatabase) -> Li
             return_document=True
         )
         if result:
+            result["id"] = task_id
             results.append(result)
     return results
