@@ -61,6 +61,6 @@ export const getPropertiesAndOptionsApi = async () => {
 };
 
 export const batchUpdateTasksApi = async (tasks: TaskUpdate[]) => {
-  const response = await apiClient.post("/task/batch", { tasks });
+  const response = await apiClient.post("/task/batch", tasks);
   return response.data;
 };

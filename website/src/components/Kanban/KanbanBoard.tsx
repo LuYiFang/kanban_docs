@@ -147,12 +147,14 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
       id: task.id,
       title: task.title,
       content: task.content,
+      type: task.type,
       order: index,
     }));
     const updatedDestinationTasks = destinationTasks.map((task, index) => ({
       id: task.id,
       title: task.title,
       content: task.content,
+      type: task.type,
       order: index,
     }));
 

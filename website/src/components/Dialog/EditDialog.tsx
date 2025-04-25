@@ -116,11 +116,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
   };
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const inputValue = e.target.value;
-    const formattedValue = inputValue.replace(/\n{2,}/g, (match) => {
-      return "\n" + "<br/>".repeat(match.length - 1);
-    });
-    setContent(formattedValue);
+    setContent(e.target.value);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
