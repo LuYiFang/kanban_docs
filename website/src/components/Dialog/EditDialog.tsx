@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ReactMarkdown from "react-markdown";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -44,7 +50,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
   const task: TaskWithProperties = useSelector((state: RootState) => {
     return (
       (state.kanban[dataName] as TaskWithProperties[]).find(
-        (t: TaskWithProperties) => t.id === taskId,
+        (t) => t.id === taskId,
       ) || {
         id: "",
         title: "",
@@ -55,8 +61,9 @@ const EditDialog: React.FC<EditDialogProps> = ({
       }
     );
   });
-  const [title, setTitle] = useState(task.title);
-  const [content, setContent] = useState(task.content);
+
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -65,62 +72,67 @@ const EditDialog: React.FC<EditDialogProps> = ({
       setTitle(task.title);
       setContent(task.content);
     }
-  }, [isOpen, task]);
+  }, [isOpen, task.title, task.content]);
+
+  const handleClickOutside = useCallback((event: MouseEvent) => {
+    if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      setIsMenuOpen(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!isOpen) return;
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsMenuOpen(false);
-      }
-    };
-
     document.addEventListener("mousedown", handleClickOutside);
-
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isOpen]);
+  }, [isOpen, handleClickOutside]);
 
-  const propertyMap = useMemo(() => {
-    return _.mapValues(
-      _.groupBy(task.properties, "name"),
-      (group) => _.first(group) as Property,
-    );
-  }, [task.properties]);
+  const propertyMap = useMemo(
+    () =>
+      _.mapValues(
+        _.groupBy(task.properties, "name"),
+        (group) => _.first(group) as Property,
+      ),
+    [task.properties],
+  );
 
   const propertyConfig = useSelector(
     (state: RootState) => state.kanban.propertySetting,
   );
 
-  const propertyConfigMap = useMemo(() => {
-    return _.mapValues(
-      _.groupBy(propertyConfig, "name"),
-      (group) => _.first(group) as PropertyConfigType,
-    );
-  }, [propertyConfig]);
+  const propertyConfigMap = useMemo(
+    () =>
+      _.mapValues(
+        _.groupBy(propertyConfig, "name"),
+        (group) => _.first(group) as PropertyConfigType,
+      ),
+    [propertyConfig],
+  );
 
-  const handlePropertyChange = (property: string, value: string) => {
-    const propertyId = propertyMap[property.toLowerCase()]?.id;
-    if (!propertyId) return;
-    dispatch(updateProperty({ taskId: task.id, propertyId, property, value }));
-  };
+  const handlePropertyChange = useCallback(
+    (property: string, value: string) => {
+      const propertyId = propertyMap[property.toLowerCase()]?.id;
+      if (!propertyId) return;
+      dispatch(
+        updateProperty({ taskId: task.id, propertyId, property, value }),
+      );
+    },
+    [dispatch, propertyMap, task.id],
+  );
 
-  const formatDateTimeLocal = (date: string) => {
-    if (!date) return "";
-    return moment(date).format("YYYY-MM-DDTHH:mm");
-  };
+  const formatDateTimeLocal = useCallback(
+    (date: string) => (date ? moment(date).format("YYYY-MM-DDTHH:mm") : ""),
+    [],
+  );
 
-  const handleDeleteTask = () => {
+  const handleDeleteTask = useCallback(() => {
     onClose();
     setIsMenuOpen(false);
     dispatch(deleteTask({ taskId }));
-  };
+  }, [dispatch, onClose, taskId]);
 
-  if (!isOpen) return null;
-
-  const handleOverlayClick = () => {
+  const handleOverlayClick = useCallback(() => {
     dispatch(
       updateTask({
         taskId,
@@ -133,30 +145,34 @@ const EditDialog: React.FC<EditDialogProps> = ({
     );
     setIsMenuOpen(false);
     onClose();
-  };
+  }, [dispatch, taskId, task, title, content, onClose]);
 
-  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setContent(e.target.value);
-  };
+  const handleContentChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => setContent(e.target.value),
+    [],
+  );
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Tab") {
-      e.preventDefault();
-      const target = e.target as HTMLTextAreaElement;
-      const start = target.selectionStart;
-      const end = target.selectionEnd;
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === "Tab") {
+        e.preventDefault();
+        const target = e.target as HTMLTextAreaElement;
+        const start = target.selectionStart;
+        const end = target.selectionEnd;
 
-      // 插入制表符
-      const value = target.value;
-      const newValue = value.substring(0, start) + "\t" + value.substring(end);
+        const newValue =
+          target.value.substring(0, start) + "\t" + target.value.substring(end);
+        setContent(newValue);
 
-      // 更新內容並調整光標位置
-      setContent(newValue);
-      setTimeout(() => {
-        target.selectionStart = target.selectionEnd = start + 1;
-      }, 0);
-    }
-  };
+        setTimeout(() => {
+          target.selectionStart = target.selectionEnd = start + 1;
+        }, 0);
+      }
+    },
+    [],
+  );
+
+  if (!isOpen) return null;
 
   return (
     <div
@@ -169,6 +185,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
         onClick={(e) => e.stopPropagation()}
         data-cy="edit-dialog"
       >
+        {/* Menu */}
         <div className="absolute top-4 right-4">
           <FontAwesomeIcon
             icon={faEllipsisH}
@@ -244,7 +261,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
                       <input
                         type="datetime-local"
                         className="w-1/3 text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
-                        value={formatDateTimeLocal(value)} // 格式化為 datetime-local 可接受的格式
+                        value={formatDateTimeLocal(value)}
                         onChange={(e) => onChange(e.target.value)}
                         data-cy="property-date-input"
                       />
@@ -264,9 +281,8 @@ const EditDialog: React.FC<EditDialogProps> = ({
           </div>
         </div>
 
-        {/* Markdown Input & Preview (side-by-side) */}
+        {/* Markdown Input & Preview */}
         <div className="flex space-x-4 flex-1 min-h-[350px] h-full">
-          {/* Markdown Input */}
           <textarea
             className="flex-1 min-h-[350px] h-full border border-gray-700 bg-gray-800 text-gray-300 p-3 rounded text-sm resize-none"
             value={content}
@@ -275,8 +291,6 @@ const EditDialog: React.FC<EditDialogProps> = ({
             placeholder="Enter Markdown content here..."
             data-cy="property-content-input"
           />
-
-          {/* Markdown Preview */}
           <div className="flex-1 min-h-[350px] h-full border border-gray-700 bg-gray-800 text-gray-300 p-3 rounded overflow-auto">
             <ReactMarkdown
               remarkPlugins={[remarkGfm, remarkBreaks]}

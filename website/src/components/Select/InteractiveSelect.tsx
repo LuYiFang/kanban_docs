@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../store/store";
 import { PropertyOption } from "../../types/property";
@@ -14,6 +14,8 @@ const InteractiveSelect: React.FC<{
   onChange: (value: string) => void;
 }> = ({ taskId, propertyName, dataName, onChange }) => {
   const dispatch = useDispatch<AppDispatch>();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   const propertyConfig = useSelector(
     (state: RootState) =>
       state.kanban.propertySetting.find(
@@ -40,81 +42,82 @@ const InteractiveSelect: React.FC<{
   const [isExpanded, setIsExpanded] = useState(false);
   const [inputValue, setInputValue] = useState(taskProperty.value);
   const [filteredOptions, setFilteredOptions] = useState<PropertyOption[]>([]);
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // 展開選單處理邏輯
-  const handleExpand = () => {
+  // 展開選單
+  const handleExpand = useCallback(() => {
     setIsExpanded(true);
-    if (propertyConfig?.options) {
-      setFilteredOptions(propertyConfig.options); // 重置篩選
-    }
-  };
+    setFilteredOptions(propertyConfig?.options || []);
+  }, [propertyConfig]);
 
-  // 輸入框變更處理邏輯
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setInputValue(value);
-
-    // 篩選匹配的選項
-    if (propertyConfig?.options) {
-      const filtered = propertyConfig.options.filter((option) =>
-        option.name.toLowerCase().includes(value.toLowerCase()),
+  // 輸入框變更
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      setInputValue(value);
+      setFilteredOptions(
+        (propertyConfig?.options || []).filter((option) =>
+          option.name.toLowerCase().includes(value.toLowerCase()),
+        ) || [],
       );
-      setFilteredOptions(filtered);
-    }
-  };
+    },
+    [propertyConfig],
+  );
 
-  // 按下 Enter 鍵新增選項
-  const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && inputValue.trim()) {
-      e.preventDefault();
-      const newOptionName = inputValue.trim();
+  // 新增選項
+  const handleKeyDown = useCallback(
+    async (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter" && inputValue.trim()) {
+        e.preventDefault();
+        const newOptionName = inputValue.trim();
 
-      // 檢查是否已存在該選項
-      const isOptionExists = (propertyConfig?.options || []).some(
-        (option) => option.name.toLowerCase() === newOptionName.toLowerCase(),
-      );
-      if (isOptionExists) {
-        setIsExpanded(false);
-        return;
+        if (
+          (propertyConfig?.options || []).some(
+            (option) =>
+              option.name.toLowerCase() === newOptionName.toLowerCase(),
+          )
+        ) {
+          setIsExpanded(false);
+          return;
+        }
+
+        try {
+          const newOption: PropertyOption = await dispatch(
+            createPropertyOption({
+              propertyId: propertyConfig.id,
+              name: newOptionName,
+            }),
+          ).unwrap();
+
+          setFilteredOptions((prev) => [...prev, newOption]);
+          handleSelectOption(newOption);
+        } catch (error) {
+          console.error("Failed to create property option:", error);
+        }
       }
+    },
+    [dispatch, inputValue, propertyConfig],
+  );
 
-      // 調用 Redux action 新增選項
-      try {
-        const newOption: PropertyOption = await dispatch(
-          createPropertyOption({
-            propertyId: propertyConfig.id,
-            name: newOptionName,
-          }),
-        ).unwrap();
+  // 選擇選項
+  const handleSelectOption = useCallback(
+    (option: PropertyOption) => {
+      setInputValue(option.name);
+      setIsExpanded(false);
+      onChange(option.name);
+    },
+    [onChange],
+  );
 
-        // 更新選項列表並選中新增的選項
-        setFilteredOptions((prev) => [...prev, newOption]);
-        handleSelectOption(newOption);
-      } catch (error) {
-        console.error("Failed to create property option:", error);
-      }
-    }
-  };
-
-  // 選擇某個選項處理邏輯
-  const handleSelectOption = (option: PropertyOption) => {
-    setInputValue(option.name); // 將選項名稱設為選中的值
-    setIsExpanded(false); // 收起選單
-    onChange(option.name);
-  };
-
-  // 點擊外部關閉選單處理邏輯
-  const handleClickOutside = (event: MouseEvent) => {
+  // 點擊外部關閉選單
+  const handleClickOutside = useCallback((event: MouseEvent) => {
     if (
       dropdownRef.current &&
       !dropdownRef.current.contains(event.target as Node)
     ) {
       setIsExpanded(false);
     }
-  };
+  }, []);
 
-  // useEffect 註冊點擊事件監聽器
   useEffect(() => {
     if (isExpanded) {
       document.addEventListener("mousedown", handleClickOutside);
@@ -122,11 +125,10 @@ const InteractiveSelect: React.FC<{
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isExpanded]);
+  }, [isExpanded, handleClickOutside]);
 
   return (
     <div className="relative w-64" ref={dropdownRef}>
-      {/* 展開按鈕 */}
       <button
         className="w-full text-sm p-2 border border-gray-700 bg-gray-800 text-gray-300 rounded"
         onClick={handleExpand}
@@ -137,7 +139,6 @@ const InteractiveSelect: React.FC<{
 
       {isExpanded && (
         <div className="absolute top-12 left-0 w-full z-50 bg-gray-800 border border-gray-700 rounded-md shadow-md">
-          {/* 搜索框 */}
           <input
             type="text"
             value={inputValue}
@@ -147,8 +148,6 @@ const InteractiveSelect: React.FC<{
             className="w-full border-b border-gray-700 p-2 bg-gray-800 text-gray-300 placeholder-gray-500 rounded-t-md"
             data-cy="property-select-search"
           />
-
-          {/* 選項列表 */}
           <ul className="max-h-48 overflow-y-auto">
             {filteredOptions.map((option) => (
               <li
