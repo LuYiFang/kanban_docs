@@ -4,17 +4,11 @@ export interface Task {
   id: string;
   title: string;
   content: string;
+  type: string;
   order: number;
 }
 
-export interface TaskCreate {
-  id: string;
-  title: string;
-  content: string;
-  properties: {
-    [key: string]: string;
-  };
-}
+export interface TaskCreate extends Omit<Task, "id"> {}
 
 export interface TaskUpdate {
   title: string;

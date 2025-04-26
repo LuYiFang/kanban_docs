@@ -13,17 +13,22 @@ import {
   updateProperty,
   updateTask,
 } from "../../store/slices/kanbanThuck";
-import { RootState } from "../../store/store";
+import { AppDispatch, RootState } from "../../store/store";
 import InteractiveSelect from "../Select/InteractiveSelect";
 import { formatToCapitalCase } from "../../utils/tools";
+import { TaskWithProperties } from "../../types/task";
+import {
+  Property,
+  PropertyConfig as PropertyConfigType,
+} from "../../types/property";
+import { kanbanDataName } from "../../types/kanban";
 
 interface EditDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  columnId: string;
   taskId: string;
-  dataName: string;
-  propertyOrder: [];
+  dataName: kanbanDataName;
+  propertyOrder: string[];
   type: string;
 }
 
@@ -35,9 +40,20 @@ const EditDialog: React.FC<EditDialogProps> = ({
   propertyOrder,
   type,
 }) => {
-  const dispatch = useDispatch();
-  const task = useSelector((state: RootState) => {
-    return state.kanban[dataName].find((t) => t.id === taskId) || {};
+  const dispatch = useDispatch<AppDispatch>();
+  const task: TaskWithProperties = useSelector((state: RootState) => {
+    return (
+      (state.kanban[dataName] as TaskWithProperties[]).find(
+        (t: TaskWithProperties) => t.id === taskId,
+      ) || {
+        id: "",
+        title: "",
+        content: "",
+        type: "",
+        order: 0,
+        properties: [],
+      }
+    );
   });
   const [title, setTitle] = useState(task.title);
   const [content, setContent] = useState(task.content);
@@ -68,7 +84,10 @@ const EditDialog: React.FC<EditDialogProps> = ({
   }, [isOpen]);
 
   const propertyMap = useMemo(() => {
-    return _.mapValues(_.groupBy(task.properties, "name"), _.first);
+    return _.mapValues(
+      _.groupBy(task.properties, "name"),
+      (group) => _.first(group) as Property,
+    );
   }, [task.properties]);
 
   const propertyConfig = useSelector(
@@ -76,15 +95,16 @@ const EditDialog: React.FC<EditDialogProps> = ({
   );
 
   const propertyConfigMap = useMemo(() => {
-    return _.mapValues(_.groupBy(propertyConfig, "name"), _.first);
+    return _.mapValues(
+      _.groupBy(propertyConfig, "name"),
+      (group) => _.first(group) as PropertyConfigType,
+    );
   }, [propertyConfig]);
 
   const handlePropertyChange = (property: string, value: string) => {
     const propertyId = propertyMap[property.toLowerCase()]?.id;
     if (!propertyId) return;
-    dispatch(
-      updateProperty({ taskId: task.id, propertyId, property, value, type }),
-    );
+    dispatch(updateProperty({ taskId: task.id, propertyId, property, value }));
   };
 
   const formatDateTimeLocal = (date: string) => {
@@ -194,7 +214,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
               const title = formatToCapitalCase(key) || "";
               const value = propertyMap[key]?.value || "";
               const propertyType = propertyConfigMap[key]?.type || "";
-              const onChange = (newValue) =>
+              const onChange = (newValue: string) =>
                 handlePropertyChange(key, newValue);
 
               return (

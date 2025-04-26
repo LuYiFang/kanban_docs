@@ -1,12 +1,14 @@
 export interface PropertyOption {
-  id: string;
+  id?: string;
   name: string;
-  [p: string]: any;
+  propertyId?: string; // 可選屬性，表示屬於哪個 Property
+  [p: string]: any; // 允許擴展屬性
 }
 
 export interface PropertyConfig {
+  id: string;
   name: string;
-  type: PropertyType;
+  type: string;
   options?: PropertyOption[];
   defaultValue?: string;
 }
@@ -18,12 +20,9 @@ export interface Property {
   taskId: string;
 }
 
-export interface PropertyCreate {
-  name: string;
-  value: string;
-  taskId: string;
-}
+export interface PropertyCreate extends Omit<Property, "id"> {}
 
+// 預設的屬性順序
 export const taskPropertyOrder = [
   "project",
   "priority",
@@ -34,6 +33,7 @@ export const taskPropertyOrder = [
   "finishedAt",
 ];
 
+// 狀態的排序
 export const statusOrder = [
   "epic",
   "todo",
@@ -44,18 +44,15 @@ export const statusOrder = [
   "deferred",
 ];
 
+// 優先級對應的顏色
 export const priorityColor = {
   high: "bg-red-500 text-white",
   medium: "bg-orange-400 text-gray-900",
   low: "bg-green-500 text-white",
 };
 
-export interface DefaultProperty {
-  name: string;
-  value: string;
-}
-
-export const defaultTaskProperties = [
+// 預設的任務屬性
+export const defaultTaskProperties: DefaultProperty[] = [
   { name: "priority", value: "low" },
   { name: "status", value: "todo" },
   { name: "level", value: "c-level" },
@@ -65,20 +62,7 @@ export const defaultTaskProperties = [
   { name: "finishedAt", value: "" },
 ];
 
-export interface PropertyType {
-  id: string;
+export interface DefaultProperty {
   name: string;
-}
-
-export interface PropertyOption {
-  propertyId: string;
-  name: string;
-}
-
-export interface PropertyConfig {
-  id: string;
-  name: string;
-  type: PropertyType;
-  options?: PropertyOption[];
-  defaultValue?: string;
+  value: string;
 }

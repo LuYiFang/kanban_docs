@@ -52,13 +52,13 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ task, index, onEdit }) => {
             </div>
           )}
           {/* 顯示 Assignee */}
-          {assignee?.label && (
+          {assignee?.value && (
             <div
               className="mt-2 text-gray-300 text-sm flex items-center"
               data-cy="kanban-task-assignee"
             >
               <FontAwesomeIcon icon={faUser} className="mr-2" />
-              <span>{assignee.label}</span>
+              <span>{assignee.value}</span>
             </div>
           )}
         </div>

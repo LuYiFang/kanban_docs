@@ -1,24 +1,40 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../store/store";
+import { AppDispatch, RootState } from "../../store/store";
 import { PropertyOption } from "../../types/property";
 import { formatToCapitalCase } from "../../utils/tools";
 import { createPropertyOption } from "../../store/slices/kanbanThuck";
+import { TaskWithProperties } from "../../types/task";
+import { kanbanDataName } from "../../types/kanban";
 
 const InteractiveSelect: React.FC<{
   taskId: string;
   propertyName: string;
-  dataName: string;
+  dataName: kanbanDataName;
   onChange: (value: string) => void;
 }> = ({ taskId, propertyName, dataName, onChange }) => {
-  const dispatch = useDispatch();
-  const propertyConfig = useSelector((state: RootState) =>
-    state.kanban.propertySetting.find((prop) => prop.name === propertyName),
+  const dispatch = useDispatch<AppDispatch>();
+  const propertyConfig = useSelector(
+    (state: RootState) =>
+      state.kanban.propertySetting.find(
+        (prop) => prop.name === propertyName,
+      ) || {
+        id: "",
+        options: [],
+      },
   );
 
   const taskProperty = useSelector((state: RootState) => {
-    const task = state.kanban[dataName].find((task) => task.id === taskId);
-    return task?.properties.find((prop) => prop.name === propertyName);
+    const task = (state.kanban[dataName] as TaskWithProperties[]).find(
+      (task) => task.id === taskId,
+    );
+    return (
+      task?.properties.find((prop) => prop.name === propertyName) || {
+        id: "",
+        name: propertyName,
+        value: "",
+      }
+    );
   });
 
   const [isExpanded, setIsExpanded] = useState(false);
@@ -55,7 +71,7 @@ const InteractiveSelect: React.FC<{
       const newOptionName = inputValue.trim();
 
       // 檢查是否已存在該選項
-      const isOptionExists = propertyConfig?.options.some(
+      const isOptionExists = (propertyConfig?.options || []).some(
         (option) => option.name.toLowerCase() === newOptionName.toLowerCase(),
       );
       if (isOptionExists) {
@@ -65,7 +81,7 @@ const InteractiveSelect: React.FC<{
 
       // 調用 Redux action 新增選項
       try {
-        const newOption = await dispatch(
+        const newOption: PropertyOption = await dispatch(
           createPropertyOption({
             propertyId: propertyConfig.id,
             name: newOptionName,

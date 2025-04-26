@@ -12,14 +12,9 @@ import {
 import { convertUtcToLocal } from "../../utils/tools";
 import _ from "lodash";
 import { TaskWithProperties } from "../../types/task";
-import { PropertyConfig } from "../../types/property";
+import { KanbanState } from "../../types/kanban";
 
-interface Tasks {
-  tasks: TaskWithProperties[];
-  propertySetting: PropertyConfig[];
-}
-
-const initialState: Tasks = {
+const initialState: KanbanState = {
   tasks: [],
   propertySetting: [],
 };

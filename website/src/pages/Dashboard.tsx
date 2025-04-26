@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import Sidebar from "../components/Sidebar/Sidebar";
-import { Routes, Route } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import KanbanPage from "../pages/KanbanPage";
 import WeeklyReportPage from "../pages/WeeklyReportPage";
 import DocsPage from "../pages/DocsPage";
@@ -9,9 +9,10 @@ import {
   getPropertiesAndOptions,
 } from "../store/slices/kanbanThuck";
 import { useDispatch } from "react-redux";
+import { AppDispatch } from "../store/store";
 
 const Dashboard: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   useEffect(() => {
     dispatch(getAllTaskWithProperties());
     dispatch(getPropertiesAndOptions());

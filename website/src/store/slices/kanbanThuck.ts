@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { TaskUpdate } from "../../types/task";
+import { Task, TaskCreate, TaskUpdate } from "../../types/task";
 import { PropertyCreate } from "../../types/property";
 import {
   batchUpdateTasksApi,
@@ -11,6 +11,7 @@ import {
   updatePropertyApi,
   updateTaskApi,
 } from "../../utils/fetchApi";
+import { AxiosError } from "axios";
 
 export const getAllTaskWithProperties = createAsyncThunk(
   "kanban/getAllTaskWithProperties",
@@ -18,7 +19,8 @@ export const getAllTaskWithProperties = createAsyncThunk(
     try {
       return await getAllTaskWithPropertiesApi();
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response.data);
+      const axiosError = error as AxiosError;
+      return thunkAPI.rejectWithValue(axiosError?.response?.data);
     }
   },
 );
@@ -26,13 +28,14 @@ export const getAllTaskWithProperties = createAsyncThunk(
 export const createTaskWithDefaultProperties = createAsyncThunk(
   "kanban/createTaskWithDefaultProperties",
   async (
-    { task, properties }: { task: TaskUpdate; properties: PropertyCreate },
+    { task, properties }: { task: TaskCreate; properties: PropertyCreate[] },
     thunkAPI,
   ) => {
     try {
       return await createTaskWithPropertiesApi(task, properties);
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response.data);
+      const axiosError = error as AxiosError;
+      return thunkAPI.rejectWithValue(axiosError?.response?.data);
     }
   },
 );
@@ -44,7 +47,6 @@ export const updateTask = createAsyncThunk(
       taskId,
       task,
     }: {
-      columnId: string;
       taskId: string;
       task: TaskUpdate;
     },
@@ -56,22 +58,24 @@ export const updateTask = createAsyncThunk(
         task: updatedTask,
       };
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response.data);
+      const axiosError = error as AxiosError;
+      return thunkAPI.rejectWithValue(axiosError?.response?.data);
     }
   },
 );
 
-export const updateMultipleTasks = createAsyncThunk(
-  "kanban/updateMultipleTasks",
-  async (tasks: TaskUpdate[], thunkAPI) => {
-    try {
-      const updatedTasks = await batchUpdateTasksApi(tasks);
-      return updatedTasks;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error.response.data);
-    }
-  },
-);
+export const updateMultipleTasks = createAsyncThunk<
+  Task[], // 成功时返回的類型
+  TaskUpdate[], // 参数類型
+  { rejectValue: any } // rejectWithValue 的類型
+>("kanban/updateMultipleTasks", async (tasks: TaskUpdate[], thunkAPI) => {
+  try {
+    return await batchUpdateTasksApi(tasks);
+  } catch (error) {
+    const axiosError = error as AxiosError;
+    return thunkAPI.rejectWithValue(axiosError?.response?.data);
+  }
+});
 
 export const deleteTask = createAsyncThunk(
   "kanban/deleteTask",
@@ -87,7 +91,8 @@ export const deleteTask = createAsyncThunk(
       await deleteTaskWithPropertiesApi(taskId);
       return { taskId };
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response.data);
+      const axiosError = error as AxiosError;
+      return thunkAPI.rejectWithValue(axiosError?.response?.data);
     }
   },
 );
@@ -116,7 +121,8 @@ export const updateProperty = createAsyncThunk(
       );
       return { taskId, updatedProperty };
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response.data);
+      const axiosError = error as AxiosError;
+      return thunkAPI.rejectWithValue(axiosError?.response?.data);
     }
   },
 );
@@ -128,7 +134,8 @@ export const getPropertiesAndOptions = createAsyncThunk(
       const propertiesWithOptions = await getPropertiesAndOptionsApi();
       return propertiesWithOptions;
     } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.response?.data);
+      const axiosError = error as AxiosError;
+      return thunkAPI.rejectWithValue(axiosError?.response?.data);
     }
   },
 );
@@ -143,7 +150,8 @@ export const createPropertyOption = createAsyncThunk(
       const newOption = await createPropertyOptionApi(propertyId, name);
       return { propertyId, name: newOption.name }; // 确保返回包含 propertyId 和 name
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response.data);
+      const axiosError = error as AxiosError;
+      return thunkAPI.rejectWithValue(axiosError?.response?.data);
     }
   },
 );
