@@ -8,6 +8,8 @@ import {
   updateMultipleTasks,
   updateProperty,
   updateTask,
+  uploadFile,
+  downloadFile,
 } from "./kanbanThuck";
 import { convertUtcToLocal } from "../../utils/tools";
 import _ from "lodash";

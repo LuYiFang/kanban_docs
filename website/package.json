@@ -27,6 +27,7 @@
     "rehype-raw": "^7.0.0",
     "remark-breaks": "^4.0.0",
     "remark-gfm": "^4.0.1",
+    "remark-images": "^4.1.0",
     "uuid": "^11.1.0"
   },
   "devDependencies": {

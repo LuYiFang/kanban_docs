@@ -65,3 +65,17 @@ export const batchUpdateTasksApi = async (tasks: TaskUpdate[]) => {
   const response = await apiClient.post("/task/batch", tasks);
   return response.data;
 };
+
+export const uploadFileApi = async (formData: FormData) => {
+  const response = await apiClient.post("/files/", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};
+
+export const downloadFileApi = async (fileId: string) => {
+  const response = await apiClient.get(`/files/${fileId}`);
+  return response.data;
+};

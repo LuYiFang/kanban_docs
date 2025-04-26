@@ -11,6 +11,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisH, faUser } from "@fortawesome/free-solid-svg-icons";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
+import remarkImages from "remark-images";
 import remarkBreaks from "remark-breaks";
 import _ from "lodash";
 import moment from "moment";
@@ -18,6 +19,7 @@ import {
   deleteTask,
   updateProperty,
   updateTask,
+  uploadFile,
 } from "../../store/slices/kanbanThuck";
 import { AppDispatch, RootState } from "../../store/store";
 import InteractiveSelect from "../Select/InteractiveSelect";
@@ -28,6 +30,7 @@ import {
   PropertyConfig as PropertyConfigType,
 } from "../../types/property";
 import { kanbanDataName } from "../../types/kanban";
+import apiClient from "../../utils/apiClient";
 
 interface EditDialogProps {
   isOpen: boolean;
@@ -172,6 +175,35 @@ const EditDialog: React.FC<EditDialogProps> = ({
     [],
   );
 
+  const handlePaste = useCallback(
+    (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+      const items = e.clipboardData.items;
+      for (const item of items) {
+        if (item.type.startsWith("image/")) {
+          const file = item.getAsFile();
+          if (file) {
+            const formData = new FormData();
+            formData.append("file", file);
+
+            dispatch(uploadFile(formData))
+              .unwrap()
+              .then((response) => {
+                const imageUrl = `${apiClient.defaults.baseURL}${response.url}`; // 加上 apiClient 的 host
+                setContent(
+                  (prevContent) =>
+                    `${prevContent}\n![Pasted Image](${imageUrl})`,
+                );
+              })
+              .catch((error) => {
+                console.error("Image upload failed:", error);
+              });
+          }
+        }
+      }
+    },
+    [dispatch],
+  );
+
   if (!isOpen) return null;
 
   return (
@@ -288,12 +320,13 @@ const EditDialog: React.FC<EditDialogProps> = ({
             value={content}
             onChange={handleContentChange}
             onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
             placeholder="Enter Markdown content here..."
             data-cy="property-content-input"
           />
           <div className="flex-1 min-h-[350px] h-full border border-gray-700 bg-gray-800 text-gray-300 p-3 rounded overflow-auto">
             <ReactMarkdown
-              remarkPlugins={[remarkGfm, remarkBreaks]}
+              remarkPlugins={[remarkGfm, remarkBreaks, remarkImages]}
               rehypePlugins={[rehypeRaw]}
             >
               {content}

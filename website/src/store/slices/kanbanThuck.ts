@@ -10,6 +10,8 @@ import {
   getPropertiesAndOptionsApi,
   updatePropertyApi,
   updateTaskApi,
+  uploadFileApi,
+  downloadFileApi,
 } from "../../utils/fetchApi";
 import { AxiosError } from "axios";
 
@@ -149,6 +151,32 @@ export const createPropertyOption = createAsyncThunk(
     try {
       const newOption = await createPropertyOptionApi(propertyId, name);
       return { propertyId, name: newOption.name }; // 确保返回包含 propertyId 和 name
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      return thunkAPI.rejectWithValue(axiosError?.response?.data);
+    }
+  },
+);
+
+export const uploadFile = createAsyncThunk(
+  "files/uploadFile",
+  async (formData: FormData, thunkAPI) => {
+    try {
+      const response = await uploadFileApi(formData);
+      return response;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      return thunkAPI.rejectWithValue(axiosError?.response?.data);
+    }
+  },
+);
+
+export const downloadFile = createAsyncThunk(
+  "files/downloadFile",
+  async (fileId: string, thunkAPI) => {
+    try {
+      const response = await downloadFileApi(fileId);
+      return response;
     } catch (error) {
       const axiosError = error as AxiosError;
       return thunkAPI.rejectWithValue(axiosError?.response?.data);

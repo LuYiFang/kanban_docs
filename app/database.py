@@ -26,7 +26,7 @@ class MongoDB:
     async def initialize_collections(self):
         """初始化集合"""
         collection_list = ['tasks', 'task_properties', 'property_types',
-                           'property_configs', 'property_options']
+                           'property_configs', 'property_options', 'images']
         existing_collections = await self.db.list_collection_names()
 
         for collection_name in collection_list:

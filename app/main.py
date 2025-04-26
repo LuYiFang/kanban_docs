@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from database import mongodb
-from routes import tasks, properties, tasks_with_properties
+from routes import tasks, properties, tasks_with_properties, files
 
 app = FastAPI()
 
@@ -24,6 +24,8 @@ app.include_router(properties.router, prefix=prefix + '/property',
                    tags=["properties"])
 app.include_router(tasks_with_properties.router, prefix=prefix,
                    tags=["tasks_with_properties"])
+app.include_router(files.router, prefix=prefix + '/files',
+                   tags=["files"])
 
 
 @app.on_event("startup")
