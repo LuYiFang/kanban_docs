@@ -324,7 +324,10 @@ const EditDialog: React.FC<EditDialogProps> = ({
             placeholder="Enter Markdown content here..."
             data-cy="property-content-input"
           />
-          <div className="flex-1 min-h-[350px] h-full border border-gray-700 bg-gray-800 text-gray-300 p-3 rounded overflow-auto">
+          <div
+            className="flex-1 min-h-[350px] h-full border border-gray-700 bg-gray-800 text-gray-300 p-3 rounded overflow-auto"
+            data-cy={"markdown-preview"}
+          >
             <ReactMarkdown
               remarkPlugins={[remarkGfm, remarkBreaks, remarkImages]}
               rehypePlugins={[rehypeRaw]}

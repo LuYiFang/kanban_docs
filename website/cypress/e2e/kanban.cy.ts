@@ -189,6 +189,40 @@ describe("Kanban Page Workflow Tests", () => {
       .contains(newProjectName)
       .should("exist");
   });
+
+  it("should paste an image into the editor and verify it is uploaded", () => {
+    // 打開任務對話框
+    cy.get(
+      '[data-rbd-draggable-id="550e8400-e29b-41d4-a716-446655440001"]',
+    ).click();
+
+    // 確保 Edit Dialog 打開
+    cy.get('[data-cy="edit-dialog"]').should("exist");
+
+    // 模擬圖片粘貼
+    const clipboardData = new DataTransfer();
+    cy.fixture("past_image.jpeg", "base64").then((fileContent) => {
+      const blob = Cypress.Blob.base64StringToBlob(fileContent, "image/jpeg");
+      const file = new File([blob], "past_image.jpeg", { type: "image/jpeg" });
+      clipboardData.items.add(file);
+
+      cy.get('[data-cy="property-content-input"]').trigger("paste", {
+        clipboardData,
+      });
+    });
+
+    // 確保圖片 URL 被插入到內容中
+    cy.get('[data-cy="property-content-input"]').should(
+      "contain.value",
+      "![Pasted Image](",
+    );
+
+    // 確保圖片預覽顯示正確
+    cy.get('[data-cy="markdown-preview"]')
+      .find("img")
+      .should("have.attr", "src")
+      .and("include", "/files/");
+  });
 });
 
 const simulateDragDrop = (draggableSelector, destinationSelector) => {

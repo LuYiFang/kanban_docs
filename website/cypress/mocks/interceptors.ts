@@ -336,4 +336,13 @@ export const setupInterceptors = () => {
       ],
     },
   ).as("batchUpdateTasksWithinColumn");
+
+  // Upload File
+  cy.intercept("POST", "**/api/files", {
+    statusCode: 200,
+    body: {
+      id: "12345678",
+      url: "/files/12345678",
+    },
+  }).as("uploadFile");
 };
