@@ -6,6 +6,52 @@ describe("Kanban Page Workflow Tests", () => {
     cy.visit("/kanban"); // 確保訪問正確的 Kanban 頁面
   });
 
+  it("should verify the first card contains priority, epic, and project properties", () => {
+    // 確保第二個卡片存在
+    cy.get('[data-cy="kanban-column"] [data-cy="kanban-task"]')
+      .eq(1)
+      .within(() => {
+        // 檢查是否包含 priority 屬性
+        cy.get('[data-cy="kanban-task-priority"]').should("exist");
+
+        // 檢查是否包含 epic 屬性
+        cy.get('[data-cy="kanban-task-epic"]').should("exist");
+
+        // 檢查是否包含 project 屬性
+        cy.get('[data-cy="kanban-task-project"]').should("exist");
+      });
+  });
+
+  // loading進頁面，點開task，點開 epic，確定裡面有2個task
+  it("should load the Kanban board and verify task count in Epic", () => {
+    // 確保 Kanban Board 正確加載
+    cy.get('[data-cy="kanban-column"]').should("exist");
+
+    // 點開第一個task
+    cy.get('[data-cy="kanban-column"][id="todo"] [data-cy="kanban-task"]')
+      .first()
+      .click();
+
+    // 確保 Edit Dialog 打開
+    cy.get('[data-cy="edit-dialog"]').should("exist");
+
+    // 找標題是 "Epic" 的選項
+    cy.get('[data-cy="edit-dialog"]')
+      .find('[data-cy="property-select-title"]')
+      .contains("Epic:")
+      .parent()
+      .within(() => {
+        const interactiveInputSelector = '[data-cy="property-select-input"]';
+        cy.get(interactiveInputSelector).click();
+      });
+
+    // 確認 Epic 選項有兩個
+    cy.get('[data-cy="property-select-search"]')
+      .parent()
+      .find("li")
+      .should("have.length", 2);
+  });
+
   it("should create a task, drag it to a new column, and verify status", () => {
     // 1. 新增任務
     cy.get("#add-task-button").click(); // 點擊新增任務按鈕
@@ -150,28 +196,27 @@ describe("Kanban Page Workflow Tests", () => {
 
     // 找到屬性選擇器並展開
     cy.get('[data-cy="edit-dialog"]')
-      .find('[data-cy="property-select-input"]')
-      .first()
-      .click();
-
-    // 在搜索框中輸入新選項名稱
-    cy.get('[data-cy="property-select-search"]').type(newProjectName);
-
-    // 按下 Enter 鍵
-    cy.get('[data-cy="property-select-search"]').type("{enter}");
-
-    // 再次點開
-    cy.get('[data-cy="edit-dialog"]')
-      .find('[data-cy="property-select-input"]')
-      .first()
-      .click();
-
-    // 確認新選項是否出現在選項列表中
-    cy.get('[data-cy="property-select-search"]')
+      .find('[data-cy="property-select-title"]')
+      .contains("Project:")
       .parent()
-      .find("ul")
-      .contains(newProjectName)
-      .should("exist");
+      .within(() => {
+        const interactiveInputSelector = '[data-cy="property-select-input"]';
+        cy.get(interactiveInputSelector).click();
+        // 在搜索框中輸入新選項名稱
+        cy.get('[data-cy="property-select-search"]').type(newProjectName);
+
+        // 按下 Enter 鍵
+        cy.get('[data-cy="property-select-search"]').type("{enter}");
+
+        cy.get(interactiveInputSelector).click();
+
+        // 確認新選項是否出現在選項列表中
+        cy.get('[data-cy="property-select-search"]')
+          .parent()
+          .find("ul")
+          .contains(newProjectName)
+          .should("exist");
+      });
 
     // 關閉 Edit Dialog，點開另一個任務，點開第一個選項，確定新選項有出現在選項列表中
     cy.get("body").click(0, 0);

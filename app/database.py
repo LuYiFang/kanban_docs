@@ -26,7 +26,7 @@ class MongoDB:
     async def initialize_collections(self):
         """初始化集合"""
         collection_list = ['tasks', 'task_properties', 'property_types',
-                           'property_configs', 'property_options', 'images']
+                           'property_configs', 'property_options']
         existing_collections = await self.db.list_collection_names()
 
         for collection_name in collection_list:
@@ -109,6 +109,7 @@ async def insert_default_data_to_db(db):
             {"name": "deadline", "type": "date"},
             {"name": "finishedAt", "type": "date"},
             {"name": "project", "type": "select"},
+            {"name": "epic", "type": "select"},
             {"name": "week_day", "type": "select"},
             {"name": "start_date", "type": "date"},
             {"name": "end_date", "type": "date"},

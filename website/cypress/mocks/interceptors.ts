@@ -51,6 +51,16 @@ export const setupInterceptors = () => {
             name: "level",
             value: "b-level",
           },
+          {
+            id: "550e8400-e29b-41d4-a716-446655440012",
+            name: "project",
+            value: "Project A",
+          },
+          {
+            id: "550e8400-e29b-41d4-a716-446655440012",
+            name: "epic",
+            value: "This is default task",
+          },
         ],
       },
       {
@@ -141,6 +151,7 @@ export const setupInterceptors = () => {
     statusCode: 200,
     body: [
       {
+        id: "fake-property-id-1",
         name: "priority",
         typeId: "fake-type-id-1",
         type: "select",
@@ -169,6 +180,7 @@ export const setupInterceptors = () => {
         ],
       },
       {
+        id: "fake-property-id-2",
         name: "status",
         typeId: "fake-type-id-2",
         type: "select",
@@ -225,6 +237,7 @@ export const setupInterceptors = () => {
         ],
       },
       {
+        id: "fake-property-id-3",
         name: "level",
         typeId: "fake-type-id-3",
         type: "select",
@@ -252,6 +265,35 @@ export const setupInterceptors = () => {
           },
         ],
       },
+      {
+        id: "fake-property-id-4",
+        name: "epic",
+        typeId: "fake-type-id-4",
+        type: "select",
+        options: [],
+      },
+      {
+        id: "fake-property-id-5",
+        name: "project",
+        typeId: "fake-type-id-5",
+        type: "select",
+        options: [
+          {
+            createdAt: "2025-04-06T12:00:00Z",
+            updatedAt: "2025-04-06T15:30:00Z",
+            propertyId: "fake-property-id-5",
+            name: "Project A",
+            id: "fake-id-12",
+          },
+          {
+            createdAt: "2025-04-06T12:00:00Z",
+            updatedAt: "2025-04-06T15:30:00Z",
+            propertyId: "fake-property-id-5",
+            name: "Project B",
+            id: "fake-id-13",
+          },
+        ],
+      },
     ],
   }).as("getPropertiesOptions");
 
@@ -261,7 +303,7 @@ export const setupInterceptors = () => {
     body: {
       createdAt: "2025-04-06T16:00:00Z",
       updatedAt: "2025-04-06T16:05:00Z",
-      propertyId: "fake-property-id-2",
+      propertyId: "fake-property-id-5",
       name: "New Project",
       id: "fake-id-11",
     },

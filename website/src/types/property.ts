@@ -25,6 +25,7 @@ export interface PropertyCreate extends Omit<Property, "id"> {}
 // 預設的屬性順序
 export const taskPropertyOrder = [
   "project",
+  "epic",
   "priority",
   "status",
   "level",
@@ -51,12 +52,46 @@ export const priorityColor = {
   low: "bg-green-500 text-white",
 };
 
+// 任務狀態對應的顏色
+export const projectColors = {
+  primary: "bg-blue-600 text-white",
+  secondary: "bg-purple-500 text-white",
+  success: "bg-teal-500 text-white",
+  warning: "bg-yellow-400 text-gray-900",
+  danger: "bg-pink-500 text-white",
+  info: "bg-cyan-500 text-white",
+  neutral: "bg-gray-400 text-gray-900",
+};
+
+// 用於跟踪已分配的顏色
+const assignedProjectColors: Record<string, string> = {};
+
+// 分配唯一的顏色給每個項目
+export function assignProjectColor(projectName: string): string {
+  if (!projectName) return projectColors.neutral; // 預設顏色
+  if (assignedProjectColors[projectName])
+    return assignedProjectColors[projectName];
+
+  const availableColors = Object.entries(projectColors).filter(
+    ([key, color]) => !Object.values(assignedProjectColors).includes(color),
+  );
+
+  if (availableColors.length > 0) {
+    const [colorKey, colorValue] = availableColors[0];
+    assignedProjectColors[projectName] = colorValue;
+    return colorValue;
+  }
+
+  return projectColors.neutral; // 如果顏色用完，返回預設顏色
+}
+
 // 預設的任務屬性
 export const defaultTaskProperties: DefaultProperty[] = [
   { name: "priority", value: "low" },
   { name: "status", value: "todo" },
   { name: "level", value: "c-level" },
   { name: "project", value: "" },
+  { name: "epic", value: "" },
   { name: "assignee", value: "" },
   { name: "deadline", value: "" },
   { name: "finishedAt", value: "" },

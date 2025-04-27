@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../store/store";
 import { PropertyOption } from "../../types/property";
@@ -6,6 +12,15 @@ import { formatToCapitalCase } from "../../utils/tools";
 import { createPropertyOption } from "../../store/slices/kanbanThuck";
 import { TaskWithProperties } from "../../types/task";
 import { kanbanDataName } from "../../types/kanban";
+
+const getOtherTasks = (tasks: TaskWithProperties[], taskId: string) => {
+  return tasks
+    .filter((task) => task.id !== taskId)
+    .map((task) => ({
+      id: task.id,
+      name: task.title || `Task ${task.id}`,
+    }));
+};
 
 const InteractiveSelect: React.FC<{
   taskId: string;
@@ -39,28 +54,57 @@ const InteractiveSelect: React.FC<{
     );
   });
 
+  const tasks = useSelector(
+    (state: RootState) => state.kanban[dataName] as TaskWithProperties[],
+  );
+
   const [isExpanded, setIsExpanded] = useState(false);
   const [inputValue, setInputValue] = useState(taskProperty.value);
   const [filteredOptions, setFilteredOptions] = useState<PropertyOption[]>([]);
 
+  const otherTaskOptions = useMemo(() => {
+    return getOtherTasks(tasks, taskId);
+  }, [tasks, taskId]);
+
+  useEffect(() => {
+    if (propertyName === "epic") {
+      setFilteredOptions(otherTaskOptions);
+    } else {
+      setFilteredOptions(propertyConfig?.options || []);
+    }
+  }, [propertyName, tasks, taskId, propertyConfig]);
+
   // 展開選單
   const handleExpand = useCallback(() => {
     setIsExpanded(true);
-    setFilteredOptions(propertyConfig?.options || []);
-  }, [propertyConfig]);
+    if (propertyName === "epic") {
+      setFilteredOptions(otherTaskOptions);
+    } else {
+      setFilteredOptions(propertyConfig?.options || []);
+    }
+  }, [propertyName, tasks, taskId, propertyConfig]);
 
   // 輸入框變更
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
       setInputValue(value);
-      setFilteredOptions(
-        (propertyConfig?.options || []).filter((option) =>
-          option.name.toLowerCase().includes(value.toLowerCase()),
-        ) || [],
-      );
+
+      if (propertyName === "epic") {
+        setFilteredOptions(
+          otherTaskOptions.filter((task) =>
+            task.name.toLowerCase().includes(value.toLowerCase()),
+          ),
+        );
+      } else {
+        setFilteredOptions(
+          (propertyConfig?.options || []).filter((option) =>
+            option.name.toLowerCase().includes(value.toLowerCase()),
+          ),
+        );
+      }
     },
-    [propertyConfig],
+    [propertyName, tasks, taskId, propertyConfig],
   );
 
   // 新增選項
