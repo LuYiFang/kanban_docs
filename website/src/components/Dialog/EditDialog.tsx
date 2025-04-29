@@ -8,7 +8,12 @@ import React, {
 import { useDispatch, useSelector } from "react-redux";
 import ReactMarkdown from "react-markdown";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEllipsisH, faUser } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEllipsisH,
+  faInfoCircle,
+  faTimes,
+  faUser,
+} from "@fortawesome/free-solid-svg-icons";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import remarkImages from "remark-images";
@@ -31,6 +36,30 @@ import {
 } from "../../types/property";
 import { kanbanDataName } from "../../types/kanban";
 import apiClient from "../../utils/apiClient";
+
+const markdownGuideItems = [
+  { label: "**Bold**", syntax: "**text**" },
+  { label: "*Italic*", syntax: "*text*" },
+  {
+    label: "[Link](https://example.com)",
+    syntax: "[Link](https://example.com)",
+  },
+  { label: "`Inline Code`", syntax: "`code`" },
+  { label: "```Code Block```", syntax: "```\ncode\n```" },
+  { label: "![Image](url)", syntax: "![Alt Text](url)" },
+  {
+    label: "Table",
+    syntax:
+      "| Header 1 | Header 2 |\n| -------- | -------- |\n| Cell 1   | Cell 2   |",
+  },
+  { label: "> Quote", syntax: "> This is a quote" },
+  { label: "- [ ] Checklist", syntax: "- [ ] Task 1\n- [x] Task 2" },
+  { label: "--- Divider", syntax: "---" },
+  {
+    label: "Folding",
+    syntax: "<details>\n<summary>Title</summary>\nContent\n</details>",
+  },
+];
 
 interface EditDialogProps {
   isOpen: boolean;
@@ -68,6 +97,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMarkdownGuideOpen, setIsMarkdownGuideOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -204,6 +234,21 @@ const EditDialog: React.FC<EditDialogProps> = ({
     [dispatch],
   );
 
+  const handleCopySyntax = useCallback((syntax: string) => {
+    navigator.clipboard.writeText(syntax);
+  }, []);
+
+  const handleOpenMarkdownGuide = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      if (isMarkdownGuideOpen) {
+        setIsMarkdownGuideOpen(false);
+      } else {
+        setIsMarkdownGuideOpen(true);
+      }
+    },
+    [isMarkdownGuideOpen],
+  );
+
   if (!isOpen) return null;
 
   return (
@@ -314,7 +359,55 @@ const EditDialog: React.FC<EditDialogProps> = ({
         </div>
 
         {/* Markdown Input & Preview */}
-        <div className="flex space-x-4 flex-1 min-h-[350px] h-full">
+        <div className="flex space-x-4 flex-1 min-h-[350px] h-full relative">
+          <button
+            className="absolute p-1 top-1 left-[-16px] text-gray-400 hover:text-gray-200 text-md"
+            onClick={handleOpenMarkdownGuide}
+            data-cy="open-markdown-guide"
+          >
+            <FontAwesomeIcon icon={faInfoCircle} />
+          </button>
+          {/* Markdown Guide Modal */}
+          {isMarkdownGuideOpen && (
+            <div
+              className="absolute z-50  w-full"
+              style={{
+                top: -335,
+                left: -16,
+              }}
+              data-cy="markdown-guide-modal"
+            >
+              <div className="bg-gray-800 p-4 rounded shadow-lg relative">
+                <button
+                  className="absolute p-2 top-2 right-2 text-gray-400 hover:text-gray-200 text-sm bg-transparent"
+                  onClick={() => setIsMarkdownGuideOpen(false)}
+                  data-cy="close-markdown-guide"
+                >
+                  <FontAwesomeIcon icon={faTimes} />
+                </button>
+                <h2 className="text-lg font-bold text-gray-200 mb-4">
+                  Markdown Syntax Guide
+                </h2>
+                <div className="space-y-2">
+                  {markdownGuideItems.map((item, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between bg-gray-700 text-gray-300 py-1 px-2 rounded text-sm"
+                    >
+                      <span>{item.label}</span>
+                      <button
+                        className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-500 text-xs"
+                        onClick={() => handleCopySyntax(item.syntax)}
+                        data-cy={`copy-syntax-${index}`}
+                      >
+                        Copy
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
           <textarea
             className="flex-1 min-h-[350px] h-full border border-gray-700 bg-gray-800 text-gray-300 p-3 rounded text-sm resize-none"
             value={content}
