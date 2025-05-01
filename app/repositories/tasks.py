@@ -1,14 +1,17 @@
+from datetime import datetime, timedelta, timezone
 from typing import List
 
 from motor.core import AgnosticDatabase
 from motor.motor_asyncio import AsyncIOMotorCollection
 
+from models.tasks import TaskType
 from repositories.base import upsert_document, delete_document_by_id
 
 collection_name = "tasks"
 
 
-async def upsert_task(task_id: str, updates: dict, db: AgnosticDatabase) -> dict:
+async def upsert_task(task_id: str, updates: dict,
+                      db: AgnosticDatabase) -> dict:
     return await upsert_document(collection_name, task_id, updates, db)
 
 
@@ -16,7 +19,8 @@ async def delete_task_by_id(task_id: str, db: AgnosticDatabase) -> bool:
     return await delete_document_by_id(collection_name, task_id, db)
 
 
-async def get_tasks_with_properties_repo(db: AgnosticDatabase) -> List[dict]:
+async def get_tasks_with_properties_repo(task_type: TaskType,
+                                         db: AgnosticDatabase) -> List[dict]:
     pipeline = [
         {
             "$lookup": {
@@ -34,7 +38,26 @@ async def get_tasks_with_properties_repo(db: AgnosticDatabase) -> List[dict]:
                 "type": 1,
                 "order": 1,
                 "createdAt": 1,
-                "updatedAt": {
+                "updatedAt": {"$dateFromString": {"dateString": "$updatedAt"}},
+                "properties": {
+                    "$map": {
+                        "input": "$properties",
+                        "as": "property",
+                        "in": {
+                            "id": "$$property._id",
+                            "name": "$$property.name",
+                            "value": "$$property.value",
+                            "createdAt": "$$property.createdAt",
+                            "updatedAt": {"$dateFromString": {
+                                "dateString": "$$property.updatedAt"}}
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "$addFields": {
+                "maxUpdatedAt": {
                     "$max": {
                         "$concatArrays": [
                             ["$updatedAt"],
@@ -47,28 +70,46 @@ async def get_tasks_with_properties_repo(db: AgnosticDatabase) -> List[dict]:
                             }
                         ]
                     }
-                },
-                "properties": {
-                    "$map": {
-                        "input": "$properties",
-                        "as": "property",
-                        "in": {
-                            "id": "$$property._id",
-                            "name": "$$property.name",
-                            "value": "$$property.value",
-                            "createdAt": "$$property.createdAt",
-                            "updatedAt": "$$property.updatedAt"
-                        }
-                    }
                 }
             }
         }
     ]
+
+    if task_type == "weekly":
+        now = datetime.utcnow().replace(hour=0, minute=0, second=0,
+                                        microsecond=0, tzinfo=timezone.utc)
+        start_of_week = now - timedelta(days=now.weekday())
+        end_of_week = start_of_week + timedelta(days=7)
+        end_of_week = end_of_week.replace(hour=23, minute=59, second=59)
+
+        pipeline.append({
+            "$match": {
+                "maxUpdatedAt": {
+                    "$gte": start_of_week,
+                    "$lt": end_of_week
+                }
+            }
+        })
+
+    pipeline.append({
+        "$project": {
+            "id": 1,
+            "title": 1,
+            "content": 1,
+            "type": 1,
+            "order": 1,
+            "createdAt": 1,
+            "updatedAt": "$maxUpdatedAt",  # 讓 updatedAt 變成 maxUpdatedAt 的值
+            "properties": 1
+        }
+    })
+
     result = await db[collection_name].aggregate(pipeline).to_list(length=None)
     return result
 
 
-async def update_multiple_tasks(updates: List[dict], db: AgnosticDatabase) -> List[dict]:
+async def update_multiple_tasks(updates: List[dict], db: AgnosticDatabase) -> \
+        List[dict]:
     collection: AsyncIOMotorCollection = db[collection_name]
     results = []
     for update in updates:

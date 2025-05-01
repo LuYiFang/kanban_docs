@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Depends
 
 from database import get_db
 from models.properties import TaskPropertyBase
-from models.tasks import TaskWithPropertiesResponse, TaskUpdate
+from models.tasks import TaskWithPropertiesResponse, TaskUpdate, TaskType
 from services.properties import delete_task_property_by_task
 from services.tasks import (delete_task_service)
 from services.tasks_with_properties import (get_tasks_with_properties_service,
@@ -16,9 +16,13 @@ router = APIRouter()
 
 @router.get("/task/properties",
             response_model=List[TaskWithPropertiesResponse])
-async def get_tasks_with_properties(db=Depends(get_db)):
+async def get_tasks_with_properties(task_type: TaskType, db=Depends(get_db)):
     try:
-        tasks_with_properties = await get_tasks_with_properties_service(db)
+        tasks_with_properties = await get_tasks_with_properties_service(
+            task_type,
+            db
+        )
+
         return tasks_with_properties
     except ValueError as e:
         logging.exception(e)

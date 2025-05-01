@@ -1,9 +1,16 @@
+from enum import Enum
 from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
 from models.base import BaseResponse
 from models.properties import TaskPropertyResponse
+
+
+class TaskType(str, Enum):
+    regular = "regular"
+    weekly = "weekly"
+    docs = "docs"
 
 
 class TaskBase(BaseModel):

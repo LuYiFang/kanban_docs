@@ -3,15 +3,15 @@ from typing import List
 from motor.core import AgnosticDatabase
 
 from models.properties import TaskPropertyUpdate, TaskPropertyBase
-from models.tasks import TaskWithPropertiesResponse, TaskUpdate
+from models.tasks import TaskWithPropertiesResponse, TaskUpdate, TaskType
 from repositories.tasks import (get_tasks_with_properties_repo)
 from services.properties import upsert_task_properties_service
 from services.tasks import upsert_task_service
 
 
-async def get_tasks_with_properties_service(db: AgnosticDatabase) \
+async def get_tasks_with_properties_service(task_type: TaskType, db: AgnosticDatabase) \
         -> List[TaskWithPropertiesResponse]:
-    tasks_with_properties = await get_tasks_with_properties_repo(db)
+    tasks_with_properties = await get_tasks_with_properties_repo(task_type, db)
     return [TaskWithPropertiesResponse(**task) for task in
             tasks_with_properties]
 
