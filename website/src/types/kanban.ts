@@ -15,10 +15,12 @@ export interface Column {
 }
 
 export interface KanbanBoardProps {
-  type: string;
   dataName: kanbanDataName;
   groupPropertyName: string;
   columnSort: string[];
   defaultProperties: any[];
   propertyOrder: string[];
+  readOnly: boolean;
+  taskSortProperty: string;
+  cardVisibleProperties: string[];
 }

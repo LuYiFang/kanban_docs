@@ -10,6 +10,7 @@ export const generateColumns = (
   propertyConfig: PropertyConfig[],
   groupPropertyName: string,
   columnSort: string[],
+  taskSortProperty: string,
 ): Column[] => {
   const colGroup = _.groupBy(tasks, (task) => {
     const groupProperty = task.properties.find(
@@ -32,7 +33,15 @@ export const generateColumns = (
     defaultGroup[colId] = {
       id: colId,
       name: colTitle,
-      tasks: _.sortBy(colGroup[colId] || [], "order"),
+      tasks: _.sortBy(colGroup[colId] || [], (t) => {
+        if (!taskSortProperty.includes(".")) {
+          return t[taskSortProperty];
+        }
+
+        const [_properties, _value] = taskSortProperty.split(".");
+        const _property = _.find(t.properties, { name: "project" });
+        return _property?.value;
+      }),
     };
   });
 
@@ -49,6 +58,7 @@ export const generateNextTask = (
       content: "",
       type: "",
       order: columns.find((column) => column.id === "todo")?.tasks.length || 0,
+      updatedAt: "",
     },
     properties: defaultProperties,
   };
@@ -85,6 +95,7 @@ export const updateTaskOrder = (
     content: task.content,
     type: task.type,
     order: index,
+    updatedAt: "",
   }));
   const updatedDestinationTasks = destinationTasks.map((task, index) => ({
     id: task.id,
@@ -92,6 +103,7 @@ export const updateTaskOrder = (
     content: task.content,
     type: task.type,
     order: index,
+    updatedAt: "",
   }));
 
   if (source.droppableId === destination?.droppableId) {

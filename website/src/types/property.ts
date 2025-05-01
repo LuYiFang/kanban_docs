@@ -45,6 +45,9 @@ export const statusOrder = [
   "deferred",
 ];
 
+// level 的排序
+export const levelOrder = [];
+
 // 優先級對應的顏色
 export const priorityColor = {
   high: "bg-red-500 text-white",
@@ -52,7 +55,7 @@ export const priorityColor = {
   low: "bg-green-500 text-white",
 };
 
-// 任務狀態對應的顏色
+// 任務對應的顏色
 export const projectColors = {
   primary: "bg-blue-600 text-white",
   secondary: "bg-purple-500 text-white",
@@ -61,6 +64,17 @@ export const projectColors = {
   danger: "bg-pink-500 text-white",
   info: "bg-cyan-500 text-white",
   neutral: "bg-gray-400 text-gray-900",
+};
+
+// 狀態對應的顏色
+export const statusColors = {
+  epic: "bg-purple-700 text-white",
+  todo: "bg-orange-700 text-white",
+  "in-progress": "bg-blue-700 text-white",
+  waiting: "bg-yellow-700 text-black",
+  done: "bg-green-700 text-white",
+  cancelled: "bg-red-700 text-white",
+  deferred: "bg-gray-700 text-white",
 };
 
 // 用於跟踪已分配的顏色

@@ -1,9 +1,11 @@
-import { TaskUpdate } from "../types/task";
+import { taskType, TaskUpdate } from "../types/task";
 import apiClient from "./apiClient";
 import { PropertyCreate } from "../types/property";
 
-export const getAllTaskWithPropertiesApi = async () => {
-  const response = await apiClient.get("/task/properties");
+export const getAllTaskWithPropertiesApi = async (taskType: taskType) => {
+  const params = new URLSearchParams({ task_type: taskType }).toString();
+
+  const response = await apiClient.get(`/task/properties?${params}`);
   return response.data;
 };
 

@@ -16,18 +16,20 @@ import { TaskWithProperties } from "../../types/task";
 import { KanbanBoardProps } from "../../types/kanban";
 
 const KanbanBoard: React.FC<KanbanBoardProps> = ({
-  type,
   dataName,
   groupPropertyName,
   columnSort,
   defaultProperties,
   propertyOrder,
+  readOnly,
+  taskSortProperty,
+  cardVisibleProperties,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
 
-  const tasks: TaskWithProperties[] = useSelector(
-    (state: RootState) => state.kanban[dataName] as TaskWithProperties[],
-  );
+  const tasks: TaskWithProperties[] = useSelector((state: RootState) => {
+    return state.kanban[dataName] as TaskWithProperties[];
+  });
   const propertyConfig = useSelector(
     (state: RootState) => state.kanban.propertySetting,
   );
@@ -40,7 +42,13 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
     selectedTask,
     setIsDialogOpen,
     setSelectedTask,
-  } = useKanbanColumns(tasks, propertyConfig, groupPropertyName, columnSort);
+  } = useKanbanColumns(
+    tasks,
+    propertyConfig,
+    groupPropertyName,
+    columnSort,
+    taskSortProperty,
+  );
 
   useEffect(() => {
     // for test
@@ -49,6 +57,8 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
   }, [tasks, columns]);
 
   const handleDragEnd = (result: DropResult) => {
+    if (readOnly) return;
+
     const { source, destination } = result;
     if (
       !destination ||
@@ -106,7 +116,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
 
   return (
     <>
-      <AddTaskButton onClick={handleAddTask} />
+      {!readOnly && <AddTaskButton onClick={handleAddTask} />}
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="grid grid-cols-4 gap-4 p-4">
           {columns.map((column) => (
@@ -116,6 +126,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
               isCollapsed={collapsedColumns[column.id]}
               onToggleCollapse={toggleColumnCollapse}
               onEditTask={handleEdit}
+              cardVisibleProperties={cardVisibleProperties}
             />
           ))}
         </div>
@@ -127,7 +138,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
           taskId={selectedTask.id}
           dataName={dataName}
           propertyOrder={propertyOrder}
-          type={type}
+          readOnly={readOnly}
         />
       )}
     </>

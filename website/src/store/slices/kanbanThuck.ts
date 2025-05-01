@@ -1,25 +1,25 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { Task, TaskCreate, TaskUpdate } from "../../types/task";
+import { Task, TaskCreate, taskType, TaskUpdate } from "../../types/task";
 import { PropertyCreate } from "../../types/property";
 import {
   batchUpdateTasksApi,
   createPropertyOptionApi,
   createTaskWithPropertiesApi,
   deleteTaskWithPropertiesApi,
+  downloadFileApi,
   getAllTaskWithPropertiesApi,
   getPropertiesAndOptionsApi,
   updatePropertyApi,
   updateTaskApi,
   uploadFileApi,
-  downloadFileApi,
 } from "../../utils/fetchApi";
 import { AxiosError } from "axios";
 
 export const getAllTaskWithProperties = createAsyncThunk(
   "kanban/getAllTaskWithProperties",
-  async (_, thunkAPI) => {
+  async ({ taskType }: { taskType: taskType }, thunkAPI) => {
     try {
-      return await getAllTaskWithPropertiesApi();
+      return await getAllTaskWithPropertiesApi(taskType);
     } catch (error) {
       const axiosError = error as AxiosError;
       return thunkAPI.rejectWithValue(axiosError?.response?.data);

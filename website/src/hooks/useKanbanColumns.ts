@@ -9,6 +9,7 @@ export const useKanbanColumns = (
   propertyConfig: PropertyConfig[],
   groupPropertyName: string,
   columnSort: string[],
+  taskSortProperty: string,
 ) => {
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -21,8 +22,15 @@ export const useKanbanColumns = (
   });
 
   const columns: Column[] = useMemo(
-    () => generateColumns(tasks, propertyConfig, groupPropertyName, columnSort),
-    [tasks, propertyConfig, columnSort, groupPropertyName],
+    () =>
+      generateColumns(
+        tasks,
+        propertyConfig,
+        groupPropertyName,
+        columnSort,
+        taskSortProperty,
+      ),
+    [tasks, propertyConfig, columnSort, groupPropertyName, taskSortProperty],
   );
 
   const toggleColumnCollapse = (columnId: string) => {

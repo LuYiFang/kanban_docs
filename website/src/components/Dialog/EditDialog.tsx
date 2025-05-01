@@ -67,7 +67,7 @@ interface EditDialogProps {
   taskId: string;
   dataName: kanbanDataName;
   propertyOrder: string[];
-  type: string;
+  readOnly: boolean;
 }
 
 const EditDialog: React.FC<EditDialogProps> = ({
@@ -76,7 +76,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
   taskId,
   dataName,
   propertyOrder,
-  type,
+  readOnly,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
   const task: TaskWithProperties = useSelector((state: RootState) => {
@@ -89,6 +89,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
         content: "",
         type: "",
         order: 0,
+        updatedAt: "",
         properties: [],
       }
     );
@@ -258,7 +259,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
       data-cy="edit-dialog-backdrop"
     >
       <div
-        className="bg-gray-900 p-6 rounded shadow-lg w-3/4 max-h-[90vh] flex flex-col space-y-4 relative overflow-auto"
+        className=" bg-gray-900 p-6 rounded shadow-lg w-3/4 max-h-[90vh] flex flex-col space-y-4 relative overflow-auto"
         onClick={(e) => e.stopPropagation()}
         data-cy="edit-dialog"
       >
@@ -297,6 +298,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Task Title"
             data-cy="title-input"
+            disabled={readOnly}
           />
         </div>
 
@@ -332,6 +334,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
                         propertyName={key}
                         dataName={dataName}
                         onChange={onChange}
+                        readOnly={readOnly}
                       />
                     )}
                     {propertyType === "date" && (
@@ -341,6 +344,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
                         value={formatDateTimeLocal(value)}
                         onChange={(e) => onChange(e.target.value)}
                         data-cy="property-date-input"
+                        disabled={readOnly}
                       />
                     )}
                     {propertyType === "readonly" && (
@@ -416,6 +420,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
             onPaste={handlePaste}
             placeholder="Enter Markdown content here..."
             data-cy="property-content-input"
+            disabled={readOnly}
           />
           <div
             className="flex-1 min-h-[350px] h-full border border-gray-700 bg-gray-800 text-gray-300 p-3 rounded overflow-auto"

@@ -1,6 +1,6 @@
 export const setupInterceptors = () => {
   // Get All Tasks With Properties
-  cy.intercept("GET", "**/api/task/properties", {
+  cy.intercept("GET", "**/api/task/properties?task_type=regular", {
     statusCode: 200,
     body: [
       {

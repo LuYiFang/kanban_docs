@@ -25,9 +25,10 @@ const getOtherTasks = (tasks: TaskWithProperties[], taskId: string) => {
 const InteractiveSelect: React.FC<{
   taskId: string;
   propertyName: string;
+  readOnly: boolean;
   dataName: kanbanDataName;
   onChange: (value: string) => void;
-}> = ({ taskId, propertyName, dataName, onChange }) => {
+}> = ({ taskId, propertyName, dataName, onChange, readOnly }) => {
   const dispatch = useDispatch<AppDispatch>();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -177,6 +178,7 @@ const InteractiveSelect: React.FC<{
         className="w-full text-sm p-2 border border-gray-700 bg-gray-800 text-gray-300 rounded"
         onClick={handleExpand}
         data-cy="property-select-input"
+        disabled={readOnly}
       >
         {formatToCapitalCase(inputValue) || "Select an option"}
       </button>

@@ -13,6 +13,7 @@ interface KanbanColumnProps {
   isCollapsed: boolean;
   onToggleCollapse: (columnId: string) => void;
   onEditTask: (task: any) => void;
+  cardVisibleProperties: string[];
 }
 
 const KanbanColumn: React.FC<KanbanColumnProps> = ({
@@ -20,6 +21,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
   isCollapsed,
   onToggleCollapse,
   onEditTask,
+  cardVisibleProperties,
 }) => (
   <Droppable droppableId={column.id}>
     {(provided) => (
@@ -50,6 +52,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                 task={task}
                 index={index}
                 onEdit={onEditTask}
+                cardVisibleProperties={cardVisibleProperties}
               />
             ))}
             {provided.placeholder}
