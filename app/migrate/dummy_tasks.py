@@ -66,8 +66,8 @@ async def insert_tasks(db):
             "content": content,
             "type": task_type.value,
             "order": i + 1,
-            "createdAt": created_time.isoformat(),
-            "updatedAt": updated_time.isoformat(),
+            "createdAt": created_time,
+            "updatedAt": updated_time,
         })
     result = await db.tasks.insert_many(tasks)
     print(f"Inserted {len(result.inserted_ids)} tasks")
@@ -113,9 +113,8 @@ async def insert_task_properties(db, tasks):
                 assigned_value = property_options[(i+j) % len(property_options)]
 
             property_id = str(uuid.uuid4())
-            prop_updated_at = datetime.fromisoformat(
-                task["updatedAt"]) + timedelta(days=(i % 6) + 1)
-            prop_updated_at_iso = prop_updated_at.isoformat()
+            prop_updated_at = task["updatedAt"] + timedelta(days=(i % 6) + 1)
+            prop_updated_at_iso = prop_updated_at
 
             task_properties.append({
                 "_id": property_id,

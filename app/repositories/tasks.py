@@ -38,26 +38,7 @@ async def get_tasks_with_properties_repo(task_type: TaskType,
                 "type": 1,
                 "order": 1,
                 "createdAt": 1,
-                "updatedAt": {"$dateFromString": {"dateString": "$updatedAt"}},
-                "properties": {
-                    "$map": {
-                        "input": "$properties",
-                        "as": "property",
-                        "in": {
-                            "id": "$$property._id",
-                            "name": "$$property.name",
-                            "value": "$$property.value",
-                            "createdAt": "$$property.createdAt",
-                            "updatedAt": {"$dateFromString": {
-                                "dateString": "$$property.updatedAt"}}
-                        }
-                    }
-                }
-            }
-        },
-        {
-            "$addFields": {
-                "maxUpdatedAt": {
+                "updatedAt": {
                     "$max": {
                         "$concatArrays": [
                             ["$updatedAt"],
@@ -70,9 +51,22 @@ async def get_tasks_with_properties_repo(task_type: TaskType,
                             }
                         ]
                     }
+                },
+                "properties": {
+                    "$map": {
+                        "input": "$properties",
+                        "as": "property",
+                        "in": {
+                            "id": "$$property._id",
+                            "name": "$$property.name",
+                            "value": "$$property.value",
+                            "createdAt": "$$property.createdAt",
+                            "updatedAt": "$$property.updatedAt"
+                        }
+                    }
                 }
             }
-        }
+        },
     ]
 
     if task_type == "weekly":
@@ -84,25 +78,12 @@ async def get_tasks_with_properties_repo(task_type: TaskType,
 
         pipeline.append({
             "$match": {
-                "maxUpdatedAt": {
+                "updatedAt": {
                     "$gte": start_of_week,
                     "$lt": end_of_week
                 }
             }
         })
-
-    pipeline.append({
-        "$project": {
-            "id": 1,
-            "title": 1,
-            "content": 1,
-            "type": 1,
-            "order": 1,
-            "createdAt": 1,
-            "updatedAt": "$maxUpdatedAt",  # 讓 updatedAt 變成 maxUpdatedAt 的值
-            "properties": 1
-        }
-    })
 
     result = await db[collection_name].aggregate(pipeline).to_list(length=None)
     return result
