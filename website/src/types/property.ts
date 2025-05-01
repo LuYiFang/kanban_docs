@@ -57,24 +57,24 @@ export const priorityColor = {
 
 // 任務對應的顏色
 export const projectColors = {
-  primary: "bg-blue-600 text-white",
-  secondary: "bg-purple-500 text-white",
-  success: "bg-teal-500 text-white",
-  warning: "bg-yellow-400 text-gray-900",
-  danger: "bg-pink-500 text-white",
-  info: "bg-cyan-500 text-white",
-  neutral: "bg-gray-400 text-gray-900",
+  primary: "bg-indigo-800 text-white", // 深藍紫
+  secondary: "bg-teal-800 text-white", // 深藍綠
+  success: "bg-emerald-800 text-white", // 深綠
+  warning: "bg-amber-800 text-black", // 深琥珀黃
+  danger: "bg-rose-800 text-white", // 深玫瑰紅
+  info: "bg-sky-800 text-white", // 深天藍
+  neutral: "bg-slate-800 text-white", // 深灰藍
 };
 
 // 狀態對應的顏色
 export const statusColors = {
-  epic: "bg-purple-700 text-white",
-  todo: "bg-orange-700 text-white",
-  "in-progress": "bg-blue-700 text-white",
-  waiting: "bg-yellow-700 text-black",
-  done: "bg-green-700 text-white",
-  cancelled: "bg-red-700 text-white",
-  deferred: "bg-gray-700 text-white",
+  epic: "bg-violet-300 text-black", // 淺紫色
+  todo: "bg-amber-300 text-black", // 淺橙黃色
+  "in-progress": "bg-sky-300 text-black", // 淺天藍色
+  waiting: "bg-lime-300 text-black", // 淺綠黃色
+  done: "bg-emerald-300 text-black", // 淺綠色
+  cancelled: "bg-gray-400 text-black", // 淺灰色（不突出）
+  deferred: "bg-zinc-300 text-black", // 淺灰色（不同於 cancelled）
 };
 
 // 用於跟踪已分配的顏色

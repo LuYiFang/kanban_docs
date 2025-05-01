@@ -14,12 +14,18 @@ import { TaskWithProperties } from "../../types/task";
 import { kanbanDataName } from "../../types/kanban";
 
 const getOtherTasks = (tasks: TaskWithProperties[], taskId: string) => {
-  return tasks
-    .filter((task) => task.id !== taskId)
-    .map((task) => ({
-      id: task.id,
-      name: task.title || `Task ${task.id}`,
-    }));
+  // 過濾出屬性為 "epic" 的任務
+  const epicTasks = tasks.filter((task) => {
+    if (task.id === taskId) return false;
+
+    return task.properties.some(
+      (property) => property.name === "status" && property.value === "Epic",
+    );
+  });
+  return epicTasks.map((task) => ({
+    id: task.id,
+    name: task.title || `Task ${task.id}`,
+  }));
 };
 
 const InteractiveSelect: React.FC<{
