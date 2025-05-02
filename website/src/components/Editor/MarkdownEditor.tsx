@@ -41,6 +41,9 @@ import { uploadFile } from "../../store/slices/kanbanThuck";
 import apiClient from "../../utils/apiClient";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../store/store";
+import { MermaidCodeEditorDescriptor } from "./MermaidCodeEditorDescriptor";
+import mermaid from "mermaid";
+import _ from "lodash";
 
 interface MarkdownEditorProps {
   isOpen: boolean;
@@ -63,10 +66,27 @@ const MarkdownEditor = forwardRef<MarkdownEditorMethods, MarkdownEditorProps>(
     }));
 
     useEffect(() => {
+      if (isOpen) {
+        mermaid.run({
+          querySelector: ".mermaid",
+        });
+      }
+
       if (!editorRef.current) return;
 
       editorRef.current.setMarkdown(content);
     }, [isOpen, content]);
+
+    const handleEditorChange = (markdown: string) => {
+      onChange(markdown);
+      rerenderMermaid();
+    };
+
+    const rerenderMermaid = _.debounce(() => {
+      mermaid.run({
+        querySelector: ".mermaid",
+      });
+    }, 1000);
 
     const uploadImage = async (image: File): Promise<string> => {
       try {
@@ -84,9 +104,9 @@ const MarkdownEditor = forwardRef<MarkdownEditorMethods, MarkdownEditorProps>(
       <MDXEditor
         readOnly={readOnly}
         ref={editorRef}
-        className=" dark-theme  w-full"
+        className="dark-theme w-full"
         markdown={""}
-        onChange={onChange}
+        onChange={handleEditorChange}
         plugins={[
           listsPlugin(),
           toolbarPlugin({
@@ -116,9 +136,9 @@ const MarkdownEditor = forwardRef<MarkdownEditorMethods, MarkdownEditorProps>(
           tablePlugin(),
           thematicBreakPlugin(),
           frontmatterPlugin(),
-          codeBlockPlugin({ defaultCodeBlockLanguage: "txt" }),
-          directivesPlugin({
-            directiveDescriptors: [AdmonitionDirectiveDescriptor],
+          codeBlockPlugin({
+            defaultCodeBlockLanguage: "txt",
+            codeBlockEditorDescriptors: [MermaidCodeEditorDescriptor],
           }),
           codeMirrorPlugin({
             codeBlockLanguages: {
@@ -127,7 +147,11 @@ const MarkdownEditor = forwardRef<MarkdownEditorMethods, MarkdownEditorProps>(
               txt: "text",
               tsx: "TypeScript",
               py: "Python",
+              mermaid: "Mermaid",
             },
+          }),
+          directivesPlugin({
+            directiveDescriptors: [AdmonitionDirectiveDescriptor],
           }),
           markdownShortcutPlugin(),
         ]}

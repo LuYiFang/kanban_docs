@@ -21,9 +21,16 @@
 
 .dark-theme.mdxeditor .cm-editor {
     background-color: theme('colors.gray.800');
+    color: white;
 }
 
-.dark-theme.mdxeditor .cm-activeLineGutter {
+.dark-theme.mdxeditor .cm-gutters {
     background-color: theme('colors.gray.800');
     color: white;
 }
+
+.dark-theme.mdxeditor .cm-gutters, .dark-theme.mdxeditor .cm-activeLineGutter {
+    background-color: theme('colors.gray.600');
+    color: white;
+}
+
