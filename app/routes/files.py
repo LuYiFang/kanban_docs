@@ -3,7 +3,6 @@ from fastapi.responses import StreamingResponse
 from models.files import FileResponse, FileCreate
 from services.files import upload_file_service, get_file_service
 from database import get_db
-from utils.tools import dprint
 
 router = APIRouter()
 
@@ -21,7 +20,6 @@ async def upload_file(file: UploadFile = File(...), db=Depends(get_db)):
 
 @router.get("/{file_id}", response_class=StreamingResponse)
 async def download_file(file_id: str, db=Depends(get_db)):
-    dprint('file_id', file_id)
     file = await get_file_service(file_id, db)
     return StreamingResponse(
         file,

@@ -1,0 +1,29 @@
+@import url('../../../node_modules/@radix-ui/colors/tomato-dark.css');
+@import url('../../../node_modules/@radix-ui/colors/mauve-dark.css');
+
+.dark-theme {
+    --basePageBg: theme('colors.gray.900');
+    --baseBg: theme('colors.gray.700');
+    --baseBgActive: theme('colors.gray.500');
+
+    --admonitionTipBg: theme('colors.sky.900');
+    --admonitionInfoBg: theme('colors.emerald.900');
+    --admonitionCautionBg: theme('colors.amber.900');
+    --admonitionDangerBg: theme('colors.rose.900');
+    --admonitionNoteBg: theme('colors.slate.800');
+
+    --codeBg: theme('colors.gray.700');
+    --codeBorder: theme('colors.gray.900');
+
+    --codeToggleBg: theme('colors.gray.700');
+    --codeToggleBorder: theme('colors.gray.900');
+}
+
+.dark-theme.mdxeditor .cm-editor {
+    background-color: theme('colors.gray.800');
+}
+
+.dark-theme.mdxeditor .cm-activeLineGutter {
+    background-color: theme('colors.gray.800');
+    color: white;
+}

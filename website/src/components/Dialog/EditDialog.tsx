@@ -6,25 +6,14 @@ import React, {
   useState,
 } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import ReactMarkdown from "react-markdown";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faEllipsisH,
-  faInfoCircle,
-  faTimes,
-  faUser,
-} from "@fortawesome/free-solid-svg-icons";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
-import remarkImages from "remark-images";
-import remarkBreaks from "remark-breaks";
+import { faEllipsisH, faUser } from "@fortawesome/free-solid-svg-icons";
 import _ from "lodash";
 import moment from "moment";
 import {
   deleteTask,
   updateProperty,
   updateTask,
-  uploadFile,
 } from "../../store/slices/kanbanThuck";
 import { AppDispatch, RootState } from "../../store/store";
 import InteractiveSelect from "../Select/InteractiveSelect";
@@ -35,31 +24,8 @@ import {
   PropertyConfig as PropertyConfigType,
 } from "../../types/property";
 import { kanbanDataName } from "../../types/kanban";
-import apiClient from "../../utils/apiClient";
-
-const markdownGuideItems = [
-  { label: "**Bold**", syntax: "**text**" },
-  { label: "*Italic*", syntax: "*text*" },
-  {
-    label: "[Link](https://example.com)",
-    syntax: "[Link](https://example.com)",
-  },
-  { label: "`Inline Code`", syntax: "`code`" },
-  { label: "```Code Block```", syntax: "```\ncode\n```" },
-  { label: "![Image](url)", syntax: "![Alt Text](url)" },
-  {
-    label: "Table",
-    syntax:
-      "| Header 1 | Header 2 |\n| -------- | -------- |\n| Cell 1   | Cell 2   |",
-  },
-  { label: "> Quote", syntax: "> This is a quote" },
-  { label: "- [ ] Checklist", syntax: "- [ ] Task 1\n- [x] Task 2" },
-  { label: "--- Divider", syntax: "---" },
-  {
-    label: "Folding",
-    syntax: "<details>\n<summary>Title</summary>\nContent\n</details>",
-  },
-];
+import MarkdownEditor from "../Editor/MarkdownEditor";
+import { MDXEditorMethods } from "@mdxeditor/editor";
 
 interface EditDialogProps {
   isOpen: boolean;
@@ -96,17 +62,15 @@ const EditDialog: React.FC<EditDialogProps> = ({
   });
 
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isMarkdownGuideOpen, setIsMarkdownGuideOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const editorRef = useRef<MDXEditorMethods>(null);
 
   useEffect(() => {
     if (isOpen) {
       setTitle(task.title);
-      setContent(task.content);
     }
-  }, [isOpen, task.title, task.content]);
+  }, [isOpen, task.title]);
 
   const handleClickOutside = useCallback((event: MouseEvent) => {
     if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -121,6 +85,27 @@ const EditDialog: React.FC<EditDialogProps> = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen, handleClickOutside]);
+
+  const saveTask = useCallback(
+    (content: string) => {
+      dispatch(
+        updateTask({
+          taskId,
+          task: {
+            ...task,
+            title,
+            content,
+          },
+        }),
+      );
+    },
+    [dispatch, taskId, task, title],
+  );
+
+  const delaySaveTask = _.debounce(
+    (content: string) => saveTask(content),
+    3000,
+  );
 
   const propertyMap = useMemo(
     () =>
@@ -167,88 +152,12 @@ const EditDialog: React.FC<EditDialogProps> = ({
   }, [dispatch, onClose, taskId]);
 
   const handleOverlayClick = useCallback(() => {
-    dispatch(
-      updateTask({
-        taskId,
-        task: {
-          ...task,
-          title,
-          content,
-        },
-      }),
-    );
+    if (!editorRef.current) return;
+    const content = editorRef.current.getMarkdown();
+    saveTask(content);
     setIsMenuOpen(false);
     onClose();
-  }, [dispatch, taskId, task, title, content, onClose]);
-
-  const handleContentChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => setContent(e.target.value),
-    [],
-  );
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-      if (e.key === "Tab") {
-        e.preventDefault();
-        const target = e.target as HTMLTextAreaElement;
-        const start = target.selectionStart;
-        const end = target.selectionEnd;
-
-        const newValue =
-          target.value.substring(0, start) + "\t" + target.value.substring(end);
-        setContent(newValue);
-
-        setTimeout(() => {
-          target.selectionStart = target.selectionEnd = start + 1;
-        }, 0);
-      }
-    },
-    [],
-  );
-
-  const handlePaste = useCallback(
-    (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-      const items = e.clipboardData.items;
-      for (const item of items) {
-        if (item.type.startsWith("image/")) {
-          const file = item.getAsFile();
-          if (file) {
-            const formData = new FormData();
-            formData.append("file", file);
-
-            dispatch(uploadFile(formData))
-              .unwrap()
-              .then((response) => {
-                const imageUrl = `${apiClient.defaults.baseURL}${response.url}`; // 加上 apiClient 的 host
-                setContent(
-                  (prevContent) =>
-                    `${prevContent}\n![Pasted Image](${imageUrl})`,
-                );
-              })
-              .catch((error) => {
-                console.error("Image upload failed:", error);
-              });
-          }
-        }
-      }
-    },
-    [dispatch],
-  );
-
-  const handleCopySyntax = useCallback((syntax: string) => {
-    navigator.clipboard.writeText(syntax);
-  }, []);
-
-  const handleOpenMarkdownGuide = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
-      if (isMarkdownGuideOpen) {
-        setIsMarkdownGuideOpen(false);
-      } else {
-        setIsMarkdownGuideOpen(true);
-      }
-    },
-    [isMarkdownGuideOpen],
-  );
+  }, [dispatch, taskId, task, title, onClose]);
 
   if (!isOpen) return null;
 
@@ -287,7 +196,6 @@ const EditDialog: React.FC<EditDialogProps> = ({
             </div>
           )}
         </div>
-
         {/* Title */}
         <div>
           <h2 className="text-lg font-bold text-gray-200 mb-2">Edit Title</h2>
@@ -301,7 +209,6 @@ const EditDialog: React.FC<EditDialogProps> = ({
             disabled={readOnly}
           />
         </div>
-
         {/* Properties */}
         <div>
           <h3 className="text-lg font-bold text-gray-200 mb-2">Properties</h3>
@@ -361,78 +268,15 @@ const EditDialog: React.FC<EditDialogProps> = ({
             })}
           </div>
         </div>
-
         {/* Markdown Input & Preview */}
-        <div className="flex space-x-4 flex-1 min-h-[350px] h-full relative">
-          <button
-            className="absolute p-1 top-1 left-[-16px] text-gray-400 hover:text-gray-200 text-md"
-            onClick={handleOpenMarkdownGuide}
-            data-cy="open-markdown-guide"
-          >
-            <FontAwesomeIcon icon={faInfoCircle} />
-          </button>
-          {/* Markdown Guide Modal */}
-          {isMarkdownGuideOpen && (
-            <div
-              className="absolute z-50  w-full"
-              style={{
-                top: -335,
-                left: -16,
-              }}
-              data-cy="markdown-guide-modal"
-            >
-              <div className="bg-gray-800 p-4 rounded shadow-lg relative">
-                <button
-                  className="absolute p-2 top-2 right-2 text-gray-400 hover:text-gray-200 text-sm bg-transparent"
-                  onClick={() => setIsMarkdownGuideOpen(false)}
-                  data-cy="close-markdown-guide"
-                >
-                  <FontAwesomeIcon icon={faTimes} />
-                </button>
-                <h2 className="text-lg font-bold text-gray-200 mb-4">
-                  Markdown Syntax Guide
-                </h2>
-                <div className="space-y-2">
-                  {markdownGuideItems.map((item, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between bg-gray-700 text-gray-300 py-1 px-2 rounded text-sm"
-                    >
-                      <span>{item.label}</span>
-                      <button
-                        className="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-500 text-xs"
-                        onClick={() => handleCopySyntax(item.syntax)}
-                        data-cy={`copy-syntax-${index}`}
-                      >
-                        Copy
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-          <textarea
-            className="flex-1 min-h-[350px] h-full border border-gray-700 bg-gray-800 text-gray-300 p-3 rounded text-sm resize-none"
-            value={content}
-            onChange={handleContentChange}
-            onKeyDown={handleKeyDown}
-            onPaste={handlePaste}
-            placeholder="Enter Markdown content here..."
-            data-cy="property-content-input"
-            disabled={readOnly}
+        <div className="flex space-x-4 flex-1 min-h-[350px] h-full w-full relative">
+          <MarkdownEditor
+            ref={editorRef}
+            readOnly={readOnly}
+            isOpen={isOpen}
+            content={task.content}
+            onChange={delaySaveTask}
           />
-          <div
-            className="flex-1 min-h-[350px] h-full border border-gray-700 bg-gray-800 text-gray-300 p-3 rounded overflow-auto"
-            data-cy={"markdown-preview"}
-          >
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm, remarkBreaks, remarkImages]}
-              rehypePlugins={[rehypeRaw]}
-            >
-              {content}
-            </ReactMarkdown>
-          </div>
         </div>
       </div>
     </div>
