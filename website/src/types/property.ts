@@ -101,9 +101,9 @@ export function assignProjectColor(projectName: string): string {
 
 // 預設的任務屬性
 export const defaultTaskProperties: DefaultProperty[] = [
-  { name: "priority", value: "low" },
-  { name: "status", value: "todo" },
-  { name: "level", value: "c-level" },
+  { name: "priority", value: "Low" },
+  { name: "status", value: "Todo" },
+  { name: "level", value: "C Level" },
   { name: "project", value: "" },
   { name: "epic", value: "" },
   { name: "assignee", value: "" },

@@ -26,9 +26,13 @@ const KanbanCard: React.FC<KanbanCardProps> = ({
   onEdit,
   cardVisibleProperties,
 }) => {
-  const propertyOptionsIdNameMap = useSelector((state: RootState) => {
+  const propertySetting = useSelector(
+    (state: RootState) => state.kanban.propertySetting,
+  );
+
+  const propertyOptionsIdNameMap = useMemo(() => {
     return _.reduce(
-      state.kanban.propertySetting,
+      propertySetting,
       (result, property) => {
         _.each(property.options, (option) => {
           result[option.id] = option.name;
@@ -37,7 +41,7 @@ const KanbanCard: React.FC<KanbanCardProps> = ({
       },
       {} as Record<string, string>,
     );
-  });
+  }, [propertySetting]);
 
   return (
     <Draggable draggableId={task.id} index={index}>

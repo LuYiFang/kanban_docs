@@ -8,8 +8,6 @@ import {
   updateMultipleTasks,
   updateProperty,
   updateTask,
-  uploadFile,
-  downloadFile,
 } from "./kanbanThuck";
 import { convertUtcToLocal } from "../../utils/tools";
 import _ from "lodash";
@@ -98,15 +96,12 @@ const kanbanSlice = createSlice({
         });
       })
       .addCase(createPropertyOption.fulfilled, (state, action) => {
-        const { propertyId, name } = action.payload;
+        const { options } = action.payload;
         const property = state.propertySetting.find(
-          (prop) => prop.id === propertyId,
+          (prop) => prop.id === options.propertyId,
         );
         if (property) {
-          property.options = [
-            ...(property.options || []),
-            { name, propertyId },
-          ];
+          property.options = [...(property.options || []), options];
         }
       });
   },

@@ -12,18 +12,21 @@ import { formatToCapitalCase } from "../../utils/tools";
 import { createPropertyOption } from "../../store/slices/kanbanThuck";
 import { TaskWithProperties } from "../../types/task";
 import { kanbanDataName } from "../../types/kanban";
+import _ from "lodash";
 
 const getOtherTasks = (
   tasks: TaskWithProperties[],
   taskId: string,
   propertyId: string,
+  statusEpicId: string,
 ) => {
   // 過濾出屬性為 "epic" 的任務
   const epicTasks = tasks.filter((task) => {
     if (task.id === taskId) return false;
 
     return task.properties.some(
-      (property) => property.name === "status" && property.value === "Epic",
+      (property) =>
+        property.name === "status" && property.value === statusEpicId,
     );
   });
   return epicTasks.map((task) => ({
@@ -43,15 +46,33 @@ const InteractiveSelect: React.FC<{
   const dispatch = useDispatch<AppDispatch>();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const propertyConfig = useSelector(
-    (state: RootState) =>
-      state.kanban.propertySetting.find(
-        (prop) => prop.name === propertyName,
-      ) || {
-        id: "",
-        options: [],
-      },
+  const propertySetting = useSelector(
+    (state: RootState) => state.kanban.propertySetting,
   );
+  const tasks = useSelector(
+    (state: RootState) => state.kanban[dataName] as TaskWithProperties[],
+  );
+
+  const propertyConfig = useMemo(() => {
+    const _propertyConfig = _.cloneDeep(
+      propertySetting.find((prop) => prop.name === propertyName),
+    ) || { id: "", options: [] };
+
+    if (propertyName === "epic") {
+      const statusEpicId =
+        propertySetting
+          .find((prop) => prop.name === "status")
+          ?.options?.find((op) => op.name === "Epic")?.id || "";
+      const _tasks = tasks as TaskWithProperties[];
+      _propertyConfig.options = getOtherTasks(
+        _tasks,
+        taskId,
+        _propertyConfig.id,
+        statusEpicId,
+      );
+    }
+    return _propertyConfig;
+  }, [propertySetting, propertyName, tasks, taskId]);
 
   const taskProperty = useSelector((state: RootState) => {
     const task = (state.kanban[dataName] as TaskWithProperties[]).find(
@@ -66,17 +87,9 @@ const InteractiveSelect: React.FC<{
     );
   });
 
-  const tasks = useSelector(
-    (state: RootState) => state.kanban[dataName] as TaskWithProperties[],
-  );
-
   const [isExpanded, setIsExpanded] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [filteredOptions, setFilteredOptions] = useState<PropertyOption[]>([]);
-
-  const otherTaskOptions = useMemo(() => {
-    return getOtherTasks(tasks, taskId, propertyConfig.id);
-  }, [tasks, taskId, propertyConfig]);
 
   useEffect(() => {
     if (!propertyConfig.options) {
@@ -91,44 +104,27 @@ const InteractiveSelect: React.FC<{
   }, [propertyConfig]);
 
   useEffect(() => {
-    if (propertyName === "epic") {
-      setFilteredOptions(otherTaskOptions);
-    } else {
-      setFilteredOptions(propertyConfig?.options || []);
-    }
-  }, [propertyName, tasks, taskId, propertyConfig]);
+    setFilteredOptions(propertyConfig?.options || []);
+  }, [propertyName, taskId, propertyConfig]);
 
   // 展開選單
   const handleExpand = useCallback(() => {
     setIsExpanded(true);
-    if (propertyName === "epic") {
-      setFilteredOptions(otherTaskOptions);
-    } else {
-      setFilteredOptions(propertyConfig?.options || []);
-    }
-  }, [propertyName, tasks, taskId, propertyConfig]);
+    setFilteredOptions(propertyConfig?.options || []);
+  }, [propertyName, taskId, propertyConfig]);
 
   // 輸入框變更
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
       setInputValue(value);
-
-      if (propertyName === "epic") {
-        setFilteredOptions(
-          otherTaskOptions.filter((task) =>
-            task.name.toLowerCase().includes(value.toLowerCase()),
-          ),
-        );
-      } else {
-        setFilteredOptions(
-          (propertyConfig?.options || []).filter((option) =>
-            option.name.toLowerCase().includes(value.toLowerCase()),
-          ),
-        );
-      }
+      setFilteredOptions(
+        (propertyConfig?.options || []).filter((option) =>
+          option.name.toLowerCase().includes(value.toLowerCase()),
+        ),
+      );
     },
-    [propertyName, tasks, taskId, propertyConfig],
+    [propertyName, taskId, propertyConfig],
   );
 
   // 新增選項

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import KanbanBoard from "../components/Kanban/KanbanBoard";
 import {
   defaultTaskProperties,
@@ -6,15 +6,40 @@ import {
   taskPropertyOrder,
 } from "../types/property";
 import { getAllTaskWithProperties } from "../store/slices/kanbanThuck";
-import { useDispatch } from "react-redux";
-import { AppDispatch } from "../store/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../store/store";
+import _ from "lodash";
 
 const KanbanPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
 
+  const propertySetting = useSelector(
+    (state: RootState) => state.kanban.propertySetting,
+  );
+
   useEffect(() => {
     dispatch(getAllTaskWithProperties({ taskType: "regular" }));
   }, []);
+
+  const defaultTaskPropertiesWithId = useMemo(() => {
+    const defaultPropertiesWithId = _.cloneDeep(defaultTaskProperties);
+    const propertyNameToIdMap = _.reduce(
+      propertySetting,
+      (result, property) => {
+        _.each(property.options, (option) => {
+          result[option.name] = option.id;
+        });
+        return result;
+      },
+      {} as Record<string, string>,
+    );
+
+    _.each(defaultPropertiesWithId, (property) => {
+      property.value = propertyNameToIdMap[property.value] || "";
+    });
+
+    return defaultPropertiesWithId;
+  }, [propertySetting]);
 
   return (
     <div className="h-full w-full flex flex-col bg-gray-900 text-gray-300">
@@ -23,7 +48,7 @@ const KanbanPage: React.FC = () => {
         dataName="tasks"
         groupPropertyName="status"
         columnSort={statusOrder}
-        defaultProperties={defaultTaskProperties}
+        defaultProperties={defaultTaskPropertiesWithId}
         propertyOrder={taskPropertyOrder}
         readOnly={false}
         taskSortProperty="order"
