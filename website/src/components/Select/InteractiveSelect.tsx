@@ -13,7 +13,11 @@ import { createPropertyOption } from "../../store/slices/kanbanThuck";
 import { TaskWithProperties } from "../../types/task";
 import { kanbanDataName } from "../../types/kanban";
 
-const getOtherTasks = (tasks: TaskWithProperties[], taskId: string) => {
+const getOtherTasks = (
+  tasks: TaskWithProperties[],
+  taskId: string,
+  propertyId: string,
+) => {
   // 過濾出屬性為 "epic" 的任務
   const epicTasks = tasks.filter((task) => {
     if (task.id === taskId) return false;
@@ -25,6 +29,7 @@ const getOtherTasks = (tasks: TaskWithProperties[], taskId: string) => {
   return epicTasks.map((task) => ({
     id: task.id,
     name: task.title || `Task ${task.id}`,
+    propertyId: propertyId,
   }));
 };
 
@@ -66,12 +71,24 @@ const InteractiveSelect: React.FC<{
   );
 
   const [isExpanded, setIsExpanded] = useState(false);
-  const [inputValue, setInputValue] = useState(taskProperty.value);
+  const [inputValue, setInputValue] = useState("");
   const [filteredOptions, setFilteredOptions] = useState<PropertyOption[]>([]);
 
   const otherTaskOptions = useMemo(() => {
-    return getOtherTasks(tasks, taskId);
-  }, [tasks, taskId]);
+    return getOtherTasks(tasks, taskId, propertyConfig.id);
+  }, [tasks, taskId, propertyConfig]);
+
+  useEffect(() => {
+    if (!propertyConfig.options) {
+      setInputValue(taskProperty.value);
+      return;
+    }
+
+    setInputValue(
+      propertyConfig.options.find((op) => op.id === taskProperty.value)?.name ||
+        "",
+    );
+  }, [propertyConfig]);
 
   useEffect(() => {
     if (propertyName === "epic") {
@@ -154,7 +171,7 @@ const InteractiveSelect: React.FC<{
     (option: PropertyOption) => {
       setInputValue(option.name);
       setIsExpanded(false);
-      onChange(option.name);
+      onChange(option.id);
     },
     [onChange],
   );

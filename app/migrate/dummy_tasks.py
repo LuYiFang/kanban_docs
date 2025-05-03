@@ -74,8 +74,14 @@ async def insert_tasks(db):
     return tasks
 
 
-async def insert_task_properties(db, tasks):
+async def insert_task_properties(db, tasks, options):
     """插入 Task Properties"""
+
+    property_configs = await db.property_configs.find({}).to_list(None)
+    property_id_name_map = {config["_id"]: config["name"] for config in
+                            property_configs}
+
+    property_options = await db.property_options.find({}).to_list(None)
 
     property_groups = {}
 
@@ -87,12 +93,13 @@ async def insert_task_properties(db, tasks):
         # 取得所有可能的屬性值
         if property_type == "select":
             options = [
-                option["name"] for option in dummy_option_info
-                if option["propertyName"] == property_name
+                option["_id"] for option in property_options
+                if
+                property_id_name_map.get(option["propertyId"]) == property_name
             ]
             # 避免同 level 都是一樣的 project
             if property_name == "project":
-                options.append("Project A")
+                options.append(options[0])
             if property_name in ("project", "assignee"):
                 options.append("")
             property_groups[property_name] = options
@@ -106,11 +113,13 @@ async def insert_task_properties(db, tasks):
     task_property_collection = db.task_properties
     task_properties = []
     for i, task in enumerate(tasks):
-        for j, (property_name, property_options) in enumerate(property_groups.items()):
+        for j, (property_name, property_options) in enumerate(
+                property_groups.items()):
             # 取得所有可能值
             assigned_value = ''
             if property_options:
-                assigned_value = property_options[(i+j) % len(property_options)]
+                assigned_value = property_options[
+                    (i + j) % len(property_options)]
 
             property_id = str(uuid.uuid4())
             prop_updated_at = task["updatedAt"] + timedelta(days=(i % 6) + 1)
@@ -141,9 +150,9 @@ async def main():
     await connect_to_mongodb()
     db = await get_db()
 
-    await insert_property_options(db, dummy_option_info)
+    options = await insert_property_options(db, dummy_option_info)
     tasks_inserted = await insert_tasks(db)
-    await insert_task_properties(db, tasks_inserted)
+    await insert_task_properties(db, tasks_inserted, options)
 
 
 if __name__ == "__main__":

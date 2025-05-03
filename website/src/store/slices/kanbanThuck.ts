@@ -149,8 +149,7 @@ export const createPropertyOption = createAsyncThunk(
     thunkAPI,
   ) => {
     try {
-      const newOption = await createPropertyOptionApi(propertyId, name);
-      return { propertyId, name: newOption.name }; // 确保返回包含 propertyId 和 name
+      return await createPropertyOptionApi(propertyId, name);
     } catch (error) {
       const axiosError = error as AxiosError;
       return thunkAPI.rejectWithValue(axiosError?.response?.data);

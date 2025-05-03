@@ -12,11 +12,23 @@ export const generateColumns = (
   columnSort: string[],
   taskSortProperty: string,
 ): Column[] => {
+  const propertyOptionsIdNameMap = _.reduce(
+    propertyConfig,
+    (result, property) => {
+      _.each(property.options, (option) => {
+        result[option.id] = option.name;
+      });
+      return result;
+    },
+    {} as Record<string, string>,
+  );
   const colGroup = _.groupBy(tasks, (task) => {
     const groupProperty = task.properties.find(
       (prop) => prop.name === groupPropertyName,
     );
-    return groupProperty ? convertToKebabCase(groupProperty.value) : null;
+    return groupProperty
+      ? convertToKebabCase(propertyOptionsIdNameMap[groupProperty.value] || "")
+      : null;
   });
 
   const targetProperty = _.find(propertyConfig, { name: groupPropertyName });

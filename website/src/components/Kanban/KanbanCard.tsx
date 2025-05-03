@@ -9,6 +9,9 @@ import {
   statusColors,
 } from "../../types/property";
 import { convertToKebabCase } from "../../utils/tools";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
+import _ from "lodash";
 
 interface KanbanCardProps {
   task: TaskWithProperties;
@@ -23,6 +26,19 @@ const KanbanCard: React.FC<KanbanCardProps> = ({
   onEdit,
   cardVisibleProperties,
 }) => {
+  const propertyOptionsIdNameMap = useSelector((state: RootState) => {
+    return _.reduce(
+      state.kanban.propertySetting,
+      (result, property) => {
+        _.each(property.options, (option) => {
+          result[option.id] = option.name;
+        });
+        return result;
+      },
+      {} as Record<string, string>,
+    );
+  });
+
   return (
     <Draggable draggableId={task.id} index={index}>
       {(provided, snapshot) => (
@@ -53,6 +69,8 @@ const KanbanCard: React.FC<KanbanCardProps> = ({
               propertyValue = task.properties.find(
                 (prop) => prop.name === propertyName,
               )?.value;
+              if (propertyValue)
+                propertyValue = propertyOptionsIdNameMap[propertyValue];
             }
             if (!propertyValue) return "";
 

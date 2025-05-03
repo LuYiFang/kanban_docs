@@ -1,5 +1,5 @@
 export interface PropertyOption {
-  id?: string;
+  id: string;
   name: string;
   propertyId?: string; // 可選屬性，表示屬於哪個 Property
   [p: string]: any; // 允許擴展屬性
