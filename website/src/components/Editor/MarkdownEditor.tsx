@@ -43,7 +43,6 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../store/store";
 import { MermaidCodeEditorDescriptor } from "./MermaidCodeEditorDescriptor";
 import mermaid from "mermaid";
-import _ from "lodash";
 
 interface MarkdownEditorProps {
   isOpen: boolean;
@@ -79,14 +78,7 @@ const MarkdownEditor = forwardRef<MarkdownEditorMethods, MarkdownEditorProps>(
 
     const handleEditorChange = (markdown: string) => {
       onChange(markdown);
-      rerenderMermaid();
     };
-
-    const rerenderMermaid = _.debounce(() => {
-      mermaid.run({
-        querySelector: ".mermaid",
-      });
-    }, 1000);
 
     const uploadImage = async (image: File): Promise<string> => {
       try {

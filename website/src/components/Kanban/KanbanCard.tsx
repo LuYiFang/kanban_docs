@@ -12,12 +12,14 @@ import { convertToKebabCase } from "../../utils/tools";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import _ from "lodash";
+import { kanbanDataName } from "../../types/kanban";
 
 interface KanbanCardProps {
   task: TaskWithProperties;
   index: number;
   onEdit: (task: TaskWithProperties) => void;
   cardVisibleProperties: string[];
+  dataName: kanbanDataName;
 }
 
 const KanbanCard: React.FC<KanbanCardProps> = ({
@@ -25,13 +27,27 @@ const KanbanCard: React.FC<KanbanCardProps> = ({
   index,
   onEdit,
   cardVisibleProperties,
+  dataName,
 }) => {
   const propertySetting = useSelector(
     (state: RootState) => state.kanban.propertySetting,
   );
 
+  const tasks: TaskWithProperties[] = useSelector((state: RootState) => {
+    return state.kanban[dataName] as TaskWithProperties[];
+  });
+
   const propertyOptionsIdNameMap = useMemo(() => {
-    return _.reduce(
+    const taskIdTitleMap = _.reduce(
+      tasks,
+      (result, task) => {
+        result[task.id] = task.title;
+        return result;
+      },
+      {} as Record<string, string>,
+    );
+
+    const propertyIdNameMap = _.reduce(
       propertySetting,
       (result, property) => {
         _.each(property.options, (option) => {
@@ -41,7 +57,9 @@ const KanbanCard: React.FC<KanbanCardProps> = ({
       },
       {} as Record<string, string>,
     );
-  }, [propertySetting]);
+
+    return _.merge({}, taskIdTitleMap, propertyIdNameMap);
+  }, [tasks, propertySetting]);
 
   return (
     <Draggable draggableId={task.id} index={index}>

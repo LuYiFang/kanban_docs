@@ -133,8 +133,7 @@ export const getPropertiesAndOptions = createAsyncThunk(
   "kanban/getPropertiesAndOptions",
   async (_, thunkAPI) => {
     try {
-      const propertiesWithOptions = await getPropertiesAndOptionsApi();
-      return propertiesWithOptions;
+      return await getPropertiesAndOptionsApi();
     } catch (error: any) {
       const axiosError = error as AxiosError;
       return thunkAPI.rejectWithValue(axiosError?.response?.data);

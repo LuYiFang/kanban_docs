@@ -269,7 +269,10 @@ const EditDialog: React.FC<EditDialogProps> = ({
           </div>
         </div>
         {/* Markdown Input & Preview */}
-        <div className="flex space-x-4 flex-1 min-h-[350px] h-full w-full relative">
+        <div
+          className="flex space-x-4 flex-1 min-h-[350px] h-full w-full relative"
+          data-cy="editor-content"
+        >
           <MarkdownEditor
             ref={editorRef}
             readOnly={readOnly}

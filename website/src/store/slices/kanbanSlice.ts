@@ -96,7 +96,7 @@ const kanbanSlice = createSlice({
         });
       })
       .addCase(createPropertyOption.fulfilled, (state, action) => {
-        const { options } = action.payload;
+        const options = action.payload;
         const property = state.propertySetting.find(
           (prop) => prop.id === options.propertyId,
         );

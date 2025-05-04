@@ -123,3 +123,25 @@ export const updateTaskOrder = (
     };
   }
 };
+
+export const getOtherTasks = (
+  tasks: TaskWithProperties[],
+  taskId: string,
+  propertyId: string,
+  statusEpicId: string,
+) => {
+  // 過濾出屬性為 "epic" 的任務
+  const epicTasks = tasks.filter((task) => {
+    if (task.id === taskId) return false;
+
+    return task.properties.some(
+      (property) =>
+        property.name === "status" && property.value === statusEpicId,
+    );
+  });
+  return epicTasks.map((task) => ({
+    id: task.id,
+    name: task.title || `Task ${task.id}`,
+    propertyId: propertyId,
+  }));
+};

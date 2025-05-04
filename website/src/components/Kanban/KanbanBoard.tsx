@@ -10,7 +10,10 @@ import {
 } from "../../store/slices/kanbanThuck";
 import AddTaskButton from "./AddTaskButton";
 import KanbanColumn from "./KanbanColumn";
-import { useKanbanColumns } from "../../hooks/useKanbanColumns";
+import {
+  defaultColumnCollapseProxy,
+  useKanbanColumns,
+} from "../../hooks/useKanbanColumns";
 import { generateNextTask, updateTaskOrder } from "../../utils/kanbanUtils";
 import { TaskWithProperties } from "../../types/task";
 import { KanbanBoardProps } from "../../types/kanban";
@@ -36,8 +39,6 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
 
   const {
     columns,
-    collapsedColumns,
-    toggleColumnCollapse,
     isDialogOpen,
     selectedTask,
     setIsDialogOpen,
@@ -123,10 +124,10 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
             <KanbanColumn
               key={column.id}
               column={column}
-              isCollapsed={collapsedColumns[column.id]}
-              onToggleCollapse={toggleColumnCollapse}
+              defaultIsCollapsed={defaultColumnCollapseProxy[column.name]}
               onEditTask={handleEdit}
               cardVisibleProperties={cardVisibleProperties}
+              dataName={dataName}
             />
           ))}
         </div>
