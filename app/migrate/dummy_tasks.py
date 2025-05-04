@@ -8,8 +8,9 @@ from models.tasks import TaskType
 
 # 生成時間戳
 now = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
-days_to_friday = (4 - now.weekday()) % 7  # 計算距離最近週五的天數
-start_of_this_week = now + timedelta(days=days_to_friday)
+days_since_monday = now.weekday()  # 週一是 0，週日是 6
+start_of_this_week = now - timedelta(days=days_since_monday)
+
 start_of_last_week = start_of_this_week - timedelta(days=7)  # 上週開始
 
 dummy_option_info = default_option_info.copy()

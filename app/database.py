@@ -48,14 +48,15 @@ default_option_info = [
 
 
 class MongoDB:
-    def __init__(self, uri: str):
+    def __init__(self, uri: str, db_name: str = "kanbanDocs"):
         self.uri = uri
         self.client = None
+        self.db_name = db_name
         self.db = None
 
     async def connect(self):
         self.client = AsyncIOMotorClient(self.uri)
-        self.db = self.client.kanbanDocs
+        self.db = self.client[self.db_name]
 
     async def disconnect(self):
         if self.client:
@@ -133,9 +134,9 @@ async def insert_property_configs(db, target_property_config_info):
         return []
 
     # 直接從 `db` 查找 `property_types`
-    existing_types = await db["property_types"].find({}, {"name": 1,
-                                                          "_id": 1}).to_list(
-        length=None)
+    existing_types = await db["property_types"].find(
+        {}, {"name": 1, "_id": 1}
+    ).to_list(length=None)
     type_map = {ptype["name"]: ptype["_id"] for ptype in existing_types}
 
     property_configs = [
