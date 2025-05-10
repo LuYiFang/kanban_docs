@@ -1,8 +1,10 @@
-from fastapi import APIRouter, UploadFile, File, Depends
+from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
 from fastapi.responses import StreamingResponse
-from models.files import FileResponse, FileCreate
-from services.files import upload_file_service, get_file_service
+
 from database import get_db
+from models.files import FileResponse, FileCreate
+from services.files import (upload_file_service, get_file_service,
+                            delete_file_service)
 
 router = APIRouter()
 
@@ -26,3 +28,14 @@ async def download_file(file_id: str, db=Depends(get_db)):
         media_type=file.metadata["content_type"],
         headers={"Content-Disposition": f"inline; filename={file.filename}"}
     )
+
+
+@router.delete("/{file_id}")
+async def delete_file(file_id: str, db=Depends(get_db)):
+    """
+    刪除檔案
+    """
+    is_success = await delete_file_service(file_id, db)
+    if not is_success:
+        raise HTTPException(status_code=404, detail="File not found")
+    return is_success

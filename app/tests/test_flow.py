@@ -288,6 +288,17 @@ async def test_file_flow():
         assert response.status_code == 200
         assert response.content == file_content
 
+        # 測刪除檔案
+        file_id = url.split("/")[-1]
+        response = await async_client.delete(
+            f"/api/files/{file_id}")
+        assert response.status_code == 200
+        # 測試檔案不存在
+        response = await async_client.get(
+            f"/api/files/{file_id}")
+        assert response.status_code == 404
+
+
 @pytest.mark.asyncio
 async def test_weekly_flow():
     """測試任務的創建、更新、刪除以及屬性操作的完整流程"""
@@ -307,9 +318,9 @@ async def test_weekly_flow():
     await insert_task_properties(db, tasks_inserted, options)
 
     async with AsyncClient(app=app,
-                            base_url="http://test") as async_client:
-          response = await async_client.get(
-                "/api/task/properties?task_type=weekly")
-          assert response.status_code == 200
-          data = response.json()
-          assert len(data) == 6
+                           base_url="http://test") as async_client:
+        response = await async_client.get(
+            "/api/task/properties?task_type=weekly")
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data) == 6

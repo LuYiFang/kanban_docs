@@ -15,3 +15,9 @@ async def get_file(file_id: str, db: AgnosticDatabase):
     fs = AsyncIOMotorGridFSBucket(db)
     file = await fs.open_download_stream(ObjectId(file_id))
     return file
+
+
+async def delete_file(file_id: str, db: AgnosticDatabase) -> bool:
+    fs = AsyncIOMotorGridFSBucket(db)
+    await fs.delete(ObjectId(file_id))
+    return True
