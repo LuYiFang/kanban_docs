@@ -39,7 +39,7 @@ export const useEditor = (
 
   useEffect(() => {
     setTitle(task.title);
-  }, []);
+  }, [task.title]);
 
   const saveTask = useCallback(
     (content: string) => {
