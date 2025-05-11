@@ -119,7 +119,6 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
         </div>
         {/* Title */}
         <div>
-          <h2 className="text-lg font-bold text-gray-200 mb-2">Edit Title</h2>
           <input
             type="text"
             className="w-full text-lg p-2 border border-gray-700 bg-gray-800 text-gray-300 rounded"
