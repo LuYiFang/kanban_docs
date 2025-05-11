@@ -4,6 +4,9 @@ import { PropertyConfig } from "./property";
 export interface KanbanState {
   tasks: TaskWithProperties[];
   propertySetting: PropertyConfig[];
+  docs: {
+    [key: string]: any;
+  };
 }
 
 export type kanbanDataName = "tasks" | "propertySetting" | "docs";

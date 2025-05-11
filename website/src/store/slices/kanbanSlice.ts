@@ -17,6 +17,7 @@ import { KanbanState } from "../../types/kanban";
 const initialState: KanbanState = {
   tasks: [],
   propertySetting: [],
+  docs: [],
 };
 
 const kanbanSlice = createSlice({
