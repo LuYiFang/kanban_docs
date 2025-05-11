@@ -5,7 +5,7 @@ describe("Weekly Page Workflow Tests", () => {
   beforeEach(() => {
     setupBaseInterceptors();
     setupInterceptors();
-    cy.visit("/weekly-report"); // 確保訪問正確的 weekly-report 頁面
+    cy.visit("/#/weekly-report"); // 確保訪問正確的 weekly-report 頁面
   });
 
   it("should have 4 tasks in the weekly board, verify the first card contains project, epic, status, assignee, summary properties", () => {

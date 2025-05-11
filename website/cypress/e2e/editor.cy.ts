@@ -5,7 +5,7 @@ describe("Editor Workflow Tests", () => {
   beforeEach(() => {
     setupBaseInterceptors();
     setupInterceptors();
-    cy.visit("/kanban"); // 確保訪問正確的 Kanban 頁面
+    cy.visit("/#/kanban"); // 確保訪問正確的 Kanban 頁面
   });
 
   // 確定 title 能修改

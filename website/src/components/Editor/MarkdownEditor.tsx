@@ -45,7 +45,6 @@ import { MermaidCodeEditorDescriptor } from "./MermaidCodeEditorDescriptor";
 import mermaid from "mermaid";
 
 interface MarkdownEditorProps {
-  isOpen: boolean;
   readOnly: boolean;
   content: string;
   onChange: (content: string) => void;
@@ -56,7 +55,7 @@ export interface MarkdownEditorMethods {
 }
 
 const MarkdownEditor = forwardRef<MarkdownEditorMethods, MarkdownEditorProps>(
-  ({ readOnly, isOpen, content, onChange }, ref) => {
+  ({ readOnly, content, onChange }, ref) => {
     const dispatch = useDispatch<AppDispatch>();
     const editorRef = useRef<MDXEditorMethods>(null);
 
@@ -65,16 +64,13 @@ const MarkdownEditor = forwardRef<MarkdownEditorMethods, MarkdownEditorProps>(
     }));
 
     useEffect(() => {
-      if (isOpen) {
-        mermaid.run({
-          querySelector: ".mermaid",
-        });
-      }
-
       if (!editorRef.current) return;
 
       editorRef.current.setMarkdown(content);
-    }, [isOpen, content]);
+      mermaid.run({
+        querySelector: ".mermaid",
+      });
+    }, [content]);
 
     const handleEditorChange = (markdown: string) => {
       onChange(markdown);

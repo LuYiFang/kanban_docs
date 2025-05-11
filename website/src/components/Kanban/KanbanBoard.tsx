@@ -13,7 +13,7 @@ import KanbanColumn from "./KanbanColumn";
 import {
   defaultColumnCollapseProxy,
   useKanbanColumns,
-} from "../../hooks/useKanbanColumns";
+} from "./useKanbanColumns";
 import { generateNextTask, updateTaskOrder } from "../../utils/kanbanUtils";
 import { TaskWithProperties } from "../../types/task";
 import { KanbanBoardProps } from "../../types/kanban";

@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
-import { generateColumns } from "../utils/kanbanUtils";
-import { Task, TaskWithProperties } from "../types/task";
-import { PropertyConfig } from "../types/property";
-import { Column } from "../types/kanban";
+import { generateColumns } from "../../utils/kanbanUtils";
+import { Task, TaskWithProperties } from "../../types/task";
+import { PropertyConfig } from "../../types/property";
+import { Column } from "../../types/kanban";
 
 interface ColumnCollapse {
   [key: string]: boolean;

@@ -5,7 +5,7 @@ describe("Kanban Page Workflow Tests", () => {
   beforeEach(() => {
     setupBaseInterceptors();
     setupInterceptors();
-    cy.visit("/kanban"); // 確保訪問正確的 Kanban 頁面
+    cy.visit("/#/kanban"); // 確保訪問正確的 Kanban 頁面
   });
 
   it("should verify the first card contains priority, epic, and project properties", () => {

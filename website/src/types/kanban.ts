@@ -6,7 +6,7 @@ export interface KanbanState {
   propertySetting: PropertyConfig[];
 }
 
-export type kanbanDataName = "tasks" | "propertySetting";
+export type kanbanDataName = "tasks" | "propertySetting" | "docs";
 
 export interface Column {
   id: string;

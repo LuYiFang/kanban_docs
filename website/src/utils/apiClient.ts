@@ -1,7 +1,9 @@
 import axios from "axios";
 
+const defaultBaseURL = "http://localhost:9000/api";
+
 const apiClient = axios.create({
-  baseURL: "http://localhost:9000/api",
+  baseURL: "",
   timeout: 5000,
 });
 
@@ -15,9 +17,11 @@ async function setApiBaseUrl() {
       apiClient.defaults.baseURL = apiUrl;
       console.log("API baseURL 設定為:", apiUrl);
     } else {
+      apiClient.defaults.baseURL = defaultBaseURL;
       console.warn("config.json 未定義 API_URL，使用預設 URL");
     }
   } catch (error) {
+    apiClient.defaults.baseURL = defaultBaseURL;
     console.error("載入 API_URL 失敗:", error);
   }
 }
