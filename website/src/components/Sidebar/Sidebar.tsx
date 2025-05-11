@@ -18,7 +18,7 @@ const Sidebar: React.FC = () => {
               <NavLink
                 to={item.path}
                 className={({ isActive }) =>
-                  `block p-2 rounded transition ${
+                  `block p-2 rounded transition text-white ${
                     isActive ? "bg-gray-700" : "hover:bg-gray-700"
                   }`
                 }

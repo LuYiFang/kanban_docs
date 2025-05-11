@@ -36,14 +36,16 @@ const EditDialog: React.FC<EditDialogProps> = ({
       onClick={handleOverlayClick}
       data-cy="edit-dialog-backdrop"
     >
-      <Editor
-        ref={editorRef}
-        taskId={taskId}
-        dataName={dataName}
-        propertyOrder={propertyOrder}
-        readOnly={readOnly}
-        deleteTaskCallback={onClose}
-      />
+      <div className="w-3/4 max-h-[90vh]">
+        <Editor
+          ref={editorRef}
+          taskId={taskId}
+          dataName={dataName}
+          propertyOrder={propertyOrder}
+          readOnly={readOnly}
+          deleteTaskCallback={onClose}
+        />
+      </div>
     </div>
   );
 };

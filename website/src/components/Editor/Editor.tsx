@@ -89,7 +89,7 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
 
     return (
       <div
-        className=" bg-gray-900 p-6 rounded shadow-lg w-3/4 max-h-[90vh] flex flex-col space-y-4 relative overflow-auto"
+        className=" bg-gray-900 p-6 rounded shadow-lg w-full h-full flex flex-col space-y-4 relative overflow-auto"
         onClick={(e) => e.stopPropagation()}
         data-cy="edit-dialog"
       >

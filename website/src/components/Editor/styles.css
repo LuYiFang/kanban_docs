@@ -2,9 +2,10 @@
 @import url('../../../node_modules/@radix-ui/colors/mauve-dark.css');
 
 .dark-theme {
-    --basePageBg: theme('colors.gray.900');
+    --basePageBg: theme('colors.gray.700');
     --baseBg: theme('colors.gray.700');
     --baseBgActive: theme('colors.gray.500');
+    background-color: theme('colors.gray.800');
 
     --admonitionTipBg: theme('colors.sky.900');
     --admonitionInfoBg: theme('colors.emerald.900');
@@ -19,8 +20,13 @@
     --codeToggleBorder: theme('colors.gray.900');
 }
 
+.dark-theme.mdxeditor .mdxeditor-toolbar {
+    background-color: theme('colors.gray.950');
+    color: white;
+}
+
 .dark-theme.mdxeditor .cm-editor {
-    background-color: theme('colors.gray.800');
+    background-color: theme('colors.gray.900');
     color: white;
 }
 
@@ -30,7 +36,10 @@
 }
 
 .dark-theme.mdxeditor .cm-gutters, .dark-theme.mdxeditor .cm-activeLineGutter {
-    background-color: theme('colors.gray.600');
+    background-color: theme('colors.gray.900');
     color: white;
 }
 
+.dark-theme.mdxeditor [class*="codeMirrorWrapper"] {
+    background-color: theme('colors.gray.900');
+}
