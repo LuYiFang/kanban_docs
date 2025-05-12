@@ -89,7 +89,7 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
 
     return (
       <div
-        className=" bg-gray-900 p-6 rounded shadow-lg w-full h-full flex flex-col space-y-4 relative overflow-auto"
+        className=" bg-gray-900 p-6 rounded shadow-lg w-full max-h-[90vh] flex flex-col space-y-4 relative overflow-auto"
         onClick={(e) => e.stopPropagation()}
         data-cy="edit-dialog"
       >
@@ -190,7 +190,7 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
         </div>
         {/* Markdown Input & Preview */}
         <div
-          className="flex space-x-4 flex-1 min-h-[350px] h-full w-full relative"
+          className="flex space-x-4 flex-1 h-full w-full relative"
           data-cy="editor-content"
         >
           <MarkdownEditor

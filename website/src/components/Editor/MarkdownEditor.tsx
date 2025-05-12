@@ -30,6 +30,7 @@ import {
   MDXEditor,
   MDXEditorMethods,
   quotePlugin,
+  StrikeThroughSupSubToggles,
   tablePlugin,
   thematicBreakPlugin,
   toolbarPlugin,
@@ -104,6 +105,7 @@ const MarkdownEditor = forwardRef<MarkdownEditorMethods, MarkdownEditorProps>(
                 <UndoRedo />
                 <ListsToggle />
                 <InsertTable />
+                <StrikeThroughSupSubToggles />
                 <BoldItalicUnderlineToggles />
                 <InsertThematicBreak />
                 <InsertAdmonition />
