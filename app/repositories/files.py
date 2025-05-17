@@ -1,6 +1,6 @@
-from motor.motor_asyncio import AsyncIOMotorGridFSBucket
-from motor.core import AgnosticDatabase
 from bson import ObjectId
+from motor.core import AgnosticDatabase
+from motor.motor_asyncio import AsyncIOMotorGridFSBucket
 
 
 async def save_file(file_data: bytes, filename: str, content_type: str,
@@ -12,12 +12,20 @@ async def save_file(file_data: bytes, filename: str, content_type: str,
 
 
 async def get_file(file_id: str, db: AgnosticDatabase):
-    fs = AsyncIOMotorGridFSBucket(db)
-    file = await fs.open_download_stream(ObjectId(file_id))
-    return file
+    try:
+        fs = AsyncIOMotorGridFSBucket(db)
+        file = await fs.open_download_stream(ObjectId(file_id))
+        return file
+    except Exception as e:
+        print(f"Error retrieving file: {e}")
+        return None
 
 
 async def delete_file(file_id: str, db: AgnosticDatabase) -> bool:
-    fs = AsyncIOMotorGridFSBucket(db)
-    await fs.delete(ObjectId(file_id))
-    return True
+    try:
+        fs = AsyncIOMotorGridFSBucket(db)
+        await fs.delete(ObjectId(file_id))
+        return True
+    except Exception as e:
+        print(f"Error deleting file: {e}")
+        return False

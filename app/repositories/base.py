@@ -10,6 +10,14 @@ async def upsert_document(collection_name: str, doc_id: str,
     """
     通用的 upsert 方法，用於插入或更新文檔
     """
+
+    existing_doc = await db[collection_name].find_one({"_id": doc_id})
+
+    if existing_doc and all(
+            existing_doc.get(k) == v for k, v in updates.items()):
+        existing_doc['id'] = existing_doc['_id']
+        return existing_doc
+
     update_data = {
         "$set": updates,
         "$currentDate": {"updatedAt": True},

@@ -51,6 +51,7 @@ async def test_task_flow():
         task_id = await create_task_with_properties(async_client,
                                                     payload_create1,
                                                     properties1)
+        await no_change_update(async_client, db, task_id)
         await update_task(async_client, task_id)
 
         await varify_properties(async_client, task_id,
@@ -160,6 +161,26 @@ async def create_task_with_properties(async_client, payload_create,
     assert task_with_properties["title"] == payload_create["title"]
     assert len(task_with_properties["properties"]) == len(properties)
     return task_with_properties["id"]
+
+
+async def no_change_update(async_client, db, task_id):
+    """測試當 title 和 content 都未改變時，更新操作不會儲存任何變更"""
+    payload_no_change = {
+        "title": "Updated Task",
+        "content": "Updated task content",
+        "order": 0,
+        "type": "regular",
+    }
+    response_no_change = await async_client.put(f"/api/task/{task_id}",
+                                                json=payload_no_change)
+    assert response_no_change.status_code == 200
+    no_change_task = response_no_change.json()
+    assert no_change_task["title"] == payload_no_change["title"]
+    assert no_change_task["content"] == payload_no_change["content"]
+    # 檢查是否有更新時間戳
+    task_in_db = await db["tasks"].find_one({"_id": task_id})
+    assert no_change_task["updatedAt"] == task_in_db["updatedAt"].isoformat()+'+00:00', \
+        "Task should not be updated if title and content are unchanged"
 
 
 async def update_task(async_client, task_id):
