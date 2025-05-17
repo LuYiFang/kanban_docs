@@ -69,7 +69,7 @@ async def get_tasks_with_properties_repo(task_type: TaskType,
         },
     ]
 
-    if task_type == "weekly":
+    if task_type == TaskType.weekly:
         now = datetime.utcnow().replace(hour=0, minute=0, second=0,
                                         microsecond=0, tzinfo=timezone.utc)
         start_of_week = now - timedelta(days=now.weekday())
@@ -82,6 +82,19 @@ async def get_tasks_with_properties_repo(task_type: TaskType,
                     "$gte": start_of_week,
                     "$lt": end_of_week
                 }
+            }
+        })
+
+    if task_type == TaskType.docs:
+        pipeline.append({
+            "$match": {
+                "type": TaskType.docs
+            }
+        })
+    else:
+        pipeline.append({
+            "$match": {
+                "type": TaskType.regular
             }
         })
 

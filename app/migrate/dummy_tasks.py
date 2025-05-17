@@ -22,6 +22,16 @@ dummy_option_info.extend([
     {"name": "Eve", "propertyName": "assignee"},
 ])
 
+predefined_tags = [
+    "Documentation", "Bug Fix", "Feature Request",
+    "UI Improvement", "Backend Optimization",
+    "Testing", "Deployment"
+]
+
+dummy_option_info.extend([
+    {"name": tag, "propertyName": "tags"} for tag in predefined_tags
+])
+
 task_data = [
     ("Prepare weekly report", "Summarize project progress for this week.",
      TaskType.weekly),
@@ -76,7 +86,7 @@ async def insert_tasks(db):
 
 
 async def insert_task_properties(db, tasks, options):
-    """插入 Task Properties"""
+    """Insert Task Properties"""
 
     property_configs = await db.property_configs.find({}).to_list(None)
     property_id_name_map = {config["_id"]: config["name"] for config in
@@ -86,29 +96,25 @@ async def insert_task_properties(db, tasks, options):
 
     property_groups = {}
 
-    # 取得所有可能的屬性值
+    # Get all possible property values
     for property_config in default_property_config_info:
         property_name = property_config["name"]
         property_type = property_config["type"]
 
-        # 取得所有可能的屬性值
-        if property_type == "select":
+        if property_type in ("select", "multi_select"):
             options = [
                 option["_id"] for option in property_options
                 if
                 property_id_name_map.get(option["propertyId"]) == property_name
             ]
-            # 避免同 level 都是一樣的 project
             if property_name == "project":
                 options.append(options[0])
             if property_name in ("project", "assignee"):
                 options.append("")
             property_groups[property_name] = options
         elif property_type == "date":
-            # 對於日期類型，這裡可以選擇不分組，或是給一個預設值
             property_groups[property_name] = []
         else:
-            # 其他類型的處理
             property_groups[property_name] = []
 
     task_property_collection = db.task_properties
@@ -116,11 +122,20 @@ async def insert_task_properties(db, tasks, options):
     for i, task in enumerate(tasks):
         for j, (property_name, property_options) in enumerate(
                 property_groups.items()):
-            # 取得所有可能值
-            assigned_value = ''
-            if property_options:
+            # Only include "tags" for tasks with type "docs"
+            if property_name == "tags" and task["type"] != "docs":
+                continue
+
+            assigned_value = ""
+            if property_name != "tags" and property_options:
+                assigned_value = property_options[(i + j) % len(property_options)]
+
+            elif property_name == "tags":
+                # Assign 1-5 tags based on loop index
+                start_index = i % len(predefined_tags)
+                num_tags = (i % 5) + 1
                 assigned_value = property_options[
-                    (i + j) % len(property_options)]
+                                 start_index:start_index + num_tags]
 
             property_id = str(uuid.uuid4())
             prop_updated_at = task["updatedAt"] + timedelta(days=(i % 6) + 1)

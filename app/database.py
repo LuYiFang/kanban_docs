@@ -13,7 +13,8 @@ default_property_types_names = [
     {"name": "select"},
     {"name": "member"},
     {"name": "date"},
-    {"name": "read_only"}
+    {"name": "read_only"},
+    {"name": "multi_select"}
 ]
 
 """插入屬性配置"""
@@ -26,6 +27,7 @@ default_property_config_info = [
     {"name": "finishedAt", "type": "date"},
     {"name": "project", "type": "select"},
     {"name": "epic", "type": "select"},
+    {"name": "tags", "type": "multi_select"},
 ]
 
 """插入選項"""

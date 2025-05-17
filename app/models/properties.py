@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Union
 
 from pydantic import BaseModel, Field
 
@@ -8,8 +8,8 @@ from models.base import BaseResponse, BaseISODate, BaseCreate
 class TaskPropertyBase(BaseModel):
     name: str = Field(..., min_length=0, max_length=100,
                       description="Property name", example="location")
-    value: str = Field(..., min_length=0, description="property value",
-                       example="Taipei")
+    value: Union[str, List[str]] = Field(..., description="Property value",
+                                         example=["Option1", "Option2"])
 
 
 class TaskPropertyCreate(TaskPropertyBase):
