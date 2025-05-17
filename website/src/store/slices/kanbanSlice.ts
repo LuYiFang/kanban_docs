@@ -30,6 +30,7 @@ const kanbanSlice = createSlice({
         const tasks = action.payload;
         const timeName = ["createdAt", "updatedAt"];
         const regularTasks: TaskWithProperties[] = [];
+        const docsTasks: TaskWithProperties[] = [];
 
         _.each(tasks, (task) => {
           _.each(timeName, (tn) => {
@@ -42,10 +43,15 @@ const kanbanSlice = createSlice({
             });
           });
 
-          regularTasks.push(task);
+          if (task.type === "docs") {
+            docsTasks.push(task);
+          } else {
+            regularTasks.push(task);
+          }
         });
 
         state.tasks = regularTasks;
+        state.docs = docsTasks;
       })
       .addCase(createTaskWithDefaultProperties.fulfilled, (state, action) => {
         const task = action.payload;
