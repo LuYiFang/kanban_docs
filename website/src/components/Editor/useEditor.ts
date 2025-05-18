@@ -73,7 +73,7 @@ export const useEditor = (
   );
 
   const handlePropertyChange = useCallback(
-    (property: string, value: string) => {
+    (property: string, value: string | string[]) => {
       if (readOnly) return;
 
       const propertyId = propertyMap[property.toLowerCase()]?.id;

@@ -1,13 +1,10 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../store/store";
-import { PropertyOption } from "../../types/property";
+import {
+  InteractiveSelectPropertyConfig,
+  PropertyOption,
+} from "../../types/property";
 import { formatToCapitalCase } from "../../utils/tools";
 import { createPropertyOption } from "../../store/slices/kanbanThuck";
 import { TaskWithProperties } from "../../types/task";
@@ -24,7 +21,7 @@ const InteractiveSelect: React.FC<{
   onChange: (value: string) => void;
 }> = ({ taskId, propertyName, dataName, onChange, readOnly }) => {
   const dispatch = useDispatch<AppDispatch>();
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const propertySetting = useSelector(
     (state: RootState) => state.kanban.propertySetting,
@@ -33,7 +30,7 @@ const InteractiveSelect: React.FC<{
     (state: RootState) => state.kanban[dataName] as TaskWithProperties[],
   );
 
-  const propertyConfig = useMemo(() => {
+  const propertyConfig: InteractiveSelectPropertyConfig = useMemo(() => {
     const _propertyConfig = _.cloneDeep(
       propertySetting.find((prop) => prop.name === propertyName),
     ) || { id: "", options: [] };
@@ -51,7 +48,7 @@ const InteractiveSelect: React.FC<{
         statusEpicId,
       );
     }
-    return _propertyConfig;
+    return _propertyConfig as InteractiveSelectPropertyConfig;
   }, [propertySetting, propertyName, tasks, taskId]);
 
   const taskProperty = useSelector((state: RootState) => {
@@ -67,130 +64,40 @@ const InteractiveSelect: React.FC<{
     );
   });
 
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [inputValue, setInputValue] = useState("");
-  const [filteredOptions, setFilteredOptions] = useState<PropertyOption[]>([]);
-
-  useEffect(() => {
-    if (!propertyConfig.options) {
-      setInputValue(taskProperty.value);
+  const handleSelectChange = (values: string | PropertyOption[]) => {
+    if (_.isArray(values)) {
       return;
     }
-
-    setInputValue(
-      propertyConfig.options.find((op) => op.id === taskProperty.value)?.name ||
-        "",
-    );
-  }, [propertyConfig]);
-
-  useEffect(() => {
-    setFilteredOptions(propertyConfig?.options || []);
-  }, [propertyName, taskId, propertyConfig]);
-
-  // 展開選單
-  const handleExpand = useCallback(() => {
-    setIsExpanded(true);
-    setFilteredOptions(propertyConfig?.options || []);
-  }, [propertyName, taskId, propertyConfig]);
-
-  // 輸入框變更
-  const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      setInputValue(value);
-      setFilteredOptions(
-        (propertyConfig?.options || []).filter((option) =>
-          option.name.toLowerCase().includes(value.toLowerCase()),
-        ),
-      );
-    },
-    [propertyName, taskId, propertyConfig],
-  );
-
-  // 新增選項
-  const handleKeyDown = useCallback(
-    async (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Enter" && inputValue.trim()) {
-        e.preventDefault();
-        const newOptionName = inputValue.trim();
-
-        if (
-          (propertyConfig?.options || []).some(
-            (option) =>
-              option.name.toLowerCase() === newOptionName.toLowerCase(),
-          )
-        ) {
-          setIsExpanded(false);
-          return;
-        }
-
-        try {
-          const newOption: PropertyOption = await dispatch(
-            createPropertyOption({
-              propertyId: propertyConfig.id,
-              name: newOptionName,
-            }),
-          ).unwrap();
-
-          setFilteredOptions((prev) => [...prev, newOption]);
-          handleSelectOption(newOption);
-        } catch (error) {
-          console.error("Failed to create property option:", error);
-        }
-      }
-    },
-    [dispatch, inputValue, propertyConfig],
-  );
-
-  // 選擇選項
-  const handleSelectOption = useCallback(
-    (option: PropertyOption) => {
-      setInputValue(option.name);
-      setIsExpanded(false);
-      onChange(option.id);
-    },
-    [onChange],
-  );
-
-  // 點擊外部關閉選單
-  const handleClickOutside = useCallback((event: MouseEvent) => {
-    if (
-      dropdownRef.current &&
-      !dropdownRef.current.contains(event.target as Node)
-    ) {
-      setIsExpanded(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isExpanded) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isExpanded, handleClickOutside]);
+    onChange(values);
+  };
 
   return (
-    <div className="relative w-64" ref={dropdownRef}>
+    <div className="relative w-64">
       <button
         className="w-full text-sm p-2 border border-gray-700 bg-gray-800 text-gray-300 rounded"
-        onClick={handleExpand}
+        onClick={() => setIsExpanded(true)}
         data-cy="property-select-input"
         disabled={readOnly}
       >
-        {formatToCapitalCase(inputValue) || "Select an option"}
+        {formatToCapitalCase(
+          propertyConfig.options.find((op) => op.id === taskProperty.value)
+            ?.name || "",
+        ) || "Select an option"}
       </button>
 
-      {isExpanded && (
-        <DropdownMenu
-          inputValue={inputValue}
-          filteredOptions={filteredOptions}
-          onInputChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          onSelectOption={handleSelectOption}
-        />
-      )}
+      <DropdownMenu
+        propertyConfig={propertyConfig}
+        selectedOptions={taskProperty.value}
+        readOnly={readOnly}
+        isExpanded={isExpanded}
+        setIsExpanded={setIsExpanded}
+        onChange={handleSelectChange}
+        onCreateOption={(name) =>
+          dispatch(
+            createPropertyOption({ propertyId: propertyConfig.id, name }),
+          ).unwrap()
+        }
+      />
     </div>
   );
 };

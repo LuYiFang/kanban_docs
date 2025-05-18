@@ -227,13 +227,24 @@ const DocsPage: React.FC = () => {
         rowHeight={30}
         isResizable={true}
         isDraggable={true}
+        onDragStart={() => console.log("Drag started")}
+        draggableHandle={".draggable-handle"}
       >
         {pinnedDocs.map((docId) => {
           const doc = documents.find((doc) => doc.id === docId);
           if (!doc) return null;
 
           return (
-            <div key={doc.id.toString()}>
+            <div key={doc.id.toString()} className="relative">
+              {/* Top draggable handle */}
+              <div className="absolute top-0 left-0 right-0 h-8 draggable-handle"></div>
+              {/* Bottom draggable handle */}
+              <div className="absolute bottom-0 left-0 right-0 h-8 draggable-handle"></div>
+              {/* Left draggable handle */}
+              <div className="absolute top-0 bottom-0 left-0 w-8 draggable-handle"></div>
+              {/* Right draggable handle */}
+              <div className="absolute top-0 bottom-0 right-0 w-6 draggable-handle"></div>
+
               <button
                 className="z-20 absolute top-0.5 right-6 ml-2 w-5 h-5 p-0 flex items-center justify-center rounded-full text-gray-100 hover:bg-gray-300 hover:bg-opacity-80 text-[10px]"
                 onClick={() => {

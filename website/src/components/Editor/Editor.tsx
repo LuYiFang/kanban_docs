@@ -138,7 +138,7 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
               const title = formatToCapitalCase(key) || "";
               const value = propertyMap[key]?.value || "";
               const propertyType = propertyConfigMap[key]?.type || "";
-              const onChange = (newValue: string) =>
+              const onChange = (newValue: string | string[]) =>
                 handlePropertyChange(key, newValue);
 
               return (
@@ -170,7 +170,7 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
                         taskId={taskId}
                         propertyName={key}
                         dataName={dataName}
-                        onChange={(values) => onChange(values.join(","))}
+                        onChange={(values) => onChange(values)}
                         readOnly={readOnly}
                       />
                     )}

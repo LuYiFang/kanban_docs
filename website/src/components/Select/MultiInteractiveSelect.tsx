@@ -1,13 +1,11 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../store/store";
-import { assignProjectColor, PropertyOption } from "../../types/property";
+import {
+  assignProjectColor,
+  InteractiveSelectPropertyConfig,
+  PropertyOption,
+} from "../../types/property";
 import { createPropertyOption } from "../../store/slices/kanbanThuck";
 import _ from "lodash";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -24,17 +22,19 @@ const MultiInteractiveSelect: React.FC<{
   onChange: (values: string[]) => void;
 }> = ({ taskId, propertyName, dataName, onChange, readOnly }) => {
   const dispatch = useDispatch<AppDispatch>();
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const propertySetting = useSelector(
     (state: RootState) => state.kanban.propertySetting,
   );
 
-  const propertyConfig = useMemo(() => {
+  const propertyConfig: InteractiveSelectPropertyConfig = useMemo(() => {
     return (
-      _.cloneDeep(
+      (_.cloneDeep(
         propertySetting.find((prop) => prop.name === propertyName),
-      ) || { id: "", options: [] }
+      ) as InteractiveSelectPropertyConfig) || {
+        id: "",
+        options: [],
+      }
     );
   }, [propertySetting, propertyName]);
 
@@ -54,10 +54,8 @@ const MultiInteractiveSelect: React.FC<{
     );
   });
 
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [inputValue, setInputValue] = useState("");
-  const [filteredOptions, setFilteredOptions] = useState<PropertyOption[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<PropertyOption[]>([]);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     if (!propertyConfig.options) {
@@ -82,105 +80,16 @@ const MultiInteractiveSelect: React.FC<{
     setSelectedOptions(selected);
   }, [propertyConfig, taskProperty]);
 
-  useEffect(() => {
-    setFilteredOptions(propertyConfig?.options || []);
-  }, [propertyConfig]);
-
-  const handleExpand = useCallback(() => {
-    setIsExpanded(true);
-    setFilteredOptions(propertyConfig?.options || []);
-  }, [propertyConfig]);
-
-  const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      setInputValue(value);
-      setFilteredOptions(
-        (propertyConfig?.options || []).filter((option) =>
-          option.name.toLowerCase().includes(value.toLowerCase()),
-        ),
-      );
-    },
-    [propertyConfig],
-  );
-
-  const handleKeyDown = useCallback(
-    async (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Enter" && inputValue.trim()) {
-        e.preventDefault();
-        const newOptionName = inputValue.trim();
-
-        if (
-          (propertyConfig?.options || []).some(
-            (option) =>
-              option.name.toLowerCase() === newOptionName.toLowerCase(),
-          )
-        ) {
-          setIsExpanded(false);
-          return;
-        }
-
-        try {
-          const newOption: PropertyOption = await dispatch(
-            createPropertyOption({
-              propertyId: propertyConfig.id,
-              name: newOptionName,
-            }),
-          ).unwrap();
-
-          setFilteredOptions((prev) => [...prev, newOption]);
-          handleSelectOption(newOption);
-        } catch (error) {
-          console.error("Failed to create property option:", error);
-        }
-      }
-    },
-    [dispatch, inputValue, propertyConfig],
-  );
-
-  const handleSelectOption = useCallback(
-    (option: PropertyOption) => {
-      if (selectedOptions.some((selected) => selected.id === option.id)) {
-        return;
-      }
-      const newSelectedOptions = [...selectedOptions, option];
-      setSelectedOptions(newSelectedOptions);
-      onChange(newSelectedOptions.map((opt) => opt.id));
-    },
-    [selectedOptions, onChange],
-  );
-
-  const handleRemoveOption = useCallback(
-    (optionId: string) => {
-      const newSelectedOptions = selectedOptions.filter(
-        (option) => option.id !== optionId,
-      );
-      setSelectedOptions(newSelectedOptions);
-      onChange(newSelectedOptions.map((opt) => opt.id));
-    },
-    [selectedOptions, onChange],
-  );
-
-  const handleClickOutside = useCallback((event: MouseEvent) => {
-    if (
-      dropdownRef.current &&
-      !dropdownRef.current.contains(event.target as Node)
-    ) {
-      setIsExpanded(false);
+  const handleSelectChange = (values: string | PropertyOption[]) => {
+    if (typeof values === "string") {
+      return;
     }
-  }, []);
-
-  useEffect(() => {
-    if (isExpanded) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isExpanded, handleClickOutside]);
+    setSelectedOptions(values);
+    onChange(_.map(values, "id"));
+  };
 
   return (
-    <div className="relative w-full" ref={dropdownRef}>
+    <div className="relative w-full">
       <div className="w-full text-sm p-2 border border-gray-700 bg-gray-800 text-gray-300 rounded flex flex-wrap gap-2">
         {selectedOptions.map((option) => {
           const color = assignProjectColor(option.name);
@@ -192,7 +101,13 @@ const MultiInteractiveSelect: React.FC<{
               {option.name}
               {!readOnly && (
                 <button
-                  onClick={() => handleRemoveOption(option.id)}
+                  onClick={() =>
+                    onChange(
+                      selectedOptions
+                        .filter((opt) => opt.id !== option.id)
+                        .map((opt) => opt.id),
+                    )
+                  }
                   className={`ml-2 w-5 h-5 p-0 flex items-center justify-center rounded-full ${color} text-gray-100 hover:bg-gray-300 hover:bg-opacity-80 text-[10px]`}
                 >
                   <FontAwesomeIcon icon={faTimes} />
@@ -204,7 +119,9 @@ const MultiInteractiveSelect: React.FC<{
         {!readOnly && (
           <button
             className="my-auto w-7 h-7 p-0 flex items-center text-[12px] justify-center rounded-full bg-gray-600 bg-opacity-90 text-gray-100 hover:bg-gray-300 hover:bg-opacity-80"
-            onClick={handleExpand}
+            onClick={() => {
+              setIsExpanded(true);
+            }}
             disabled={readOnly}
           >
             <FontAwesomeIcon icon={faPlus} />
@@ -212,15 +129,19 @@ const MultiInteractiveSelect: React.FC<{
         )}
       </div>
 
-      {isExpanded && (
-        <DropdownMenu
-          inputValue={inputValue}
-          filteredOptions={filteredOptions}
-          onInputChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          onSelectOption={handleSelectOption}
-        />
-      )}
+      <DropdownMenu
+        propertyConfig={propertyConfig}
+        selectedOptions={selectedOptions}
+        readOnly={readOnly}
+        isExpanded={isExpanded}
+        setIsExpanded={setIsExpanded}
+        onChange={handleSelectChange}
+        onCreateOption={(name) =>
+          dispatch(
+            createPropertyOption({ propertyId: propertyConfig.id, name }),
+          ).unwrap()
+        }
+      />
     </div>
   );
 };

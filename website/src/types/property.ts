@@ -13,6 +13,11 @@ export interface PropertyConfig {
   defaultValue?: string;
 }
 
+export interface InteractiveSelectPropertyConfig {
+  id: string;
+  options: PropertyOption[];
+}
+
 export interface Property {
   id: string;
   name: string;
