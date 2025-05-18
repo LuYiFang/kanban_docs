@@ -101,13 +101,13 @@ const MultiInteractiveSelect: React.FC<{
               {option.name}
               {!readOnly && (
                 <button
-                  onClick={() =>
-                    onChange(
-                      selectedOptions
-                        .filter((opt) => opt.id !== option.id)
-                        .map((opt) => opt.id),
-                    )
-                  }
+                  onClick={() => {
+                    const filteredSelectedOptions = selectedOptions.filter(
+                      (opt) => opt.id !== option.id,
+                    );
+                    onChange(filteredSelectedOptions.map((opt) => opt.id));
+                    setSelectedOptions(filteredSelectedOptions);
+                  }}
                   className={`ml-2 w-5 h-5 p-0 flex items-center justify-center rounded-full ${color} text-gray-100 hover:bg-gray-300 hover:bg-opacity-80 text-[10px]`}
                 >
                   <FontAwesomeIcon icon={faTimes} />

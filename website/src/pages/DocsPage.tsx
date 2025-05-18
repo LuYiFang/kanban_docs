@@ -136,6 +136,10 @@ const DocsPage: React.FC = () => {
     filteredSearch();
   };
 
+  const UnpinnedDocs = (docId: string) => {
+    setPinnedDocs(pinnedDocs.filter((id) => id !== docId));
+  };
+
   return (
     <div className="p-4 bg-gray-900 text-gray-300 h-full relative  flex flex-col">
       <h1 className="text-2xl font-bold mb-4">Documents</h1>
@@ -235,7 +239,7 @@ const DocsPage: React.FC = () => {
           if (!doc) return null;
 
           return (
-            <div key={doc.id.toString()} className="relative">
+            <div key={doc.id} className="relative">
               {/* Top draggable handle */}
               <div className="absolute top-0 left-0 right-0 h-8 draggable-handle"></div>
               {/* Bottom draggable handle */}
@@ -247,10 +251,7 @@ const DocsPage: React.FC = () => {
 
               <button
                 className="z-20 absolute top-0.5 right-6 ml-2 w-5 h-5 p-0 flex items-center justify-center rounded-full text-gray-100 hover:bg-gray-300 hover:bg-opacity-80 text-[10px]"
-                onClick={() => {
-                  setSearchTerm("");
-                  setShowDropdown(false);
-                }}
+                onClick={() => UnpinnedDocs(doc.id)}
               >
                 <FontAwesomeIcon icon={faTimes} />
               </button>
