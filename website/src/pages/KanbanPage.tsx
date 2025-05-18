@@ -52,7 +52,13 @@ const KanbanPage: React.FC = () => {
         propertyOrder={taskPropertyOrder}
         readOnly={false}
         taskSortProperty="order"
-        cardVisibleProperties={["project", "epic", "priority", "assignee"]}
+        cardVisibleProperties={[
+          "title",
+          "project",
+          "epic",
+          "priority",
+          "assignee",
+        ]}
       />
     </div>
   );

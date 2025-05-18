@@ -13,6 +13,7 @@ import { faEllipsisH, faUser } from "@fortawesome/free-solid-svg-icons";
 import _ from "lodash";
 import { RootState } from "../../store/store";
 import InteractiveSelect from "../Select/InteractiveSelect";
+import MultiInteractiveSelect from "../Select/MultiInteractiveSelect";
 import { formatToCapitalCase } from "../../utils/tools";
 import { PropertyConfig as PropertyConfigType } from "../../types/property";
 import { kanbanDataName } from "../../types/kanban";
@@ -89,7 +90,7 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
 
     return (
       <div
-        className=" bg-gray-900 p-6 rounded shadow-lg w-full max-h-[90vh] flex flex-col space-y-4 relative overflow-auto"
+        className=" bg-gray-900 p-6 rounded shadow-lg w-full h-full  flex flex-col space-y-4 relative overflow-auto"
         onClick={(e) => e.stopPropagation()}
         data-cy="edit-dialog"
       >
@@ -161,6 +162,15 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
                         propertyName={key}
                         dataName={dataName}
                         onChange={onChange}
+                        readOnly={readOnly}
+                      />
+                    )}
+                    {propertyType === "multi_select" && (
+                      <MultiInteractiveSelect
+                        taskId={taskId}
+                        propertyName={key}
+                        dataName={dataName}
+                        onChange={(values) => onChange(values.join(","))}
                         readOnly={readOnly}
                       />
                     )}

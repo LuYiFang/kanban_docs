@@ -7,21 +7,21 @@ import React, {
 } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../store/store";
-import { PropertyOption } from "../../types/property";
-import { formatToCapitalCase } from "../../utils/tools";
+import { assignProjectColor, PropertyOption } from "../../types/property";
 import { createPropertyOption } from "../../store/slices/kanbanThuck";
-import { TaskWithProperties } from "../../types/task";
-import { kanbanDataName } from "../../types/kanban";
 import _ from "lodash";
-import { getOtherTasks } from "../../utils/kanbanUtils";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus, faTimes } from "@fortawesome/free-solid-svg-icons";
 import DropdownMenu from "./DropdownMenu";
+import { kanbanDataName } from "../../types/kanban";
+import { TaskWithProperties } from "../../types/task";
 
-const InteractiveSelect: React.FC<{
+const MultiInteractiveSelect: React.FC<{
   taskId: string;
   propertyName: string;
   readOnly: boolean;
   dataName: kanbanDataName;
-  onChange: (value: string) => void;
+  onChange: (values: string[]) => void;
 }> = ({ taskId, propertyName, dataName, onChange, readOnly }) => {
   const dispatch = useDispatch<AppDispatch>();
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -29,40 +29,27 @@ const InteractiveSelect: React.FC<{
   const propertySetting = useSelector(
     (state: RootState) => state.kanban.propertySetting,
   );
-  const tasks = useSelector(
-    (state: RootState) => state.kanban[dataName] as TaskWithProperties[],
-  );
 
   const propertyConfig = useMemo(() => {
-    const _propertyConfig = _.cloneDeep(
-      propertySetting.find((prop) => prop.name === propertyName),
-    ) || { id: "", options: [] };
-
-    if (propertyName === "epic") {
-      const statusEpicId =
-        propertySetting
-          .find((prop) => prop.name === "status")
-          ?.options?.find((op) => op.name === "Epic")?.id || "";
-      const _tasks = tasks as TaskWithProperties[];
-      _propertyConfig.options = getOtherTasks(
-        _tasks,
-        taskId,
-        _propertyConfig.id,
-        statusEpicId,
-      );
-    }
-    return _propertyConfig;
-  }, [propertySetting, propertyName, tasks, taskId]);
+    return (
+      _.cloneDeep(
+        propertySetting.find((prop) => prop.name === propertyName),
+      ) || { id: "", options: [] }
+    );
+  }, [propertySetting, propertyName]);
 
   const taskProperty = useSelector((state: RootState) => {
-    const task = (state.kanban[dataName] as TaskWithProperties[]).find(
-      (task) => task.id === taskId,
-    );
+    const tasks = state.kanban[dataName] as TaskWithProperties[];
+    if (!Array.isArray(tasks) || !tasks.length) {
+      return { id: "", name: propertyName, value: [] };
+    }
+
+    const task = tasks.find((task) => task.id === taskId);
     return (
       task?.properties.find((prop) => prop.name === propertyName) || {
         id: "",
         name: propertyName,
-        value: "",
+        value: [],
       }
     );
   });
@@ -70,30 +57,40 @@ const InteractiveSelect: React.FC<{
   const [isExpanded, setIsExpanded] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [filteredOptions, setFilteredOptions] = useState<PropertyOption[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<PropertyOption[]>([]);
 
   useEffect(() => {
     if (!propertyConfig.options) {
-      setInputValue(taskProperty.value);
+      setSelectedOptions([]);
+      return;
+    }
+    if (!Array.isArray(taskProperty.value)) {
       return;
     }
 
-    setInputValue(
-      propertyConfig.options.find((op) => op.id === taskProperty.value)?.name ||
-        "",
-    );
-  }, [propertyConfig]);
+    const selected = taskProperty.value
+      .map((id: string) => {
+        if (!propertyConfig.options) return null;
+
+        const option = propertyConfig.options.find((op) => op.id === id);
+        if (!option) {
+          return null;
+        }
+        return option;
+      })
+      .filter(Boolean) as PropertyOption[];
+    setSelectedOptions(selected);
+  }, [propertyConfig, taskProperty]);
 
   useEffect(() => {
     setFilteredOptions(propertyConfig?.options || []);
-  }, [propertyName, taskId, propertyConfig]);
+  }, [propertyConfig]);
 
-  // 展開選單
   const handleExpand = useCallback(() => {
     setIsExpanded(true);
     setFilteredOptions(propertyConfig?.options || []);
-  }, [propertyName, taskId, propertyConfig]);
+  }, [propertyConfig]);
 
-  // 輸入框變更
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
@@ -104,10 +101,9 @@ const InteractiveSelect: React.FC<{
         ),
       );
     },
-    [propertyName, taskId, propertyConfig],
+    [propertyConfig],
   );
 
-  // 新增選項
   const handleKeyDown = useCallback(
     async (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter" && inputValue.trim()) {
@@ -142,17 +138,29 @@ const InteractiveSelect: React.FC<{
     [dispatch, inputValue, propertyConfig],
   );
 
-  // 選擇選項
   const handleSelectOption = useCallback(
     (option: PropertyOption) => {
-      setInputValue(option.name);
-      setIsExpanded(false);
-      onChange(option.id);
+      if (selectedOptions.some((selected) => selected.id === option.id)) {
+        return;
+      }
+      const newSelectedOptions = [...selectedOptions, option];
+      setSelectedOptions(newSelectedOptions);
+      onChange(newSelectedOptions.map((opt) => opt.id));
     },
-    [onChange],
+    [selectedOptions, onChange],
   );
 
-  // 點擊外部關閉選單
+  const handleRemoveOption = useCallback(
+    (optionId: string) => {
+      const newSelectedOptions = selectedOptions.filter(
+        (option) => option.id !== optionId,
+      );
+      setSelectedOptions(newSelectedOptions);
+      onChange(newSelectedOptions.map((opt) => opt.id));
+    },
+    [selectedOptions, onChange],
+  );
+
   const handleClickOutside = useCallback((event: MouseEvent) => {
     if (
       dropdownRef.current &&
@@ -172,15 +180,37 @@ const InteractiveSelect: React.FC<{
   }, [isExpanded, handleClickOutside]);
 
   return (
-    <div className="relative w-64" ref={dropdownRef}>
-      <button
-        className="w-full text-sm p-2 border border-gray-700 bg-gray-800 text-gray-300 rounded"
-        onClick={handleExpand}
-        data-cy="property-select-input"
-        disabled={readOnly}
-      >
-        {formatToCapitalCase(inputValue) || "Select an option"}
-      </button>
+    <div className="relative w-full" ref={dropdownRef}>
+      <div className="w-full text-sm p-2 border border-gray-700 bg-gray-800 text-gray-300 rounded flex flex-wrap gap-2">
+        {selectedOptions.map((option) => {
+          const color = assignProjectColor(option.name);
+          return (
+            <div
+              key={option.id}
+              className={`px-2 py-1 text-xs w-[fit-content] font-semibold flex items-center rounded ${color}`}
+            >
+              {option.name}
+              {!readOnly && (
+                <button
+                  onClick={() => handleRemoveOption(option.id)}
+                  className={`ml-2 w-5 h-5 p-0 flex items-center justify-center rounded-full ${color} text-gray-100 hover:bg-gray-300 hover:bg-opacity-80 text-[10px]`}
+                >
+                  <FontAwesomeIcon icon={faTimes} />
+                </button>
+              )}
+            </div>
+          );
+        })}
+        {!readOnly && (
+          <button
+            className="my-auto w-7 h-7 p-0 flex items-center text-[12px] justify-center rounded-full bg-gray-600 bg-opacity-90 text-gray-100 hover:bg-gray-300 hover:bg-opacity-80"
+            onClick={handleExpand}
+            disabled={readOnly}
+          >
+            <FontAwesomeIcon icon={faPlus} />
+          </button>
+        )}
+      </div>
 
       {isExpanded && (
         <DropdownMenu
@@ -195,4 +225,4 @@ const InteractiveSelect: React.FC<{
   );
 };
 
-export default InteractiveSelect;
+export default MultiInteractiveSelect;

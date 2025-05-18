@@ -7,17 +7,19 @@ import {
   statusColors,
 } from "../../types/property";
 import { convertToKebabCase } from "../../utils/tools";
+import Editor from "../Editor/Editor";
 
-// 新增 Chip 組件
 export const Chip: React.FC<{
   color: string;
   propertyName: string;
   propertyValue: string;
-}> = ({ color, propertyName, propertyValue }) => {
+  onClick?: (() => void) | null;
+}> = ({ color, propertyName, propertyValue, onClick = null }) => {
   return (
     <div
-      className={`px-2 py-1 text-xs w-[fit-content] font-semibold rounded ${color}`}
+      className={`px-2 py-1 text-xs w-[fit-content] font-semibold rounded ${color} ${onClick ? "cursor-pointer" : "cursor-default"}`}
       data-cy={`kanban-task-${propertyName}`}
+      onClick={onClick || undefined}
     >
       {propertyValue}
     </div>
@@ -27,7 +29,8 @@ export const Chip: React.FC<{
 export const MultiChipLabel: React.FC<{
   propertyName: string;
   propertyValues: string[];
-}> = ({ propertyName, propertyValues }) => {
+  onClick?: (value: string) => void | null;
+}> = ({ propertyName, propertyValues, onClick = null }) => {
   return (
     <div className="flex flex-wrap gap-2 mt-2">
       {propertyValues.map((value, index) => {
@@ -38,6 +41,7 @@ export const MultiChipLabel: React.FC<{
             color={color}
             propertyName={propertyName}
             propertyValue={value}
+            onClick={onClick ? () => onClick(value) : null}
           />
         );
       })}
@@ -123,14 +127,20 @@ export const TextLabel: React.FC<{
 
 export const ContentLabel: React.FC<{
   propertyName: string;
-  content: string;
-}> = ({ propertyName, content }) => {
+  readonly: boolean;
+  taskId: string;
+}> = ({ propertyName, readonly, taskId }) => {
   return (
     <div
-      className="mt-2 text-gray-300 text-sm"
+      className="mt-2 text-gray-300 text-sm flex-grow"
       data-cy={`kanban-task-${propertyName}`}
     >
-      {content}
+      <Editor
+        taskId={taskId}
+        dataName="docs"
+        propertyOrder={["tags"]}
+        readOnly={readonly}
+      />
     </div>
   );
 };

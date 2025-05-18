@@ -7,30 +7,39 @@ import {
   PersonLabel,
   SummaryLabel,
   TextLabel,
-} from "./Labels";
+} from "../Label/Labels";
 import _ from "lodash";
 
 interface KanbanCardContentProps {
   task: TaskWithProperties;
   cardVisibleProperties: string[];
   propertyOptionsIdNameMap: Record<string, string>;
+  readonly: boolean;
 }
 
 const Card: React.FC<KanbanCardContentProps> = ({
   task,
   cardVisibleProperties,
   propertyOptionsIdNameMap,
+  readonly = false,
 }) => {
   return (
     <div
-      className="p-4 mb-2 bg-gray-700 rounded shadow w-full h-full"
-      style={{ boxSizing: "border-box" }} // 確保內邊距不影響大小
+      className="p-4 mb-2 bg-gray-700 rounded shadow w-full h-full flex flex-col overflow-auto"
+      style={{ boxSizing: "border-box" }}
     >
-      <div className="font-bold text-gray-100 mb-2" data-cy="kanban-task-title">
-        {task.title}
-      </div>
-
       {cardVisibleProperties.map((propertyName) => {
+        if (propertyName === "title") {
+          return (
+            <div
+              className="font-bold text-gray-100 mb-2"
+              data-cy="kanban-task-title"
+            >
+              {task.title}
+            </div>
+          );
+        }
+
         let propertyValue;
         if (propertyName == "summary" || propertyName == "content") {
           propertyValue = task.content;
@@ -104,7 +113,8 @@ const Card: React.FC<KanbanCardContentProps> = ({
             <ContentLabel
               key={propertyName}
               propertyName={propertyName}
-              content={propertyValue as string}
+              taskId={task.id}
+              readonly={readonly}
             />
           );
         }

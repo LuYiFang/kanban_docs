@@ -28,6 +28,7 @@ const WeeklyReportPage: React.FC = () => {
         readOnly={true}
         taskSortProperty="properties.project"
         cardVisibleProperties={[
+          "title",
           "project",
           "epic",
           "status",
