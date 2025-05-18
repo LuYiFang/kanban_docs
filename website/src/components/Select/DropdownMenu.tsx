@@ -119,15 +119,20 @@ const DropdownMenu: React.FC<{
           placeholder="Search or add an option"
           className="w-full border-b border-gray-700 p-2 bg-gray-800 text-gray-300 placeholder-gray-500 rounded-t-md"
           onFocus={handleExpand}
+          data-cy="property-select-search"
         />
       )}
       {isExpanded && (
-        <ul className="absolute top-12 left-0 w-full z-50 bg-gray-800 border border-gray-700 rounded-md shadow-md max-h-48 overflow-y-auto">
+        <ul
+          className="absolute top-12 left-0 w-full z-50 bg-gray-800 border border-gray-700 rounded-md shadow-md max-h-48 overflow-y-auto"
+          data-cy="property-select-options"
+        >
           {filteredOptions.map((option) => (
             <li
               key={option.id}
               onClick={() => handleSelectOption(option)}
               className="p-2 cursor-pointer hover:bg-gray-700 text-gray-300"
+              data-cy="property-select-option"
             >
               {option.name}
             </li>

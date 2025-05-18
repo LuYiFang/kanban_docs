@@ -6,7 +6,7 @@ export const setupBaseInterceptors = () => {
       {
         id: "task-id-1",
         createdAt: "2025-04-06T12:00:00Z",
-        updatedAt: "2025-04-02T15:30:00Z", // 上週更新
+        updatedAt: "2025-04-02T15:30:00Z",
         title: "This is default task",
         content: "default",
         order: 0,
@@ -31,7 +31,7 @@ export const setupBaseInterceptors = () => {
       {
         id: "task-id-2",
         createdAt: "2025-04-06T14:00:00Z",
-        updatedAt: "2025-05-01T15:45:00Z", // 這週更新
+        updatedAt: "2025-05-01T15:45:00Z",
         title: "Second task",
         content: "This is the second task content.",
         order: 1,
@@ -66,7 +66,7 @@ export const setupBaseInterceptors = () => {
       {
         id: "task-id-3",
         createdAt: "2025-04-06T16:00:00Z",
-        updatedAt: "2025-05-01T17:00:00Z", // 這週更新
+        updatedAt: "2025-05-01T17:00:00Z",
         title: "Third task",
         content: "This is the third task content.",
         order: 0,
@@ -258,6 +258,35 @@ export const setupBaseInterceptors = () => {
             propertyId: "property-id-assignee",
             name: "User B",
             id: "option-id-user-b",
+          },
+        ],
+      },
+      {
+        id: "property-id-tags",
+        name: "tags",
+        typeId: "property-type-id-multi-select",
+        type: "multi_select",
+        options: [
+          {
+            createdAt: "2025-04-06T12:00:00Z",
+            updatedAt: "2025-04-06T15:30:00Z",
+            propertyId: "property-id-tags",
+            name: "Tag1",
+            id: "option-id-tag1",
+          },
+          {
+            createdAt: "2025-04-06T12:00:00Z",
+            updatedAt: "2025-04-06T15:30:00Z",
+            propertyId: "property-id-tags",
+            name: "Tag2",
+            id: "option-id-tag2",
+          },
+          {
+            createdAt: "2025-04-06T12:00:00Z",
+            updatedAt: "2025-04-06T15:30:00Z",
+            propertyId: "property-id-tags",
+            name: "Tag3",
+            id: "option-id-tag3",
           },
         ],
       },

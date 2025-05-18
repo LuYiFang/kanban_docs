@@ -150,21 +150,32 @@ const DocsPage: React.FC = () => {
           value={searchTerm}
           onChange={handleSearch}
           className="p-2 w-full border rounded bg-gray-800 text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          data-cy="search-input"
         />
         {showDropdown && (
-          <div className="absolute bg-white border rounded shadow-md w-full max-h-40 overflow-y-auto z-10 mt-1">
-            {searchDocs.map((doc) => (
-              <div
-                key={doc.id}
-                className="p-2 hover:bg-gray-200 cursor-pointer"
-                onClick={() => {
-                  setSearchTerm(doc.title);
-                  setShowDropdown(false);
-                }}
-              >
-                {doc.title}
-              </div>
-            ))}
+          <div
+            className="absolute bg-gray-800 border rounded shadow-md w-full max-h-40 overflow-y-auto z-10 mt-1"
+            data-cy="search-dropdown"
+          >
+            {searchDocs.map((doc) => {
+              let alreadyPinned = false;
+              if (_.includes(pinnedDocs, doc.id)) {
+                alreadyPinned = true;
+              }
+
+              return (
+                <div
+                  key={doc.id}
+                  className={`p-2 hover:bg-gray-600 cursor-pointer ${alreadyPinned ? "bg-gray-700" : "bg-gray-800"}`}
+                  onClick={() => {
+                    setShowDropdown(false);
+                    handleSelectDoc(doc.id);
+                  }}
+                >
+                  {doc.title}
+                </div>
+              );
+            })}
             {searchDocs.length === 0 && (
               <div className="p-2 text-gray-500">No results found</div>
             )}
@@ -173,7 +184,7 @@ const DocsPage: React.FC = () => {
       </div>
       <div className="mb-6">
         <h2 className="text-lg font-semibold mb-2">Tags</h2>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2" data-cy="all-tags">
           <MultiChipLabel
             propertyName={"tags"}
             propertyValues={_.map(
@@ -194,7 +205,10 @@ const DocsPage: React.FC = () => {
       </div>
       {selectedTag && (
         <div className="mb-4">
-          <div className="bg-gray-800 p-2 rounded max-h-72 overflow-auto">
+          <div
+            className="bg-gray-800 p-2 rounded max-h-72 overflow-auto"
+            data-cy="tag-documents"
+          >
             {documentsByTag.map((doc) => {
               let alreadyPinned = false;
               if (_.includes(pinnedDocs, doc.id)) {
@@ -205,13 +219,7 @@ const DocsPage: React.FC = () => {
                 <div
                   key={doc.id}
                   className={`p-1.5 border-b border-gray-700 ${alreadyPinned ? "bg-gray-700" : "bg-gray-800"} hover:bg-gray-600 cursor-pointer`}
-                  onClick={() => {
-                    setPinnedDocs((pre) =>
-                      pre.includes(doc.id)
-                        ? pre.filter((id) => id !== doc.id)
-                        : [...pre, doc.id],
-                    );
-                  }}
+                  onClick={() => handleSelectDoc(doc.id)}
                 >
                   {doc.title}
                 </div>
@@ -239,19 +247,36 @@ const DocsPage: React.FC = () => {
           if (!doc) return null;
 
           return (
-            <div key={doc.id} className="relative">
+            <div
+              key={doc.id}
+              className="relative"
+              data-cy={`doc-card-id-${docId}`}
+            >
               {/* Top draggable handle */}
-              <div className="absolute top-0 left-0 right-0 h-8 draggable-handle"></div>
+              <div
+                className="absolute top-0 left-0 right-0 h-8 draggable-handle"
+                data-cy={"doc-drag-top"}
+              ></div>
               {/* Bottom draggable handle */}
-              <div className="absolute bottom-0 left-0 right-0 h-8 draggable-handle"></div>
+              <div
+                className="absolute bottom-0 left-0 right-0 h-8 draggable-handle"
+                data-cy={"doc-drag-bottom"}
+              ></div>
               {/* Left draggable handle */}
-              <div className="absolute top-0 bottom-0 left-0 w-8 draggable-handle"></div>
+              <div
+                className="absolute top-0 bottom-0 left-0 w-8 draggable-handle"
+                data-cy={"doc-drag-left"}
+              ></div>
               {/* Right draggable handle */}
-              <div className="absolute top-0 bottom-0 right-0 w-6 draggable-handle"></div>
+              <div
+                className="absolute top-0 bottom-0 right-0 w-6 draggable-handle"
+                data-cy={"doc-drag-right"}
+              ></div>
 
               <button
                 className="z-20 absolute top-0.5 right-6 ml-2 w-5 h-5 p-0 flex items-center justify-center rounded-full text-gray-100 hover:bg-gray-300 hover:bg-opacity-80 text-[10px]"
                 onClick={() => UnpinnedDocs(doc.id)}
+                data-cy={`unpinned-${docId}`}
               >
                 <FontAwesomeIcon icon={faTimes} />
               </button>

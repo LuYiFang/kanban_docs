@@ -89,8 +89,11 @@ const MultiInteractiveSelect: React.FC<{
   };
 
   return (
-    <div className="relative w-full">
-      <div className="w-full text-sm p-2 border border-gray-700 bg-gray-800 text-gray-300 rounded flex flex-wrap gap-2">
+    <div className="relative w-full" data-cy="multi-interactive-select">
+      <div
+        className="w-full text-sm p-2 border border-gray-700 bg-gray-800 text-gray-300 rounded flex flex-wrap gap-2"
+        data-cy="multi-interactive-select-selected"
+      >
         {selectedOptions.map((option) => {
           const color = assignProjectColor(option.name);
           return (
@@ -109,6 +112,7 @@ const MultiInteractiveSelect: React.FC<{
                     setSelectedOptions(filteredSelectedOptions);
                   }}
                   className={`ml-2 w-5 h-5 p-0 flex items-center justify-center rounded-full ${color} text-gray-100 hover:bg-gray-300 hover:bg-opacity-80 text-[10px]`}
+                  data-cy="remove-selected-option"
                 >
                   <FontAwesomeIcon icon={faTimes} />
                 </button>
@@ -123,6 +127,7 @@ const MultiInteractiveSelect: React.FC<{
               setIsExpanded(true);
             }}
             disabled={readOnly}
+            data-cy="add-property-button"
           >
             <FontAwesomeIcon icon={faPlus} />
           </button>
