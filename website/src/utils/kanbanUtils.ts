@@ -2,7 +2,7 @@ import _ from "lodash";
 import { convertToKebabCase } from "./tools";
 import { DropResult } from "react-beautiful-dnd";
 import { Task, TaskCreate, TaskWithProperties } from "../types/task";
-import { PropertyConfig, PropertyCreate } from "../types/property";
+import { DefaultProperty, PropertyConfig } from "../types/property";
 import { Column } from "../types/kanban";
 
 export const generateColumns = (
@@ -16,7 +16,9 @@ export const generateColumns = (
     const groupProperty = task.properties.find(
       (prop) => prop.name === groupPropertyName,
     );
-    return groupProperty ? convertToKebabCase(groupProperty.value || "") : null;
+    return groupProperty
+      ? convertToKebabCase((groupProperty.value as string) || "")
+      : null;
   });
 
   const targetProperty = _.find(propertyConfig, { name: groupPropertyName });
@@ -49,15 +51,27 @@ export const generateColumns = (
 };
 
 export const generateNextTask = (
-  defaultProperties: PropertyCreate[],
+  defaultProperties: DefaultProperty[],
   columns: Column[],
-): { task: TaskCreate; properties: PropertyCreate[] } => {
+): { task: TaskCreate; properties: DefaultProperty[] } => {
+  return generateTask(
+    defaultProperties,
+    "regular",
+    columns.find((column) => column.id === "todo")?.tasks.length || 0,
+  );
+};
+
+export const generateTask = (
+  defaultProperties: DefaultProperty[],
+  type: string,
+  order: number,
+): { task: TaskCreate; properties: DefaultProperty[] } => {
   return {
     task: {
       title: "",
       content: "",
-      type: "",
-      order: columns.find((column) => column.id === "todo")?.tasks.length || 0,
+      type: type,
+      order: order,
       updatedAt: "",
     },
     properties: defaultProperties,

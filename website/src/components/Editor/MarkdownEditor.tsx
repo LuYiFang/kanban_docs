@@ -48,7 +48,7 @@ import mermaid from "mermaid";
 interface MarkdownEditorProps {
   readOnly: boolean;
   content: string;
-  onChange: (content: string) => void;
+  onChange: (title: string | null, content: string | null) => void;
 }
 
 export interface MarkdownEditorMethods {
@@ -74,7 +74,7 @@ const MarkdownEditor = forwardRef<MarkdownEditorMethods, MarkdownEditorProps>(
     }, [content]);
 
     const handleEditorChange = (markdown: string) => {
-      onChange(markdown);
+      onChange(null, markdown);
     };
 
     const uploadImage = async (image: File): Promise<string> => {

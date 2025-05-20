@@ -58,7 +58,7 @@ const Card: React.FC<KanbanCardContentProps> = ({
             }
           }
         }
-        if (!propertyValue) return "";
+        if (!propertyValue && propertyName !== "content") return "";
 
         if (propertyName === "epic") {
           return (
@@ -89,7 +89,7 @@ const Card: React.FC<KanbanCardContentProps> = ({
             <MultiChipLabel
               key={propertyName}
               propertyName={propertyName}
-              propertyValues={propertyValue}
+              propertyValues={propertyValue as string[]}
             />
           );
         } else if (propertyName === "assignee") {

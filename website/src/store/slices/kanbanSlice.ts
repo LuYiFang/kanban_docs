@@ -4,6 +4,7 @@ import {
   createTaskWithDefaultProperties,
   deleteTask,
   getAllTaskWithProperties,
+  getLayout,
   getPropertiesAndOptions,
   updateMultipleTasks,
   updateProperty,
@@ -12,12 +13,13 @@ import {
 import { convertUtcToLocal } from "../../utils/tools";
 import _ from "lodash";
 import { TaskWithProperties } from "../../types/task";
-import { KanbanState } from "../../types/kanban";
+import { kanbanDataName, KanbanState } from "../../types/kanban";
 
 const initialState: KanbanState = {
   tasks: [],
   propertySetting: [],
   docs: [],
+  docsLayout: null,
 };
 
 const kanbanSlice = createSlice({
@@ -55,11 +57,19 @@ const kanbanSlice = createSlice({
       })
       .addCase(createTaskWithDefaultProperties.fulfilled, (state, action) => {
         const task = action.payload;
-        state.tasks.push(task);
+        let taskType = task.type as kanbanDataName;
+        if (taskType !== "docs") {
+          taskType = "tasks";
+        }
+        state[taskType].push(task);
       })
       .addCase(updateTask.fulfilled, (state, action) => {
         const { task } = action.payload;
-        const taskIndex = state.tasks.findIndex((t) => t.id === task.id);
+        let taskType = task.type as kanbanDataName;
+        if (taskType !== "docs") {
+          taskType = "tasks";
+        }
+        const taskIndex = state[taskType].findIndex((t) => t.id === task.id);
         if (taskIndex < 0) return;
 
         const timeName = ["createdAt", "updatedAt"];
@@ -67,9 +77,9 @@ const kanbanSlice = createSlice({
           task[tn] = convertUtcToLocal(task[tn]);
         });
 
-        state.tasks[taskIndex] = {
+        state[taskType][taskIndex] = {
           ...task,
-          properties: state.tasks[taskIndex].properties,
+          properties: state[taskType][taskIndex].properties,
         };
       })
       .addCase(deleteTask.fulfilled, (state, action) => {
@@ -110,6 +120,9 @@ const kanbanSlice = createSlice({
         if (property) {
           property.options = [...(property.options || []), options];
         }
+      })
+      .addCase(getLayout.fulfilled, (state, action) => {
+        state.docsLayout = action.payload;
       });
   },
 });

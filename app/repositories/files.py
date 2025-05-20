@@ -21,6 +21,17 @@ async def get_file(file_id: str, db: AgnosticDatabase):
         return None
 
 
+async def get_file_ids_by_filename(filename: str, db: AgnosticDatabase):
+    try:
+        fs = AsyncIOMotorGridFSBucket(db)
+        cursor = fs.find({"filename": filename})
+        files = await cursor.to_list(length=None)
+        return [str(file.get('_id')) for file in files]
+    except Exception as e:
+        print(f"Error retrieving file IDs by filename: {e}")
+        return []
+
+
 async def delete_file(file_id: str, db: AgnosticDatabase) -> bool:
     try:
         fs = AsyncIOMotorGridFSBucket(db)

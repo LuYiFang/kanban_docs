@@ -12,7 +12,7 @@ const Dashboard: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex h-screen w-screen ">
+    <div className="flex h-screen w-screen">
       <Sidebar />
 
       <div className="flex flex-col flex-grow h-full bg-gray-100">

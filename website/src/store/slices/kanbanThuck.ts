@@ -1,19 +1,22 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { Task, TaskCreate, taskType, TaskUpdate } from "../../types/task";
-import { PropertyCreate } from "../../types/property";
+import { DefaultProperty } from "../../types/property";
 import {
   batchUpdateTasksApi,
   createPropertyOptionApi,
   createTaskWithPropertiesApi,
+  deleteFileApi,
   deleteTaskWithPropertiesApi,
   downloadFileApi,
   getAllTaskWithPropertiesApi,
+  getFileIdByNameApi,
   getPropertiesAndOptionsApi,
   updatePropertyApi,
   updateTaskApi,
   uploadFileApi,
 } from "../../utils/fetchApi";
 import { AxiosError } from "axios";
+import { Layouts } from "react-grid-layout";
 
 export const getAllTaskWithProperties = createAsyncThunk(
   "kanban/getAllTaskWithProperties",
@@ -30,7 +33,7 @@ export const getAllTaskWithProperties = createAsyncThunk(
 export const createTaskWithDefaultProperties = createAsyncThunk(
   "kanban/createTaskWithDefaultProperties",
   async (
-    { task, properties }: { task: TaskCreate; properties: PropertyCreate[] },
+    { task, properties }: { task: TaskCreate; properties: DefaultProperty[] },
     thunkAPI,
   ) => {
     try {
@@ -175,6 +178,62 @@ export const downloadFile = createAsyncThunk(
     try {
       const response = await downloadFileApi(fileId);
       return response;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      return thunkAPI.rejectWithValue(axiosError?.response?.data);
+    }
+  },
+);
+
+export const saveLayout = createAsyncThunk(
+  "kanban/saveLayout",
+  async (layouts: Layouts, thunkAPI) => {
+    try {
+      if (
+        !layouts ||
+        Object.values(layouts).some(
+          (layout) => Array.isArray(layout) && layout.length === 0,
+        )
+      )
+        return;
+
+      const layoutFileName = "docs-layout.json";
+
+      const fileIds = await getFileIdByNameApi(layoutFileName);
+      if (fileIds.length) {
+        await deleteFileApi(fileIds[0]);
+      }
+
+      const layoutJson = JSON.stringify(layouts);
+
+      const formData = new FormData();
+      formData.append(
+        "file",
+        new Blob([layoutJson], { type: "application/json" }),
+        layoutFileName,
+      );
+
+      const response = await uploadFileApi(formData);
+      return response;
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      return thunkAPI.rejectWithValue(axiosError?.response?.data);
+    }
+  },
+);
+
+export const getLayout = createAsyncThunk(
+  "kanban/getLayout",
+  async (_, thunkAPI) => {
+    try {
+      const layoutFileName = "docs-layout.json";
+
+      const fileIds = await getFileIdByNameApi(layoutFileName);
+      if (!fileIds.length) {
+        return null;
+      }
+
+      return await downloadFileApi(fileIds[0]);
     } catch (error) {
       const axiosError = error as AxiosError;
       return thunkAPI.rejectWithValue(axiosError?.response?.data);

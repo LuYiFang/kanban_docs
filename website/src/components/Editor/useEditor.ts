@@ -42,24 +42,24 @@ export const useEditor = (
   }, [task.title]);
 
   const saveTask = useCallback(
-    (content: string) => {
+    (title: string | null, content: string | null) => {
       if (readOnly) return;
+
+      const newTask = { ...task };
+      if (title !== null) newTask.title = title;
+      if (content !== null) newTask.content = content;
 
       dispatch(
         updateTask({
           taskId,
-          task: {
-            ...task,
-            title,
-            content,
-          },
+          task: newTask,
         }),
       );
     },
     [dispatch, taskId, task, title],
   );
   const delaySaveTask = _.debounce(
-    (content: string) => saveTask(content),
+    (title: string | null, content: string | null) => saveTask(title, content),
     3000,
   );
 

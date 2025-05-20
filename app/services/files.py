@@ -1,7 +1,9 @@
-from models.files import FileCreate, FileResponse
-from repositories.files import save_file, get_file, delete_file
-from motor.core import AgnosticDatabase
 from fastapi import HTTPException
+from motor.core import AgnosticDatabase
+
+from models.files import FileCreate, FileResponse
+from repositories.files import (save_file, get_file, delete_file,
+                                get_file_ids_by_filename)
 
 
 async def upload_file_service(file: FileCreate,
@@ -15,6 +17,13 @@ async def get_file_service(file_id: str, db: AgnosticDatabase):
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
     return file
+
+
+async def get_file_ids_by_filename_service(filename: str, db: AgnosticDatabase):
+    file_ids = await get_file_ids_by_filename(filename, db)
+    if not file_ids:
+        raise HTTPException(status_code=404, detail="No files found with the given filename")
+    return file_ids
 
 
 async def delete_file_service(file_id: str, db: AgnosticDatabase) -> bool:

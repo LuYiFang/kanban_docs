@@ -56,7 +56,7 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
     });
 
     useImperativeHandle(ref, () => ({
-      save: () => saveTask(editorRef.current?.getMarkdown() || ""),
+      save: () => saveTask(title, editorRef.current?.getMarkdown() || ""),
       close: () => {
         setIsMenuOpen(false);
       },
@@ -124,7 +124,10 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
             type="text"
             className="w-full text-lg p-2 border border-gray-700 bg-gray-800 text-gray-300 rounded"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              delaySaveTask(e.target.value, null);
+              setTitle(e.target.value);
+            }}
             placeholder="Task Title"
             data-cy="title-input"
             disabled={readOnly}
@@ -178,7 +181,7 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
                       <input
                         type="datetime-local"
                         className="w-1/3 text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
-                        value={formatDateTimeLocal(value)}
+                        value={formatDateTimeLocal(value as string)}
                         onChange={(e) => onChange(e.target.value)}
                         data-cy="property-date-input"
                         disabled={readOnly}

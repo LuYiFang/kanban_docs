@@ -1,6 +1,7 @@
 import { taskType, TaskUpdate } from "../types/task";
 import apiClient from "./apiClient";
-import { PropertyCreate } from "../types/property";
+import { DefaultProperty } from "../types/property";
+import { AxiosError } from "axios";
 
 export const getAllTaskWithPropertiesApi = async (taskType: taskType) => {
   const params = new URLSearchParams({ task_type: taskType }).toString();
@@ -11,7 +12,7 @@ export const getAllTaskWithPropertiesApi = async (taskType: taskType) => {
 
 export const createTaskWithPropertiesApi = async (
   task: TaskUpdate,
-  properties: PropertyCreate[],
+  properties: DefaultProperty[],
 ) => {
   const response = await apiClient.post("/task/properties", {
     task,
@@ -79,5 +80,22 @@ export const uploadFileApi = async (formData: FormData) => {
 
 export const downloadFileApi = async (fileId: string) => {
   const response = await apiClient.get(`/files/${fileId}`);
+  return response.data;
+};
+
+export const getFileIdByNameApi = async (filename: string) => {
+  try {
+    const response = await apiClient.get(`/files/filename/${filename}/ids`);
+    return response.data;
+  } catch (error) {
+    const axiosError = error as AxiosError;
+    if (axiosError?.response?.status === 404) {
+      return [];
+    }
+    throw error;
+  }
+};
+export const deleteFileApi = async (fileId: string) => {
+  const response = await apiClient.delete(`/files/${fileId}`);
   return response.data;
 };

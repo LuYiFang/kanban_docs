@@ -21,7 +21,7 @@ export interface InteractiveSelectPropertyConfig {
 export interface Property {
   id: string;
   name: string;
-  value: string;
+  value: string | string[];
   taskId: string;
 }
 
@@ -116,7 +116,11 @@ export const defaultTaskProperties: DefaultProperty[] = [
   { name: "finishedAt", value: "" },
 ];
 
+export const defaultDocsProperties: DefaultProperty[] = [
+  { name: "tags", value: [] },
+];
+
 export interface DefaultProperty {
   name: string;
-  value: string;
+  value: string | string[];
 }

@@ -1,10 +1,12 @@
 import { TaskWithProperties } from "./task";
 import { PropertyConfig } from "./property";
+import { Layouts } from "react-grid-layout";
 
 export interface KanbanState {
   tasks: TaskWithProperties[];
   propertySetting: PropertyConfig[];
   docs: TaskWithProperties[];
+  docsLayout: Layouts | null;
 }
 
 export type kanbanDataName = "tasks" | "propertySetting" | "docs";

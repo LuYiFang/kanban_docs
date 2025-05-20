@@ -35,14 +35,14 @@ const KanbanPage: React.FC = () => {
     );
 
     _.each(defaultPropertiesWithId, (property) => {
-      property.value = propertyNameToIdMap[property.value] || "";
+      property.value = propertyNameToIdMap[property.value as string] || "";
     });
 
     return defaultPropertiesWithId;
   }, [propertySetting]);
 
   return (
-    <div className="h-full w-full flex flex-col bg-gray-900 text-gray-300">
+    <div className="h-screen overflow-auto w-full flex flex-col bg-gray-900 text-gray-300">
       <h1 className="text-2xl font-bold mb-4 ml-4 mt-4">Kanban</h1>
       <KanbanBoard
         dataName="tasks"

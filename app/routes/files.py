@@ -4,7 +4,8 @@ from fastapi.responses import StreamingResponse
 from database import get_db
 from models.files import FileResponse, FileCreate
 from services.files import (upload_file_service, get_file_service,
-                            delete_file_service)
+                            delete_file_service,
+                            get_file_ids_by_filename_service)
 
 router = APIRouter()
 
@@ -28,6 +29,15 @@ async def download_file(file_id: str, db=Depends(get_db)):
         media_type=file.metadata["content_type"],
         headers={"Content-Disposition": f"inline; filename={file.filename}"}
     )
+
+
+@router.get("/filename/{filename}/ids")
+async def get_file_ids_by_filename(filename: str, db=Depends(get_db)):
+    """
+    Retrieve file IDs by filename. Handles cases with multiple files having the same filename.
+    """
+    file_ids = await get_file_ids_by_filename_service(filename, db)
+    return file_ids
 
 
 @router.delete("/{file_id}")
