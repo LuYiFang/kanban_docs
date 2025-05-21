@@ -8,6 +8,7 @@ import {
 } from "../../types/property";
 import { convertToKebabCase } from "../../utils/tools";
 import Editor from "../Editor/Editor";
+import { DataType } from "../../types/kanban";
 
 export const Chip: React.FC<{
   color: string;
@@ -137,7 +138,7 @@ export const ContentLabel: React.FC<{
     >
       <Editor
         taskId={taskId}
-        dataName="docs"
+        dataName={DataType.ALL}
         propertyOrder={["tags"]}
         readOnly={readonly}
       />

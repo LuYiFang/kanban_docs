@@ -87,7 +87,7 @@ const InteractiveSelect: React.FC<{
 
       <DropdownMenu
         propertyConfig={propertyConfig}
-        selectedOptions={taskProperty.value}
+        selectedOptions={taskProperty.value as string}
         readOnly={readOnly}
         isExpanded={isExpanded}
         setIsExpanded={setIsExpanded}

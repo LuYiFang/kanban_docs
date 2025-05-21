@@ -1,6 +1,6 @@
 import { Property } from "./property";
 
-export type taskType = "regular" | "weekly" | "docs";
+export type taskType = "regular" | "weekly" | "docs" | "all";
 
 export interface Task {
   id: string;

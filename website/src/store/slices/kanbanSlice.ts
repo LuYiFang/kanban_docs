@@ -13,13 +13,29 @@ import {
 import { convertUtcToLocal } from "../../utils/tools";
 import _ from "lodash";
 import { TaskWithProperties } from "../../types/task";
-import { kanbanDataName, KanbanState } from "../../types/kanban";
+import { DataType, kanbanDataName, KanbanState } from "../../types/kanban";
+import { Property } from "../../types/property";
 
 const initialState: KanbanState = {
   tasks: [],
   propertySetting: [],
-  docs: [],
+  all: [],
   docsLayout: null,
+};
+
+const timeName = ["createdAt", "updatedAt"];
+const covertTaskTime = (task: TaskWithProperties) => {
+  _.each(timeName, (tn) => {
+    task[tn] = convertUtcToLocal(task[tn]);
+  });
+
+  _.each(task.properties, (prop: Property) => {
+    _.each(timeName, (tn) => {
+      prop[tn as keyof Property] = convertUtcToLocal(
+        prop[tn as keyof Property] as string,
+      );
+    });
+  });
 };
 
 const kanbanSlice = createSlice({
@@ -30,43 +46,34 @@ const kanbanSlice = createSlice({
     builder
       .addCase(getAllTaskWithProperties.fulfilled, (state, action) => {
         const tasks = action.payload;
-        const timeName = ["createdAt", "updatedAt"];
         const regularTasks: TaskWithProperties[] = [];
-        const docsTasks: TaskWithProperties[] = [];
+        const allTasks: TaskWithProperties[] = [];
 
         _.each(tasks, (task) => {
-          _.each(timeName, (tn) => {
-            task[tn] = convertUtcToLocal(task[tn]);
-          });
+          covertTaskTime(task);
 
-          _.each(task.properties, (prop) => {
-            _.each(timeName, (tn) => {
-              prop[tn] = convertUtcToLocal(prop[tn]);
-            });
-          });
-
-          if (task.type === "docs") {
-            docsTasks.push(task);
-          } else {
+          if (task.type === DataType.TASK) {
             regularTasks.push(task);
           }
+          allTasks.push(task);
         });
 
         state.tasks = regularTasks;
-        state.docs = docsTasks;
+        state.all = allTasks;
       })
       .addCase(createTaskWithDefaultProperties.fulfilled, (state, action) => {
         const task = action.payload;
-        let taskType = task.type as kanbanDataName;
-        if (taskType !== "docs") {
-          taskType = "tasks";
+
+        covertTaskTime(task);
+        if (task.type === DataType.TASK) {
+          state.tasks.push(task);
         }
-        state[taskType].push(task);
+        state.all.push(task);
       })
       .addCase(updateTask.fulfilled, (state, action) => {
         const { task } = action.payload;
         let taskType = task.type as kanbanDataName;
-        if (taskType !== "docs") {
+        if (taskType !== DataType.ALL) {
           taskType = "tasks";
         }
         const taskIndex = state[taskType].findIndex((t) => t.id === task.id);

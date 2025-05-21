@@ -71,6 +71,7 @@ const KanbanCard: React.FC<KanbanCardProps> = ({
             task={task}
             cardVisibleProperties={cardVisibleProperties}
             propertyOptionsIdNameMap={propertyOptionsIdNameMap}
+            readonly={true}
           />
         </div>
       )}

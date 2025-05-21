@@ -19,11 +19,13 @@ export const useEditor = (
   deleteTaskCallback?: () => void,
 ) => {
   const dispatch = useDispatch<AppDispatch>();
-  const task: TaskWithProperties = useSelector((state: RootState) => {
+  const tasks: TaskWithProperties[] = useSelector(
+    (state: RootState) => state.kanban[dataName] as TaskWithProperties[],
+  );
+
+  const task: TaskWithProperties = useMemo(() => {
     return (
-      (state.kanban[dataName] as TaskWithProperties[]).find(
-        (t) => t.id === taskId,
-      ) || {
+      tasks.find((t) => t.id === taskId) || {
         id: "",
         title: "",
         content: "",
@@ -33,7 +35,7 @@ export const useEditor = (
         properties: [],
       }
     );
-  });
+  }, [tasks, taskId]);
 
   const [title, setTitle] = useState("");
 

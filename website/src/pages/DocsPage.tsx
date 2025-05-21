@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Layout, Layouts, Responsive, WidthProvider } from "react-grid-layout";
+import { Layouts, Responsive, WidthProvider } from "react-grid-layout";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
 import {
@@ -25,18 +25,19 @@ const ResponsiveGridLayout = WidthProvider(Responsive);
 
 const CARD_WIDTH = 6;
 const CARD_HEIGHT = 16;
-const ROW_HEIGHT = 6;
 
 const DocsPage: React.FC = () => {
-  const [pinnedDocs, setPinnedDocs] = useState<string[]>([]);
+  const [pinnedItems, setPinnedItems] = useState<TaskWithProperties[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedTag, setSelectedTag] = useState<string>("");
-  const [searchDocs, setSearchDocs] = useState<TaskWithProperties[]>([]);
+  const [searchItems, setSearchItems] = useState<TaskWithProperties[]>([]);
   const [layouts, setLayouts] = useState<Layouts>({});
+  const [newItemId, setNewItemId] = useState<string>("");
+  const [isDocsLayoutLoaded, setIsDocsLayoutLoaded] = useState(false); // 新增标志变量
 
   const dispatch = useDispatch<AppDispatch>();
-  const documents: TaskWithProperties[] = useSelector(
-    (state: RootState) => state.kanban.docs,
+  const allItems: TaskWithProperties[] = useSelector(
+    (state: RootState) => state.kanban.all,
   );
   const propertySetting = useSelector(
     (state: RootState) => state.kanban.propertySetting,
@@ -44,84 +45,25 @@ const DocsPage: React.FC = () => {
   const docsLayout = useSelector((state: RootState) => state.kanban.docsLayout);
 
   useEffect(() => {
-    dispatch(getAllTaskWithProperties({ taskType: "docs" }));
+    dispatch(getAllTaskWithProperties({ taskType: "all" }));
     dispatch(getLayout());
   }, [dispatch]);
 
   useEffect(() => {
-    const newDocId = _.first(
-      _.difference(
-        documents.map((doc) => doc.id),
-        pinnedDocs,
-      ),
-    );
-    if (!newDocId) return;
-
-    let maxY = 0;
-    _.each(layouts, (layout) => {
-      const maxLayout = _.maxBy(layout, "y");
-      if (maxLayout) {
-        maxY = Math.max(maxY, maxLayout.y);
-      }
-    });
-
-    setLayouts(
-      _.mapValues(layouts, (layout) => {
-        return [
-          ...layout,
-          {
-            i: newDocId,
-            x: 0,
-            y: maxY,
-            w: CARD_WIDTH,
-            h: CARD_HEIGHT,
-            resizeHandles: ["s", "w", "e", "n", "sw", "nw", "se", "ne"],
-            static: false,
-          },
-        ];
-      }) as Layouts,
-    );
-
-    setPinnedDocs((pre) => [...pre, newDocId]);
-  }, [documents]);
-
-  const generateLayout = () => {
-    const createLayout = (breakpointCols: number): Layout[] => {
-      return pinnedDocs.map((docId, index) => {
-        return {
-          i: docId,
-          x: (index % breakpointCols) * CARD_WIDTH,
-          y: Math.floor(index / breakpointCols) * ROW_HEIGHT,
-          w: CARD_WIDTH,
-          h: CARD_HEIGHT,
-          resizeHandles: ["s", "w", "e", "n", "sw", "nw", "se", "ne"],
-          static: false,
-        };
-      });
-    };
-
-    return {
-      lg: createLayout(12),
-      md: createLayout(10),
-      sm: createLayout(6),
-      xs: createLayout(4),
-      xxs: createLayout(2),
-    };
-  };
-
-  useEffect(() => {
-    if (!docsLayout || !_.keys(docsLayout).length) {
-      setLayouts(generateLayout());
-      return;
+    if (!isDocsLayoutLoaded && docsLayout && _.keys(docsLayout).length) {
+      setLayouts(docsLayout);
+      setPinnedItems(
+        docsLayout.lg
+          .map((item) => allItems.find((doc) => doc.id === item.i)!)
+          .filter(Boolean),
+      );
+      setIsDocsLayoutLoaded(true);
     }
-
-    setLayouts(docsLayout);
-    setPinnedDocs(docsLayout.lg.map((item) => item.i));
-  }, [docsLayout]);
+  }, [docsLayout, allItems, isDocsLayoutLoaded]);
 
   const propertyOptionsIdNameMap = useMemo(() => {
     const taskIdTitleMap = _.reduce(
-      documents,
+      allItems,
       (result, task) => {
         result[task.id] = task.title;
         return result;
@@ -141,10 +83,10 @@ const DocsPage: React.FC = () => {
     );
 
     return _.merge({}, taskIdTitleMap, propertyIdNameMap);
-  }, [documents, propertySetting]);
+  }, [allItems, propertySetting]);
 
   const fuse = useMemo(() => {
-    return new Fuse(documents, {
+    return new Fuse(allItems, {
       keys: [
         { name: "title", getFn: (doc) => doc.title },
         { name: "content", getFn: (doc) => doc.content },
@@ -163,21 +105,21 @@ const DocsPage: React.FC = () => {
       ],
       threshold: 0.3,
     });
-  }, [documents]);
+  }, [allItems]);
 
   const allTags = useMemo(() => {
     return Array.from(
       new Set(
-        documents
+        allItems
           .flatMap(
-            (doc) =>
-              doc.properties.find((property) => property.name === "tags")
+            (item) =>
+              item.properties.find((property) => property.name === "tags")
                 ?.value || [],
           )
           .filter((tag) => tag),
       ),
     ).sort();
-  }, [documents]);
+  }, [allItems]);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -186,8 +128,8 @@ const DocsPage: React.FC = () => {
   };
 
   const filteredSearch = _.debounce(() => {
-    setSearchDocs(fuse.search(searchTerm).map((result) => result.item));
-  }, 800);
+    setSearchItems(fuse.search(searchTerm).map((result) => result.item));
+  }, 500);
 
   const handleTagSearch = (tagName: string) => {
     if (!tagName) return;
@@ -196,14 +138,14 @@ const DocsPage: React.FC = () => {
     const tagId = invertedMap[tagName];
     if (tagId === selectedTag) {
       setSelectedTag("");
-      setSearchDocs([]);
+      setSearchItems([]);
       return;
     }
     setSelectedTag(tagId);
 
-    setSearchDocs(
-      documents.filter((doc) =>
-        doc.properties
+    setSearchItems(
+      allItems.filter((item) =>
+        item.properties
           .find((property) => property.name === "tags")
           ?.value.includes(tagId),
       ),
@@ -211,13 +153,22 @@ const DocsPage: React.FC = () => {
   };
 
   const handleSelectDoc = (docId: string) => {
-    setPinnedDocs((pre) =>
-      pre.includes(docId) ? pre.filter((id) => id !== docId) : [...pre, docId],
+    const doc = allItems.find((item) => item.id === docId);
+    if (!doc) return;
+
+    setPinnedItems((pre) =>
+      pre.some((item) => item.id === docId)
+        ? pre.filter((item) => item.id !== docId)
+        : [...pre, doc],
     );
+
+    if (!pinnedItems.some((item) => item.id === docId)) {
+      setNewItemId(doc.id);
+    }
   };
 
   const UnpinnedDocs = (docId: string) => {
-    setPinnedDocs(pinnedDocs.filter((id) => id !== docId));
+    setPinnedItems(pinnedItems.filter((item) => item.id !== docId));
   };
 
   const handleSaveLayout = () => {
@@ -226,7 +177,12 @@ const DocsPage: React.FC = () => {
 
   const handleAddDoc = () => {
     const newTask = generateTask(defaultDocsProperties, "docs", 0);
-    dispatch(createTaskWithDefaultProperties(newTask));
+    dispatch(createTaskWithDefaultProperties(newTask))
+      .unwrap()
+      .then((newItem) => {
+        setNewItemId(newItem.id);
+        setPinnedItems((pre) => [...pre, newItem]);
+      });
   };
 
   return (
@@ -265,15 +221,20 @@ const DocsPage: React.FC = () => {
           />
         </div>
       </div>
-      {searchDocs.length > 0 && (
+      {searchItems.length > 0 && (
         <div className="mb-4" data-cy="show-docs-result">
           <div
             className="bg-gray-800 p-2 rounded max-h-72 overflow-auto"
             data-cy="tag-documents"
           >
-            {searchDocs.map((doc) => {
+            {searchItems.map((doc) => {
               let alreadyPinned = false;
-              if (_.includes(pinnedDocs, doc.id)) {
+              if (
+                _.includes(
+                  pinnedItems.map((item) => item.id),
+                  doc.id,
+                )
+              ) {
                 alreadyPinned = true;
               }
 
@@ -301,18 +262,33 @@ const DocsPage: React.FC = () => {
         onDragStart={() => console.log("Drag started")}
         draggableHandle={".draggable-handle"}
         onLayoutChange={(layout, layouts) => {
-          setLayouts(layouts);
+          setLayouts(
+            _.mapValues(layouts, (layout) => {
+              return _.map(layout, (item) => {
+                if (item.i === newItemId) {
+                  setNewItemId("");
+                  return {
+                    ...item,
+                    w: CARD_WIDTH,
+                    h: CARD_HEIGHT,
+                    resizeHandles: ["s", "w", "e", "n", "sw", "nw", "se", "ne"],
+                    static: false,
+                  };
+                }
+                return item;
+              });
+            }) as Layouts,
+          );
         }}
       >
-        {pinnedDocs.map((docId) => {
-          const doc = documents.find((doc) => doc.id === docId);
+        {pinnedItems.map((doc) => {
           if (!doc) return null;
 
           return (
             <div
               key={doc.id}
               className="relative"
-              data-cy={`doc-card-id-${docId}`}
+              data-cy={`doc-card-id-${doc.id}`}
             >
               {/* Top draggable handle */}
               <div
@@ -338,7 +314,7 @@ const DocsPage: React.FC = () => {
               <button
                 className="z-20 absolute top-0.5 right-6 ml-2 w-5 h-5 p-0 flex items-center justify-center rounded-full text-gray-100 hover:bg-gray-300 hover:bg-opacity-80 text-[10px]"
                 onClick={() => UnpinnedDocs(doc.id)}
-                data-cy={`unpinned-${docId}`}
+                data-cy={`unpinned-${doc.id}`}
               >
                 <FontAwesomeIcon icon={faTimes} />
               </button>

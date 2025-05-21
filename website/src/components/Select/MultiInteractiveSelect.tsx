@@ -38,8 +38,11 @@ const MultiInteractiveSelect: React.FC<{
     );
   }, [propertySetting, propertyName]);
 
-  const taskProperty = useSelector((state: RootState) => {
-    const tasks = state.kanban[dataName] as TaskWithProperties[];
+  const tasks = useSelector(
+    (state: RootState) => state.kanban[dataName] as TaskWithProperties[],
+  );
+
+  const taskProperty = useMemo(() => {
     if (!Array.isArray(tasks) || !tasks.length) {
       return { id: "", name: propertyName, value: [] };
     }
@@ -52,7 +55,7 @@ const MultiInteractiveSelect: React.FC<{
         value: [],
       }
     );
-  });
+  }, [tasks, taskId, propertyName]);
 
   const [selectedOptions, setSelectedOptions] = useState<PropertyOption[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);

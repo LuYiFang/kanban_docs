@@ -28,10 +28,11 @@ const Card: React.FC<KanbanCardContentProps> = ({
       className="p-4 mb-2 bg-gray-700 rounded shadow w-full h-full flex flex-col overflow-auto"
       style={{ boxSizing: "border-box" }}
     >
-      {cardVisibleProperties.map((propertyName) => {
+      {cardVisibleProperties.map((propertyName, i) => {
         if (propertyName === "title") {
           return (
             <div
+              key={`card-property-${i}`}
               className="font-bold text-gray-100 mb-2"
               data-cy="kanban-task-title"
             >
@@ -63,7 +64,7 @@ const Card: React.FC<KanbanCardContentProps> = ({
         if (propertyName === "epic") {
           return (
             <TextLabel
-              key={propertyName}
+              key={`card-property-${i}`}
               propertyName={propertyName}
               text={propertyValue as string}
             />
@@ -75,7 +76,7 @@ const Card: React.FC<KanbanCardContentProps> = ({
         ) {
           return (
             <ChipLabel
-              key={propertyName}
+              key={`card-property-${i}`}
               propertyName={propertyName}
               propertyValue={propertyValue as string}
             />
@@ -87,7 +88,7 @@ const Card: React.FC<KanbanCardContentProps> = ({
 
           return (
             <MultiChipLabel
-              key={propertyName}
+              key={`card-property-${i}`}
               propertyName={propertyName}
               propertyValues={propertyValue as string[]}
             />
@@ -95,7 +96,7 @@ const Card: React.FC<KanbanCardContentProps> = ({
         } else if (propertyName === "assignee") {
           return (
             <PersonLabel
-              key={propertyName}
+              key={`card-property-${i}`}
               propertyName={propertyName}
               personName={propertyValue as string}
             />
@@ -103,7 +104,7 @@ const Card: React.FC<KanbanCardContentProps> = ({
         } else if (propertyName === "summary") {
           return (
             <SummaryLabel
-              key={propertyName}
+              key={`card-property-${i}`}
               propertyName={propertyName}
               summary={propertyValue as string}
             />
@@ -111,7 +112,7 @@ const Card: React.FC<KanbanCardContentProps> = ({
         } else if (propertyName === "content") {
           return (
             <ContentLabel
-              key={propertyName}
+              key={`card-property-${i}`}
               propertyName={propertyName}
               taskId={task.id}
               readonly={readonly}

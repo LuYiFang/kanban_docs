@@ -84,8 +84,9 @@ async def get_tasks_with_properties_repo(task_type: TaskType,
                 }
             }
         })
-
-    if task_type == TaskType.docs:
+    if task_type == TaskType.all:
+        pass
+    elif task_type == TaskType.docs:
         pipeline.append({
             "$match": {
                 "type": TaskType.docs

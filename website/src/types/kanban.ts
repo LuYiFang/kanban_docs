@@ -5,11 +5,16 @@ import { Layouts } from "react-grid-layout";
 export interface KanbanState {
   tasks: TaskWithProperties[];
   propertySetting: PropertyConfig[];
-  docs: TaskWithProperties[];
+  all: TaskWithProperties[];
   docsLayout: Layouts | null;
 }
 
-export type kanbanDataName = "tasks" | "propertySetting" | "docs";
+export type kanbanDataName = "tasks" | "propertySetting" | "all";
+
+export enum DataType {
+  TASK = "task",
+  ALL = "all",
+}
 
 export interface Column {
   id: string;

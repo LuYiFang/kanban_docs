@@ -11,6 +11,7 @@ class TaskType(str, Enum):
     regular = "regular"
     weekly = "weekly"
     docs = "docs"
+    all = "all"
 
 
 class TaskBase(BaseModel):
