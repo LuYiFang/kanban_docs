@@ -1,6 +1,6 @@
 export const setupBaseInterceptors = () => {
   // Get All Tasks With Properties
-  cy.intercept("GET", "**/api/task/properties?task_type=regular", {
+  cy.intercept("GET", "**/api/task/properties?task_type=task", {
     statusCode: 200,
     body: [
       {
@@ -10,6 +10,7 @@ export const setupBaseInterceptors = () => {
         title: "This is default task",
         content: "default",
         order: 0,
+        type: "task",
         properties: [
           {
             id: "property-id-priority",
@@ -35,6 +36,7 @@ export const setupBaseInterceptors = () => {
         title: "Second task",
         content: "This is the second task content.",
         order: 1,
+        type: "task",
         properties: [
           {
             id: "property-id-priority",
@@ -70,6 +72,7 @@ export const setupBaseInterceptors = () => {
         title: "Third task",
         content: "This is the third task content.",
         order: 0,
+        type: "task",
         properties: [
           {
             id: "property-id-priority",

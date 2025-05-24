@@ -75,6 +75,8 @@ const kanbanSlice = createSlice({
         let taskType = task.type as kanbanDataName;
         if (taskType !== DataType.ALL) {
           taskType = "tasks";
+        } else {
+          taskType = "all";
         }
         const taskIndex = state[taskType].findIndex((t) => t.id === task.id);
         if (taskIndex < 0) return;

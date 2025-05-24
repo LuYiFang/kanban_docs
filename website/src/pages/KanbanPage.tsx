@@ -9,6 +9,7 @@ import { getAllTaskWithProperties } from "../store/slices/kanbanThuck";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
 import _ from "lodash";
+import { DataType } from "../types/kanban";
 
 const KanbanPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -18,7 +19,7 @@ const KanbanPage: React.FC = () => {
   );
 
   useEffect(() => {
-    dispatch(getAllTaskWithProperties({ taskType: "regular" }));
+    dispatch(getAllTaskWithProperties({ taskType: DataType.TASK }));
   }, []);
 
   const defaultTaskPropertiesWithId = useMemo(() => {

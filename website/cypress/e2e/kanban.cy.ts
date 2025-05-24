@@ -5,6 +5,7 @@ describe("Kanban Page Workflow Tests", () => {
   beforeEach(() => {
     setupBaseInterceptors();
     setupInterceptors();
+    cy.viewport(1280, 720);
     cy.visit("/#/kanban"); // 確保訪問正確的 Kanban 頁面
   });
 
@@ -41,12 +42,6 @@ describe("Kanban Page Workflow Tests", () => {
     cy.get("body").click(0, 0);
 
     // 確保任務已新增到 "To Do" 列
-    console.log(
-      "www",
-      cy.get(
-        '[data-cy="kanban-column"][id="option-id-todo"] [data-cy="kanban-task-title"]',
-      ),
-    );
     cy.get(
       '[data-cy="kanban-column"][id="option-id-todo"] [data-cy="kanban-task-title"]',
     )

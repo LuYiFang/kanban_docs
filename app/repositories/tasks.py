@@ -95,7 +95,7 @@ async def get_tasks_with_properties_repo(task_type: TaskType,
     else:
         pipeline.append({
             "$match": {
-                "type": TaskType.regular
+                "type": TaskType.task
             }
         })
 

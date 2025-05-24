@@ -3,7 +3,7 @@ import { convertToKebabCase } from "./tools";
 import { DropResult } from "react-beautiful-dnd";
 import { Task, TaskCreate, TaskWithProperties } from "../types/task";
 import { DefaultProperty, PropertyConfig } from "../types/property";
-import { Column } from "../types/kanban";
+import { Column, DataType } from "../types/kanban";
 
 export const generateColumns = (
   tasks: TaskWithProperties[],
@@ -56,7 +56,7 @@ export const generateNextTask = (
 ): { task: TaskCreate; properties: DefaultProperty[] } => {
   return generateTask(
     defaultProperties,
-    "regular",
+    DataType.TASK,
     columns.find((column) => column.id === "todo")?.tasks.length || 0,
   );
 };

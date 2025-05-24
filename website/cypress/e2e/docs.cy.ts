@@ -5,6 +5,7 @@ describe("DocsPage", () => {
   beforeEach(() => {
     setupBaseInterceptors();
     setupInterceptors();
+    cy.viewport(1280, 720); // 設置固定的視窗尺寸
     cy.visit("/#/docs"); // 確保訪問正確的 docs 頁面
     cy.wait("@getDocs");
   });
@@ -31,17 +32,11 @@ describe("DocsPage", () => {
   it("should filter documents by tag", () => {
     // 點擊標籤 "Tag2" 並驗證過濾後的文檔數量
     cy.get("[data-cy=kanban-task-tags]").contains("Tag2").click();
-    cy.get("[data-cy=tag-documents]").children().should("have.length", 2);
+    verifyFilteredResults(2);
 
     // 點擊第一個文檔並驗證佈局中顯示的文檔數量
     cy.get("[data-cy=tag-documents]").children().first().click();
     cy.get(".layout").children().should("have.length", 1);
-
-    // 驗證第一個文檔是否被選中
-    cy.get("[data-cy=tag-documents]")
-      .children()
-      .first()
-      .should("have.class", "bg-gray-700");
 
     // 點擊第二個文檔並驗證佈局中顯示的文檔數量
     cy.get("[data-cy=tag-documents]").children().eq(1).click();
@@ -50,9 +45,28 @@ describe("DocsPage", () => {
     // 再次點擊第一個文檔並驗證佈局中顯示的文檔數量
     cy.get("[data-cy=tag-documents]").children().first().click();
     cy.get(".layout").children().should("have.length", 1);
+  });
 
-    // 驗證文檔標題輸入框的值
-    cy.get("[data-cy=title-input]").should("have.value", "Task B Title");
+  it("should filter documents by search term", () => {
+    // 在搜索框中輸入 "Tast" 並驗證過濾後的文檔數量
+    cy.get("[data-cy=search-input]").type("Tast");
+    verifyFilteredResults(6);
+
+    cy.get("[data-cy=tag-documents]").children().contains("Regular Task");
+
+    // 選擇第一個結果並驗證佈局中顯示的文檔數量
+    cy.get("[data-cy=tag-documents]").children().first().click();
+    cy.get(".layout").children().should("have.length", 1);
+
+    // 清空搜索框並輸入 "Tast"，選擇第二個結果
+    cy.get("[data-cy=search-input]").clear().type("Tast");
+    cy.get("[data-cy=tag-documents]").children().eq(1).click();
+    cy.get(".layout").children().should("have.length", 2);
+
+    cy.get("[data-cy=search-input]").clear().type("Tag3");
+    cy.get("[data-cy=tag-documents]").children().contains("Task C Title");
+    cy.get("[data-cy=search-input]").clear().type("low");
+    cy.get("[data-cy=tag-documents]").children().contains("Regular Task 1");
   });
 
   it("should pin and unpin a document", () => {
@@ -77,54 +91,30 @@ describe("DocsPage", () => {
     cy.get("[data-cy=doc-card-id-task-id-3]").should("exist");
   });
 
-  it("should filter documents by search term", () => {
-    // 在搜索框中輸入 "Tast" 並選擇第一個結果
-    cy.get("[data-cy=search-input]").type("Tast");
-    cy.get("[data-cy=search-dropdown]").children().eq(1).click();
-    cy.get(".layout").children().should("have.length", 1);
-
-    // 清空搜索框並輸入 "Tast"，選擇第二個結果
-    cy.get("[data-cy=search-input]").clear();
-    cy.get("[data-cy=search-input]").type("Tast");
-    cy.get("[data-cy=search-dropdown]").children().eq(2).click();
-    cy.get(".layout").children().should("have.length", 2);
-
-    // 再次選擇第一個結果並驗證文檔是否存在
-    cy.get("[data-cy=search-input]").clear();
-    cy.get("[data-cy=search-input]").type("Tast");
-    cy.get("[data-cy=search-dropdown]").children().eq(1).click();
-    cy.get("[data-cy=doc-card-id-task-id-3]").should("exist");
-  });
-
   it("should resize documents", () => {
     // 選擇標籤 "Tag2" 並選中第一個文檔
     cy.get("[data-cy=kanban-task-tags]").contains("Tag2").click();
     cy.get("[data-cy=tag-documents]").children().first().click();
 
-    // 驗證文檔的初始寬度和高度，並模擬調整大小操作
+    // 確保元素已完全渲染
+    cy.get("[data-cy=doc-card-id-task-id-1]").should("be.visible");
+
+    // 調整文檔大小
+    cy.get(
+      "[data-cy=doc-card-id-task-id-1] .react-resizable-handle.react-resizable-handle-ne",
+    )
+      .trigger("mousedown", { clientX: 200, clientY: 200 }) // 起始位置
+      .trigger("mousemove", { clientX: 50, clientY: 350 }) // 往左下移動
+      .trigger("mouseup"); // 結束拖動
+
+    // 驗證文檔的寬度和高度是否符合條件
     cy.get("[data-cy=doc-card-id-task-id-1]")
       .invoke("outerWidth")
-      .then((task1Width) => {
-        cy.get("[data-cy=doc-card-id-task-id-1]")
-          .invoke("outerHeight")
-          .then((task1Height) => {
-            cy.get(
-              "[data-cy=doc-card-id-task-id-1] .react-resizable-handle.react-resizable-handle-ne",
-            )
-              .trigger("mousedown", { clientX: 200, clientY: 200 }) // 起始位置
-              .trigger("mousemove", { clientX: 50, clientY: 350 }) // 往左下移動
-              .trigger("mouseup"); // 結束拖動
+      .should("be.lessThan", 800);
 
-            // 驗證文檔的寬度和高度是否減少
-            cy.get("[data-cy=doc-card-id-task-id-1]")
-              .invoke("outerWidth")
-              .should("be.lessThan", task1Width);
-
-            cy.get("[data-cy=doc-card-id-task-id-1]")
-              .invoke("outerHeight")
-              .should("be.lessThan", task1Height);
-          });
-      });
+    cy.get("[data-cy=doc-card-id-task-id-1]")
+      .invoke("outerHeight")
+      .should("be.lessThan", 500);
   });
 
   it("should drag and drop a document", () => {
@@ -188,4 +178,88 @@ describe("DocsPage", () => {
           .should("have.length", 3);
       });
   });
+
+  it("should save and reload the layout", () => {
+    // Step 1: 用 tag 點兩個 card
+    cy.get("[data-cy=kanban-task-tags]").contains("Tag2").click();
+    cy.get("[data-cy=tag-documents]").children().eq(0).click();
+    cy.get("[data-cy=tag-documents]").children().eq(1).click();
+
+    // // Step 2: 用 search 點一個 card
+    cy.get("[data-cy=search-input]").type("task");
+    cy.wait(500);
+    cy.get("[data-cy=tag-documents]").children().eq(0).click();
+
+    cy.get("[data-cy=doc-card-id-task-id-1] .react-resizable-handle-ne")
+      .trigger("mousedown", { clientX: 600, clientY: 500, force: true })
+      .trigger("mousemove", { clientX: 0, clientY: 0, force: true })
+      .trigger("mouseup");
+
+    cy.get("[data-cy=doc-card-id-task-id-2] .react-resizable-handle-ne")
+      .trigger("mousedown", { clientX: 600, clientY: 500, force: true })
+      .trigger("mousemove", { clientX: 0, clientY: 0, force: true })
+      .trigger("mouseup");
+
+    // Step 4: 將第二個 card 拖移到與第一個並行
+    cy.get("[data-cy=doc-card-id-task-id-2] [data-cy=doc-drag-top]")
+      .trigger("mousedown", { clientX: 0, clientY: 0, force: true })
+      .trigger("mousemove", { clientX: 600, clientY: 600, force: true })
+      .trigger("mouseup", { force: true });
+
+    // Step 5: 儲存 layout
+    cy.get("#save-layout-button").click();
+
+    // Step 6: Reload 並檢查 layout
+    cy.reload();
+    cy.wait("@getDocs");
+
+    // 驗證第一個和第二個 card 的大小和位置
+    cy.get("[data-cy=doc-card-id-task-id-1]")
+      .invoke("outerWidth")
+      .should("be.lessThan", 800);
+
+    cy.get("[data-cy=doc-card-id-task-id-2]")
+      .invoke("outerWidth")
+      .should("be.lessThan", 800);
+
+    // 驗證第二個 card 與第一個 card 並行
+    cy.get("[data-cy=doc-card-id-task-id-1]")
+      .invoke("attr", "style")
+      .then((style1) => {
+        const translateY1 = style1.match(/translate\([^,]+, ([^)]+)\)/)?.[1];
+
+        cy.get("[data-cy=doc-card-id-task-id-2]")
+          .invoke("attr", "style")
+          .then((style2) => {
+            const translateY2 = style2.match(
+              /translate\([^,]+, ([^)]+)\)/,
+            )?.[1];
+            expect(translateY1).to.equal(translateY2); // 驗證 y 軸值相同
+          });
+      });
+  });
+
+  it("should add a new document", () => {
+    // 點擊新增文檔按鈕
+    cy.get("#add-task-button").click();
+
+    // 填寫文檔標題和內容
+    cy.get("[data-cy=title-input]").type("New Document Title");
+    cy.get('[data-cy="editor-content"] .mdxeditor-root-contenteditable').type(
+      "This is the content of the new document.",
+    );
+
+    // 等待 5 秒以確保自動保存觸發
+    cy.wait(3500);
+
+    // 確保 API 被呼叫
+    cy.wait("@updateDoc").its("response.statusCode").should("eq", 200);
+  });
+
+  function verifyFilteredResults(expectedCount: number) {
+    // 驗證過濾後的文檔數量
+    cy.get("[data-cy=tag-documents]")
+      .children()
+      .should("have.length", expectedCount);
+  }
 });

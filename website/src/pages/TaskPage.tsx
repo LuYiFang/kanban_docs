@@ -5,6 +5,7 @@ import { taskPropertyOrder } from "../types/property";
 import { getAllTaskWithProperties } from "../store/slices/kanbanThuck";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../store/store";
+import { DataType } from "../types/kanban";
 
 const TaskPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -15,7 +16,7 @@ const TaskPage: React.FC = () => {
   const taskId = location.pathname.split("/").pop() || "";
 
   useEffect(() => {
-    dispatch(getAllTaskWithProperties({ taskType: "regular" }));
+    dispatch(getAllTaskWithProperties({ taskType: DataType.TASK }));
   }, []);
 
   return (

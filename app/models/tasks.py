@@ -8,7 +8,7 @@ from models.properties import TaskPropertyResponse
 
 
 class TaskType(str, Enum):
-    regular = "regular"
+    task = "task"
     weekly = "weekly"
     docs = "docs"
     all = "all"
@@ -21,8 +21,8 @@ class TaskBase(BaseModel):
     content: str = Field(..., min_length=0,
                          description="Detailed content of the task",
                          example="Implement and validate Cypress interceptors.")
-    type: Optional[str] = Field("regular",
-                                description="Task type (e.g., regular or daily)",
+    type: Optional[str] = Field("task",
+                                description="Task type (e.g., task or daily)",
                                 example="daily")
     order: int = Field(...,
                        description="Order of the task",

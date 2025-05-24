@@ -8,6 +8,7 @@ export const setupInterceptors = () => {
       updatedAt: "2025-04-06T15:30:00Z",
       title: "",
       content: "",
+      type: "task",
       properties: [
         { name: "priority", value: "option-id-low" },
         { name: "status", value: "option-id-todo" },
@@ -26,6 +27,7 @@ export const setupInterceptors = () => {
       id: "task-id-new",
       createdAt: "2025-04-06T12:00:00Z",
       updatedAt: "2025-04-06T15:30:00Z",
+      type: "task",
       title: "Test Task",
       content: "This is a test content.",
     },
@@ -70,6 +72,7 @@ export const setupInterceptors = () => {
           updatedAt: "2025-04-06T16:00:00Z",
           title: "This is default task",
           content: "default",
+          type: "task",
           order: 0,
         },
         {
@@ -77,6 +80,7 @@ export const setupInterceptors = () => {
           updatedAt: "2025-04-06T16:05:00Z",
           title: "Second task",
           content: "This is the second task content.",
+          type: "task",
           order: 0,
         },
         {
@@ -84,6 +88,7 @@ export const setupInterceptors = () => {
           updatedAt: "2025-04-06T16:05:00Z",
           title: "Third task",
           content: "This is the third task content.",
+          type: "task",
           order: 1,
         },
       ],
@@ -105,6 +110,7 @@ export const setupInterceptors = () => {
           updatedAt: "2025-04-06T16:00:00Z",
           title: "This is default task",
           content: "default",
+          type: "task",
           order: 1,
         },
         {
@@ -112,6 +118,7 @@ export const setupInterceptors = () => {
           updatedAt: "2025-04-06T16:05:00Z",
           title: "Second task",
           content: "This is the second task content.",
+          type: "task",
           order: 0,
         },
         {
@@ -119,6 +126,7 @@ export const setupInterceptors = () => {
           updatedAt: "2025-04-06T16:05:00Z",
           title: "Third task",
           content: "This is the third task content.",
+          type: "task",
           order: 0,
         },
       ],

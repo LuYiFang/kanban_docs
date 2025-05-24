@@ -222,7 +222,14 @@ const DocsPage: React.FC = () => {
         </div>
       </div>
       {searchItems.length > 0 && (
-        <div className="mb-4" data-cy="show-docs-result">
+        <div className="mb-4 relative" data-cy="show-docs-result">
+          <button
+            className="absolute p-0 top-2 right-6 w-6 h-6 bg-gray-800 text-white rounded-full flex items-center justify-center hover:bg-gray-600"
+            onClick={() => setSearchItems([])}
+            data-cy="clear-search-results"
+          >
+            <FontAwesomeIcon icon={faTimes} />
+          </button>
           <div
             className="bg-gray-800 p-2 rounded max-h-72 overflow-auto"
             data-cy="tag-documents"

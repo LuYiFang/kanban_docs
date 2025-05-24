@@ -6,6 +6,7 @@ from database import (get_db, insert_default_data_to_db, MongoDB,
                       insert_property_options)
 from migrate.dummy_tasks import (insert_tasks, insert_task_properties,
                                  dummy_option_info)
+from models.tasks import TaskType
 from tests.create_container import start_mongo_container, stop_mongo_container
 
 test_uri = "mongodb://localhost:27018"
@@ -85,7 +86,7 @@ async def get_task1_payload(name_id_map):
         "title": "Test Task",
         "content": "This is a test content",
         "order": 0,
-        "type": "regular",
+        "type": "task",
     }
     properties = [
         {"name": "priority", "value": name_id_map["Low"]},
@@ -103,7 +104,7 @@ async def get_task2_payload(name_id_map):
         "title": "New Task",
         "content": "Content for New Task",
         "order": 1,
-        "type": "regular",
+        "type": TaskType.task,
     }
     properties = [
         {"name": "priority", "value": name_id_map["Low"]},
@@ -169,7 +170,7 @@ async def no_change_update(async_client, db, task_id):
         "title": "Updated Task",
         "content": "Updated task content",
         "order": 0,
-        "type": "regular",
+        "type": TaskType.task,
     }
     response_no_change = await async_client.put(f"/api/task/{task_id}",
                                                 json=payload_no_change)
