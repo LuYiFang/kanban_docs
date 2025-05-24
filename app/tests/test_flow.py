@@ -200,7 +200,7 @@ async def update_task(async_client, task_id):
 
 async def varify_properties(async_client, task_id, options_name_id_map):
     response_task_properties = await async_client.get(
-        "/api/task/properties?task_type=regular")
+        "/api/task/properties?task_type=task")
     assert response_task_properties.status_code == 200
     tasks_with_properties = response_task_properties.json()
     assert len(tasks_with_properties) == 1
@@ -225,7 +225,7 @@ async def delete_task(async_client, task_id):
 
 async def check_empty_task(async_client):
     response_check = await async_client.get(
-        f"/api/task/properties?task_type=regular")
+        f"/api/task/properties?task_type=task")
     data = response_check.json()
     assert response_check.status_code == 200
     assert len(data) == 0
