@@ -15,6 +15,7 @@ interface KanbanCardContentProps {
   cardVisibleProperties: string[];
   propertyOptionsIdNameMap: Record<string, string>;
   readonly: boolean;
+  deleteContentLabelTaskCallback?: () => void;
 }
 
 const Card: React.FC<KanbanCardContentProps> = ({
@@ -22,6 +23,7 @@ const Card: React.FC<KanbanCardContentProps> = ({
   cardVisibleProperties,
   propertyOptionsIdNameMap,
   readonly = false,
+  deleteContentLabelTaskCallback,
 }) => {
   return (
     <div
@@ -116,6 +118,7 @@ const Card: React.FC<KanbanCardContentProps> = ({
               propertyName={propertyName}
               taskId={task.id}
               readonly={readonly}
+              deleteTaskCallback={deleteContentLabelTaskCallback}
             />
           );
         }

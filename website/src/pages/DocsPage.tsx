@@ -185,6 +185,9 @@ const DocsPage: React.FC = () => {
       });
   };
 
+  const handleDeleteDoc = (docId: string) => {
+    UnpinnedDocs(docId);
+  };
   return (
     <div className="p-4 bg-gray-900 text-gray-300 h-full relative flex flex-col">
       <h1 className="text-2xl font-bold mb-4">Documents</h1>
@@ -331,6 +334,7 @@ const DocsPage: React.FC = () => {
                 cardVisibleProperties={["content"]}
                 propertyOptionsIdNameMap={propertyOptionsIdNameMap}
                 readonly={false}
+                deleteContentLabelTaskCallback={() => handleDeleteDoc(doc.id)}
               />
             </div>
           );

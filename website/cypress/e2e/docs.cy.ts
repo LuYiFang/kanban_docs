@@ -256,6 +256,81 @@ describe("DocsPage", () => {
     cy.wait("@updateDoc").its("response.statusCode").should("eq", 200);
   });
 
+  it("should delete a document", () => {
+    // 選擇標籤 "Tag2" 並選中第一個文檔
+    cy.get("[data-cy=kanban-task-tags]").contains("Tag2").click();
+    cy.get("[data-cy=tag-documents]").children().first().click();
+
+    // 驗證佈局中顯示的文檔數量
+    cy.get(".layout").children().should("have.length", 1);
+
+    // 打開選單
+    cy.get(".layout")
+      .children()
+      .first()
+      .find('[data-cy="edit-menu-trigger"]')
+      .click();
+
+    // 確保選單展開
+    cy.get('[data-cy="edit-menu"]').should("exist");
+
+    // 點擊刪除按鈕
+    cy.get('[data-cy="delete-task-button"]').click();
+
+    // 驗證佈局中文檔已被刪除
+    cy.get(".layout").children().should("have.length", 0);
+
+    // 確保 API 被呼叫
+    cy.wait("@deleteDocWithProperties")
+      .its("response.statusCode")
+      .should("eq", 200);
+  });
+
+  it("should update document properties and add a new tag", () => {
+    // 選擇標籤 "Tag2" 並選中第一個文檔
+    cy.get("[data-cy=kanban-task-tags]").contains("Tag2").click();
+    cy.get("[data-cy=tag-documents]").children().first().click();
+
+    // 打開屬性編輯選單
+    cy.get(".layout")
+      .children()
+      .first()
+      .find('[data-cy="add-property-button"]')
+      .click();
+
+    // 添加新標籤
+    cy.get("[data-cy=property-select-option]").contains("Tag3").click();
+
+    // 確保 API 被呼叫
+    cy.wait("@updateProperty").its("response.statusCode").should("eq", 200);
+
+    // 驗證新標籤是否正確顯示
+    cy.get("[data-cy=multi-interactive-select-selected]")
+      .children()
+      .contains("Tag3")
+      .should("exist");
+
+    cy.get("[data-cy=multi-interactive-select-selected]")
+      .children()
+      .contains("Tag2")
+      .find("[data-cy=remove-selected-option]")
+      .click();
+
+    cy.wait("@updateProperty").its("response.statusCode").should("eq", 200);
+
+    cy.get("[data-cy=multi-interactive-select-selected]")
+      .children()
+      .should("have.length", 3);
+    cy.get("[data-cy=multi-interactive-select-selected]")
+      .children()
+      .contains("Tag3")
+      .should("exist");
+    cy.get("[data-cy=multi-interactive-select-selected]")
+      .children()
+      .contains("Tag1")
+      .should("exist");
+  });
+
   function verifyFilteredResults(expectedCount: number) {
     // 驗證過濾後的文檔數量
     cy.get("[data-cy=tag-documents]")

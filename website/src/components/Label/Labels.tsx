@@ -130,7 +130,8 @@ export const ContentLabel: React.FC<{
   propertyName: string;
   readonly: boolean;
   taskId: string;
-}> = ({ propertyName, readonly, taskId }) => {
+  deleteTaskCallback?: () => void;
+}> = ({ propertyName, readonly, taskId, deleteTaskCallback = () => {} }) => {
   return (
     <div
       className="mt-2 text-gray-300 text-sm flex-grow"
@@ -141,6 +142,7 @@ export const ContentLabel: React.FC<{
         dataName={DataType.ALL}
         propertyOrder={["tags"]}
         readOnly={readonly}
+        deleteTaskCallback={deleteTaskCallback}
       />
     </div>
   );

@@ -93,19 +93,34 @@ const kanbanSlice = createSlice({
       })
       .addCase(deleteTask.fulfilled, (state, action) => {
         const { taskId } = action.payload;
-        state.tasks = state.tasks.filter((task) => task.id !== taskId);
+        const task = state.all.find((task) => task.id === taskId);
+        if (!task) return;
+
+        if (task.type === DataType.TASK) {
+          state.tasks = state.tasks.filter((task) => task.id !== taskId);
+        }
+        state.all = state.all.filter((task) => task.id !== taskId);
       })
       .addCase(updateProperty.fulfilled, (state, action) => {
         const { taskId, updatedProperty } = action.payload;
-        const task = state.tasks.find((task) => task.id === taskId);
-        if (!task) return;
+        const item = state.all.find((item) => item.id === taskId);
+        if (!item) return;
 
-        const propertyIndex = task.properties.findIndex(
-          (prop) => prop.id === updatedProperty.id,
-        );
-        if (propertyIndex < 0) return;
+        const updateItemProperty = (item: TaskWithProperties) => {
+          const propertyIndex = item.properties.findIndex(
+            (prop) => prop.id === updatedProperty.id,
+          );
+          if (propertyIndex < 0) return;
 
-        task.properties[propertyIndex] = updatedProperty;
+          item.properties[propertyIndex] = updatedProperty;
+        };
+
+        if (item.type === DataType.TASK) {
+          const task = state.tasks.find((task) => task.id === taskId);
+          if (task) updateItemProperty(task);
+        }
+
+        updateItemProperty(item);
       })
       .addCase(getPropertiesAndOptions.fulfilled, (state, action) => {
         state.propertySetting = action.payload;

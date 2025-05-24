@@ -212,4 +212,21 @@ export const setupInterceptors = () => {
       content: "This is the content of the new document.",
     },
   }).as("updateDoc");
+
+  cy.intercept("DELETE", "**/task/*/properties", {
+    statusCode: 200,
+    body: {},
+  }).as("deleteDocWithProperties");
+
+  // Update Property
+  cy.intercept("PUT", "**/property/*", {
+    statusCode: 200,
+    body: {
+      id: "property-id-priority",
+      createdAt: "2025-04-06T12:00:00Z",
+      updatedAt: "2025-04-06T15:30:00Z",
+      name: "priority",
+      value: "option-id-high",
+    },
+  }).as("updateProperty");
 };
