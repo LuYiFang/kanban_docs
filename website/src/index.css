@@ -87,4 +87,8 @@ button:focus-visible {
   blockquote {
     @apply border-l-4 border-gray-400 pl-4 italic ;
   }
+
+  summary {
+    display: block;
+  }
 }

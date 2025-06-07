@@ -12,6 +12,8 @@ import {
   codeMirrorPlugin,
   CodeToggle,
   CreateLink,
+  diffSourcePlugin,
+  DiffSourceToggleWrapper,
   directivesPlugin,
   frontmatterPlugin,
   headingsPlugin,
@@ -22,6 +24,7 @@ import {
   InsertImage,
   InsertTable,
   InsertThematicBreak,
+  jsxPlugin,
   linkDialogPlugin,
   linkPlugin,
   listsPlugin,
@@ -96,28 +99,34 @@ const MarkdownEditor = forwardRef<MarkdownEditorMethods, MarkdownEditorProps>(
         className="dark-theme w-full"
         markdown={""}
         onChange={handleEditorChange}
+        onError={(error) => {
+          console.error("Error in MDX editor", error);
+        }}
         plugins={[
           listsPlugin(),
           toolbarPlugin({
             toolbarClassName: "my-classname",
             toolbarContents: () => (
               <>
-                <UndoRedo />
-                <ListsToggle />
-                <InsertTable />
-                <StrikeThroughSupSubToggles />
-                <BoldItalicUnderlineToggles />
-                <InsertThematicBreak />
-                <InsertAdmonition />
-                <CodeToggle />
-                <InsertCodeBlock />
-                <CreateLink />
-                <InsertImage />
-                <InsertFrontmatter />
-                <BlockTypeSelect />
+                <DiffSourceToggleWrapper>
+                  <UndoRedo />
+                  <ListsToggle />
+                  <InsertTable />
+                  <StrikeThroughSupSubToggles />
+                  <BoldItalicUnderlineToggles />
+                  <InsertThematicBreak />
+                  <InsertAdmonition />
+                  <CodeToggle />
+                  <InsertCodeBlock />
+                  <CreateLink />
+                  <InsertImage />
+                  <InsertFrontmatter />
+                  <BlockTypeSelect />
+                </DiffSourceToggleWrapper>
               </>
             ),
           }),
+          jsxPlugin(),
           quotePlugin(),
           headingsPlugin(),
           linkPlugin(),
@@ -132,18 +141,23 @@ const MarkdownEditor = forwardRef<MarkdownEditorMethods, MarkdownEditorProps>(
           }),
           codeMirrorPlugin({
             codeBlockLanguages: {
-              js: "JavaScript",
+              javascript: "JavaScript",
               css: "CSS",
-              txt: "text",
               tsx: "TypeScript",
-              py: "Python",
+              python: "Python",
+              sql: "SQL",
               mermaid: "Mermaid",
+              csharp: "C#",
             },
           }),
           directivesPlugin({
             directiveDescriptors: [AdmonitionDirectiveDescriptor],
           }),
           markdownShortcutPlugin(),
+          diffSourcePlugin({
+            diffMarkdown: "An older version",
+            viewMode: "rich-text",
+          }),
         ]}
       />
     );

@@ -17,6 +17,7 @@ import {
 } from "../../utils/fetchApi";
 import { AxiosError } from "axios";
 import { Layouts } from "react-grid-layout";
+import _ from "lodash";
 
 export const getAllTaskWithProperties = createAsyncThunk(
   "kanban/getAllTaskWithProperties",
@@ -191,8 +192,9 @@ export const saveLayout = createAsyncThunk(
     try {
       if (
         !layouts ||
-        Object.values(layouts).some(
-          (layout) => Array.isArray(layout) && layout.length === 0,
+        _.every(
+          _.values(layouts),
+          (layout) => _.isArray(layout) && layout.length === 0,
         )
       )
         return;

@@ -15,11 +15,16 @@ import Card from "../components/Card/Card";
 import _ from "lodash";
 import { MultiChipLabel } from "../components/Label/Labels";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBookmark, faTimes } from "@fortawesome/free-solid-svg-icons"; // 新增引入 faSave
+import {
+  faBookmark,
+  faTimes,
+  faUpload,
+} from "@fortawesome/free-solid-svg-icons";
 import Fuse from "fuse.js";
 import { generateTask } from "../utils/kanbanUtils";
 import { defaultDocsProperties } from "../types/property";
 import AddTaskButton from "../components/Kanban/AddTaskButton";
+import { readMarkdownFile } from "../utils/tools";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -33,7 +38,8 @@ const DocsPage: React.FC = () => {
   const [searchItems, setSearchItems] = useState<TaskWithProperties[]>([]);
   const [layouts, setLayouts] = useState<Layouts>({});
   const [newItemId, setNewItemId] = useState<string>("");
-  const [isDocsLayoutLoaded, setIsDocsLayoutLoaded] = useState(false); // 新增标志变量
+  const [isDocsLayoutLoaded, setIsDocsLayoutLoaded] = useState(false);
+  const [showSaveSuccess, setShowSaveSuccess] = useState<boolean | null>(null);
 
   const dispatch = useDispatch<AppDispatch>();
   const allItems: TaskWithProperties[] = useSelector(
@@ -52,8 +58,13 @@ const DocsPage: React.FC = () => {
   useEffect(() => {
     if (!isDocsLayoutLoaded && docsLayout && _.keys(docsLayout).length) {
       setLayouts(docsLayout);
+      const recordedLayout = _.find(docsLayout, (layout) =>
+        Boolean(_.isArray(layout) && layout.length),
+      );
+      if (!recordedLayout) return;
+
       setPinnedItems(
-        docsLayout.lg
+        recordedLayout
           .map((item) => allItems.find((doc) => doc.id === item.i)!)
           .filter(Boolean),
       );
@@ -172,11 +183,22 @@ const DocsPage: React.FC = () => {
   };
 
   const handleSaveLayout = () => {
-    dispatch(saveLayout(layouts));
+    dispatch(saveLayout(layouts))
+      .unwrap()
+      .then((result) => {
+        if (result) {
+          setShowSaveSuccess(true);
+        } else {
+          setShowSaveSuccess(false);
+        }
+        setTimeout(() => setShowSaveSuccess(null), 2000);
+      });
   };
 
-  const handleAddDoc = () => {
+  const handleAddDoc = (title: string, content: string) => {
     const newTask = generateTask(defaultDocsProperties, "docs", 0);
+    newTask.task.title = title;
+    newTask.task.content = content;
     dispatch(createTaskWithDefaultProperties(newTask))
       .unwrap()
       .then((newItem) => {
@@ -188,10 +210,21 @@ const DocsPage: React.FC = () => {
   const handleDeleteDoc = (docId: string) => {
     UnpinnedDocs(docId);
   };
+
+  const handleImportMarkdown = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const markdownContent = await readMarkdownFile(file);
+    handleAddDoc(file.name.replace(/\.[^/.]+$/, ""), markdownContent);
+  };
+
   return (
     <div className="p-4 bg-gray-900 text-gray-300 h-full relative flex flex-col">
       <h1 className="text-2xl font-bold mb-4">Documents</h1>
-      <AddTaskButton onClick={handleAddDoc} />
+      <AddTaskButton onClick={() => handleAddDoc("", "")} />
       <button
         className="absolute top-4 right-20 w-12 h-12 bg-green-500 text-white rounded-full shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 flex items-center justify-center group"
         onClick={handleSaveLayout}
@@ -202,6 +235,24 @@ const DocsPage: React.FC = () => {
           Save Layout
         </span>
       </button>
+      {showSaveSuccess !== null && (
+        <span className="z-50 absolute top-[68px] right-[56px] px-2 py-1 text-xs text-white bg-gray-700 rounded shadow-lg">
+          {showSaveSuccess ? "Layout Saved!" : "Failed to Save Layout!"}
+        </span>
+      )}
+      <input
+        type="file"
+        accept=".md"
+        className="hidden"
+        id="import-markdown-input"
+        onChange={handleImportMarkdown}
+      />
+      <label
+        htmlFor="import-markdown-input"
+        className="absolute top-4 right-36 w-12 h-12 bg-yellow-500 text-white rounded-full shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 flex items-center justify-center group cursor-pointer"
+      >
+        <FontAwesomeIcon icon={faUpload} />
+      </label>
       <div className="mb-3">
         <input
           type="text"
