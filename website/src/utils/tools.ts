@@ -22,3 +22,16 @@ export const formatToCapitalCase = (value: string) => {
 export function convertToKebabCase(value: string): string {
   return value.toLowerCase().replace(/\s+/g, "-");
 }
+
+// Helper function to extract file URLs from content
+export const extractFileUrls = (content: string): string[] => {
+  const regex = /!\[.*]\((.*\/api\/files\/[^)]+)\)/g;
+  const urls: string[] = [];
+  let match;
+  while ((match = regex.exec(content)) !== null) {
+    const fileId = match[1].split("/").pop();
+    if (!fileId) continue;
+    urls.push(fileId);
+  }
+  return urls;
+};

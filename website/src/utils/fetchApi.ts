@@ -95,7 +95,17 @@ export const getFileIdByNameApi = async (filename: string) => {
     throw error;
   }
 };
+
 export const deleteFileApi = async (fileId: string) => {
-  const response = await apiClient.delete(`/files/${fileId}`);
-  return response.data;
+  try {
+    const response = await apiClient.delete(`/files/${fileId}`);
+    return response.data;
+  } catch (error) {
+    const axiosError = error as AxiosError;
+    if (axiosError?.response?.status === 404) {
+      console.warn(`File with ID ${fileId} not found.`);
+      return null;
+    }
+    throw error;
+  }
 };

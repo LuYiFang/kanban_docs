@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { kanbanDataName } from "../../types/kanban";
 import Editor, { EditorMethods } from "../Editor/Editor";
 
@@ -20,19 +20,30 @@ const EditDialog: React.FC<EditDialogProps> = ({
   readOnly,
 }) => {
   const editorRef = useRef<EditorMethods>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleMouseDown = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  const handleMouseMove = useCallback(() => {
+    setIsDragging(true);
+  }, []);
 
   const handleOverlayClick = useCallback(() => {
-    if (!editorRef.current) return;
+    if (isDragging || !editorRef.current) return;
     editorRef.current.save();
     editorRef.current.close();
     onClose();
-  }, [taskId, onClose]);
+  }, [isDragging, onClose]);
 
   if (!isOpen) return null;
 
   return (
     <div
       className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center"
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
       onClick={handleOverlayClick}
       data-cy="edit-dialog-backdrop"
     >

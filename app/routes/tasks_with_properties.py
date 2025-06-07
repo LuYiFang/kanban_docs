@@ -9,7 +9,8 @@ from models.tasks import TaskWithPropertiesResponse, TaskUpdate, TaskType
 from services.properties import delete_task_property_by_task
 from services.tasks import (delete_task_service)
 from services.tasks_with_properties import (get_tasks_with_properties_service,
-                                            create_task_with_properties_service)
+                                            create_task_with_properties_service,
+                                            summarize_weekly_tasks)
 
 router = APIRouter()
 
@@ -58,3 +59,11 @@ async def delete_tasks_with_properties(task_id: str, db=Depends(get_db)):
             raise HTTPException(status_code=404, detail="Property not found")
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/summary/weekly", response_model=str)
+async def get_weekly_tasks_summary(db=Depends(get_db)):
+    """
+    API to summarize weekly tasks.
+    """
+    return await summarize_weekly_tasks(db)

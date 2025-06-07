@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  deleteFile,
   deleteTask,
   updateProperty,
   updateTask,
@@ -11,6 +12,7 @@ import { TaskWithProperties } from "../../types/task";
 import _ from "lodash";
 import moment from "moment/moment";
 import { Property } from "../../types/property";
+import { extractFileUrls } from "../../utils/tools";
 
 export const useEditor = (
   taskId: string,
@@ -41,7 +43,18 @@ export const useEditor = (
 
   useEffect(() => {
     setTitle(task.title);
-  }, [task.title]);
+  }, [task.id]);
+
+  function deleteContentFiles(content: string) {
+    const originalImageUrls = extractFileUrls(task.content);
+    const newImageUrls = extractFileUrls(content);
+
+    const deletedFiles = _.difference(originalImageUrls, newImageUrls);
+
+    _.each(deletedFiles || [], (fileId) => {
+      dispatch(deleteFile(fileId));
+    });
+  }
 
   const saveTask = useCallback(
     (title: string | null, content: string | null) => {
@@ -49,7 +62,11 @@ export const useEditor = (
 
       const newTask = { ...task };
       if (title !== null) newTask.title = title;
-      if (content !== null) newTask.content = content;
+      if (content !== null) {
+        deleteContentFiles(content);
+
+        newTask.content = content;
+      }
 
       dispatch(
         updateTask({
@@ -92,12 +109,19 @@ export const useEditor = (
     [],
   );
 
-  const handleDeleteTask = useCallback(() => {
-    if (readOnly) return;
+  const handleDeleteTask = useCallback(
+    (content: string) => {
+      if (readOnly) return;
 
-    dispatch(deleteTask({ taskId }));
-    if (deleteTaskCallback) deleteTaskCallback();
-  }, [dispatch, taskId]);
+      dispatch(deleteTask({ taskId }));
+      const deletedFiles = extractFileUrls(content);
+      _.each(deletedFiles || [], (fileId) => {
+        dispatch(deleteFile(fileId));
+      });
+      if (deleteTaskCallback) deleteTaskCallback();
+    },
+    [dispatch, taskId],
+  );
 
   return {
     title,

@@ -110,7 +110,9 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
             >
               <button
                 className="text-gray-200 hover:text-red-600"
-                onClick={handleDeleteTask}
+                onClick={() =>
+                  handleDeleteTask(editorRef.current?.getMarkdown() || "")
+                }
                 data-cy="delete-task-button"
               >
                 Delete Task

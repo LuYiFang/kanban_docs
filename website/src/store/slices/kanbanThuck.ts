@@ -240,3 +240,16 @@ export const getLayout = createAsyncThunk(
     }
   },
 );
+
+export const deleteFile = createAsyncThunk(
+  "files/deleteFile",
+  async (fileId: string, thunkAPI) => {
+    try {
+      await deleteFileApi(fileId);
+      return { fileId };
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      return thunkAPI.rejectWithValue(axiosError?.response?.data);
+    }
+  },
+);
