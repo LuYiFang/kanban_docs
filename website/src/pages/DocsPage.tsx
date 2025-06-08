@@ -13,18 +13,17 @@ import "react-resizable/css/styles.css";
 import { TaskWithProperties } from "../types/task";
 import Card from "../components/Card/Card";
 import _ from "lodash";
-import { MultiChipLabel } from "../components/Label/Labels";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBookmark,
   faTimes,
   faUpload,
 } from "@fortawesome/free-solid-svg-icons";
-import Fuse from "fuse.js";
 import { generateTask } from "../utils/kanbanUtils";
 import { defaultDocsProperties } from "../types/property";
 import AddTaskButton from "../components/Kanban/AddTaskButton";
 import { readMarkdownFile } from "../utils/tools";
+import SearchSelect from "../components/Select/SearchSelect";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -33,9 +32,6 @@ const CARD_HEIGHT = 16;
 
 const DocsPage: React.FC = () => {
   const [pinnedItems, setPinnedItems] = useState<TaskWithProperties[]>([]);
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [selectedTag, setSelectedTag] = useState<string>("");
-  const [searchItems, setSearchItems] = useState<TaskWithProperties[]>([]);
   const [layouts, setLayouts] = useState<Layouts>({});
   const [newItemId, setNewItemId] = useState<string>("");
   const [isDocsLayoutLoaded, setIsDocsLayoutLoaded] = useState(false);
@@ -95,73 +91,6 @@ const DocsPage: React.FC = () => {
 
     return _.merge({}, taskIdTitleMap, propertyIdNameMap);
   }, [allItems, propertySetting]);
-
-  const fuse = useMemo(() => {
-    return new Fuse(allItems, {
-      keys: [
-        { name: "title", getFn: (doc) => doc.title },
-        { name: "content", getFn: (doc) => doc.content },
-        {
-          name: "propertiesValue",
-          getFn: (doc) =>
-            _.map(doc.properties, (p) => {
-              if (_.isArray(p.value)) {
-                return _.map(p.value, (v) => propertyOptionsIdNameMap[v]).join(
-                  ",",
-                );
-              }
-              return propertyOptionsIdNameMap[p.value];
-            }),
-        },
-      ],
-      threshold: 0.3,
-    });
-  }, [allItems]);
-
-  const allTags = useMemo(() => {
-    return Array.from(
-      new Set(
-        allItems
-          .flatMap(
-            (item) =>
-              item.properties.find((property) => property.name === "tags")
-                ?.value || [],
-          )
-          .filter((tag) => tag),
-      ),
-    ).sort();
-  }, [allItems]);
-
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
-    setSearchTerm(value);
-    filteredSearch();
-  };
-
-  const filteredSearch = _.debounce(() => {
-    setSearchItems(fuse.search(searchTerm).map((result) => result.item));
-  }, 500);
-
-  const handleTagSearch = (tagName: string) => {
-    if (!tagName) return;
-
-    const invertedMap = _.invert(propertyOptionsIdNameMap);
-    const tagId = invertedMap[tagName];
-    if (tagId === selectedTag) {
-      setSelectedTag("");
-      setSearchItems([]);
-      return;
-    }
-    setSelectedTag(tagId);
-
-    setSearchItems(
-      allItems.filter((item) =>
-        item.properties
-          .find((property) => property.name === "tags")
-          ?.value.includes(tagId),
-      ),
-    );
-  };
 
   const handleSelectDoc = (docId: string) => {
     const doc = allItems.find((item) => item.id === docId);
@@ -253,65 +182,12 @@ const DocsPage: React.FC = () => {
       >
         <FontAwesomeIcon icon={faUpload} />
       </label>
-      <div className="mb-3">
-        <input
-          type="text"
-          placeholder="Search documents..."
-          value={searchTerm}
-          onChange={handleSearch}
-          className="p-2 w-1/3 border rounded bg-gray-800 text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          data-cy="search-input"
-        />
-      </div>
-      <div className="mb-6">
-        <div className="flex flex-wrap gap-2" data-cy="all-tags">
-          <MultiChipLabel
-            propertyName={"tags"}
-            propertyValues={_.map(
-              allTags,
-              (tag) => propertyOptionsIdNameMap[tag],
-            )}
-            onClick={handleTagSearch}
-          />
-        </div>
-      </div>
-      {searchItems.length > 0 && (
-        <div className="mb-4 relative" data-cy="show-docs-result">
-          <button
-            className="absolute p-0 top-2 right-6 w-6 h-6 bg-gray-800 text-white rounded-full flex items-center justify-center hover:bg-gray-600"
-            onClick={() => setSearchItems([])}
-            data-cy="clear-search-results"
-          >
-            <FontAwesomeIcon icon={faTimes} />
-          </button>
-          <div
-            className="bg-gray-800 p-2 rounded max-h-72 overflow-auto"
-            data-cy="tag-documents"
-          >
-            {searchItems.map((doc) => {
-              let alreadyPinned = false;
-              if (
-                _.includes(
-                  pinnedItems.map((item) => item.id),
-                  doc.id,
-                )
-              ) {
-                alreadyPinned = true;
-              }
-
-              return (
-                <div
-                  key={doc.id}
-                  className={`p-1.5 border-b border-gray-700 ${alreadyPinned ? "bg-gray-700" : "bg-gray-800"} hover:bg-gray-600 cursor-pointer`}
-                  onClick={() => handleSelectDoc(doc.id)}
-                >
-                  {doc.title}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      <SearchSelect
+        allItems={allItems}
+        propertyOptionsIdNameMap={propertyOptionsIdNameMap}
+        onSelectDoc={handleSelectDoc}
+        searchClass="w-1/3"
+      />
       <ResponsiveGridLayout
         className="layout bg-gray-800 flex-grow overflow-auto"
         layouts={layouts}

@@ -47,6 +47,7 @@ import { useDispatch } from "react-redux";
 import { AppDispatch } from "../../store/store";
 import { MermaidCodeEditorDescriptor } from "./MermaidCodeEditorDescriptor";
 import mermaid from "mermaid";
+import { InsertTask } from "./InsertTask";
 
 interface MarkdownEditorProps {
   readOnly: boolean;
@@ -112,6 +113,7 @@ const MarkdownEditor = forwardRef<MarkdownEditorMethods, MarkdownEditorProps>(
                   <UndoRedo />
                   <ListsToggle />
                   <InsertTable />
+                  <InsertTask />
                   <StrikeThroughSupSubToggles />
                   <BoldItalicUnderlineToggles />
                   <InsertThematicBreak />
