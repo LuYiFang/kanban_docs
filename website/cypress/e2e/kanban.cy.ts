@@ -107,11 +107,11 @@ describe("Kanban Page Workflow Tests", () => {
   });
 
   it("should delete a task and verify it is removed from the board", () => {
-    const taskId = "task-id-1";
+    const taskId = "task-id-2";
 
     // 打開任務對話框
     cy.get(`[data-rbd-draggable-id="${taskId}"]`)
-      .contains("This is default task")
+      .contains("Second task")
       .click();
 
     // 確保 Edit Dialog 打開
@@ -127,6 +127,9 @@ describe("Kanban Page Workflow Tests", () => {
 
     // 點擊刪除按鈕
     cy.get('[data-cy="delete-task-button"]').click();
+
+    // 檢查是否觸發 deleteFile API
+    cy.wait("@deleteFile").its("response.statusCode").should("eq", 200);
 
     // 確保 Edit Dialog 關閉
     cy.get('[data-cy="edit-dialog"]').should("not.exist");

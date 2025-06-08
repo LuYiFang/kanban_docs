@@ -5,6 +5,7 @@ export const setupInterceptors = () => {
     body: [
       {
         id: "task-id-1",
+        type: "task",
         createdAt: "2025-04-29T10:00:00Z",
         updatedAt: "2025-05-01T12:00:00Z",
         title: "Task A Level",
@@ -27,6 +28,7 @@ export const setupInterceptors = () => {
       },
       {
         id: "task-id-2",
+        type: "task",
         createdAt: "2025-04-29T14:00:00Z",
         updatedAt: "2025-05-01T15:00:00Z",
         title: "Task B Level",
@@ -52,6 +54,7 @@ export const setupInterceptors = () => {
       },
       {
         id: "task-id-3",
+        type: "task",
         createdAt: "2025-04-29T16:00:00Z",
         updatedAt: "2025-05-02T08:00:00Z",
         title: "Task C Level - Project D",
@@ -78,6 +81,7 @@ export const setupInterceptors = () => {
       },
       {
         id: "task-id-4",
+        type: "docs",
         createdAt: "2025-04-30T10:00:00Z",
         updatedAt: "2025-05-02T09:30:00Z",
         title: "Task C Level - Project A",
@@ -108,6 +112,7 @@ export const setupInterceptors = () => {
       },
       {
         id: "task-id-5",
+        type: "docs",
         createdAt: "2025-04-30T12:00:00Z",
         updatedAt: "2025-05-02T11:00:00Z",
         title: "Task D Level",

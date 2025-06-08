@@ -34,7 +34,8 @@ export const setupBaseInterceptors = () => {
         createdAt: "2025-04-06T14:00:00Z",
         updatedAt: "2025-05-01T15:45:00Z",
         title: "Second task",
-        content: "This is the second task content.",
+        content:
+          "This is the second task content.![link](https://api/files/edwefewf).",
         order: 1,
         type: "task",
         properties: [
@@ -295,4 +296,10 @@ export const setupBaseInterceptors = () => {
       },
     ],
   }).as("getPropertiesOptions");
+
+  // Delete File
+  cy.intercept("DELETE", "**/api/files/*", {
+    statusCode: 200,
+    body: "12345678",
+  }).as("deleteFile");
 };

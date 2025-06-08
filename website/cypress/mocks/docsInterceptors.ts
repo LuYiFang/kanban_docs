@@ -187,18 +187,25 @@ export const setupInterceptors = () => {
   });
 
   // Mock Add Document API
-  cy.intercept("POST", "**/task/properties", {
-    statusCode: 200,
-    body: {
-      id: "doc-id-new",
-      createdAt: "2025-04-06T12:00:00Z",
-      updatedAt: "2025-04-06T15:30:00Z",
-      title: "",
-      content: "",
-      type: "docs",
-      properties: [{ name: "tags", value: [] }],
+  cy.intercept(
+    {
+      method: "POST",
+      url: "**/task/properties",
+      times: 1, // 此回應僅使用一次
     },
-  }).as("createDocWithProperties");
+    {
+      statusCode: 200,
+      body: {
+        id: "doc-id-new",
+        createdAt: "2025-04-06T12:00:00Z",
+        updatedAt: "2025-04-06T15:30:00Z",
+        title: "",
+        content: "",
+        type: "docs",
+        properties: [{ name: "tags", value: [] }],
+      },
+    },
+  ).as("createDocWithProperties");
 
   // Update documents
   cy.intercept("PUT", "**/task/*", {
@@ -229,4 +236,25 @@ export const setupInterceptors = () => {
       value: "option-id-high",
     },
   }).as("updateProperty");
+
+  // Import Document
+  cy.intercept(
+    {
+      method: "POST",
+      url: "**/task/properties",
+      times: 1, // 此回應僅使用一次
+    },
+    {
+      statusCode: 200,
+      body: {
+        id: "doc-id-import",
+        createdAt: "2025-04-06T12:00:00Z",
+        updatedAt: "2025-04-06T15:30:00Z",
+        title: "example",
+        content: "## Markdown Title\n\nThis is markdown content.",
+        type: "docs",
+        properties: [{ name: "tags", value: [] }],
+      },
+    },
+  ).as("createDocWithProperties");
 };

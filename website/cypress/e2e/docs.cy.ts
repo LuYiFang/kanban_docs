@@ -103,8 +103,8 @@ describe("DocsPage", () => {
     cy.get(
       "[data-cy=doc-card-id-task-id-1] .react-resizable-handle.react-resizable-handle-ne",
     )
-      .trigger("mousedown", { clientX: 200, clientY: 200 }) // 起始位置
-      .trigger("mousemove", { clientX: 50, clientY: 350 }) // 往左下移動
+      .trigger("mousedown", { clientX: 200, clientY: 200, force: true }) // 起始位置
+      .trigger("mousemove", { clientX: 50, clientY: 350, force: true }) // 往左下移動
       .trigger("mouseup"); // 結束拖動
 
     // 驗證文檔的寬度和高度是否符合條件
@@ -329,6 +329,22 @@ describe("DocsPage", () => {
       .children()
       .contains("Tag1")
       .should("exist");
+  });
+
+  it("should import a markdown file", () => {
+    // 模擬選擇 markdown 文件
+    const markdownContent = "## Markdown Title\n\nThis is markdown content.";
+    const fileName = "example.md";
+    cy.get("#import-markdown-input").selectFile(
+      {
+        contents: Cypress.Buffer.from(markdownContent),
+        fileName: fileName,
+        mimeType: "text/markdown",
+      },
+      { force: true },
+    );
+
+    cy.get("[data-cy=doc-card-id-doc-id-import]").should("exist");
   });
 
   function verifyFilteredResults(expectedCount: number) {

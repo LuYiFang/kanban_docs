@@ -67,7 +67,6 @@ export const useEditor = (
 
         newTask.content = content;
       }
-
       dispatch(
         updateTask({
           taskId,

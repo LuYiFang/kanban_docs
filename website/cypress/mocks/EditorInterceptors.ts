@@ -58,4 +58,29 @@ export const setupInterceptors = () => {
       body: Cypress.Blob.base64StringToBlob(fileContent, "image/jpeg"),
     }).as("getFile");
   });
+
+  // Update Task
+  cy.intercept(
+    {
+      method: "PUT",
+      url: "**/task/*",
+      times: 1, // 此回應僅使用一次
+    },
+    {
+      statusCode: 200,
+      body: {
+        id: "task-id-1",
+        createdAt: "2025-04-06T12:00:00Z",
+        updatedAt: "2025-04-06T15:30:00Z",
+        title: "Updated Task Title",
+        content: "default![](http://localhost:9000/api/files/12345678)",
+      },
+    },
+  ).as("updateTask");
+  //
+  // // Delete File
+  // cy.intercept("DELETE", "**/api/files/*", {
+  //   statusCode: 200,
+  //   body: "12345678",
+  // }).as("deleteFile");
 };

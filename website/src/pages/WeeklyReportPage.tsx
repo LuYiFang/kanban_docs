@@ -30,7 +30,7 @@ const WeeklyReportPage: React.FC = () => {
         </button>
       </div>
       <KanbanBoard
-        dataName="tasks"
+        dataName="all"
         groupPropertyName="level"
         columnSort={levelOrder}
         defaultProperties={defaultTaskProperties}

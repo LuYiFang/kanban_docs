@@ -175,8 +175,26 @@ describe("Editor Workflow Tests", () => {
       });
     });
 
+    //檢查有沒有去打uploadFile
+    cy.wait("@uploadFile").its("response.statusCode").should("eq", 200);
+
     // 確保圖片 URL 被插入到內容中
     cy.get('[data-editor-block-type="image"]').should("exist");
+
+    // 等自動儲存好
+    cy.wait(4000);
+
+    // 刪除圖片
+    cy.get('[data-editor-block-type="image"] button').first().click();
+    //
+    // 等待 4 秒以確保刪除 API 被觸發
+    cy.wait(4000);
+
+    // 檢查是否觸發 deleteFile API
+    cy.wait("@deleteFile").its("response.statusCode").should("eq", 200);
+
+    // 確保圖片已被刪除
+    cy.get('[data-editor-block-type="image"]').should("not.exist");
   });
 
   // 測試 insert code block 輸入 mermaid 語法，mdxeditor 有沒有正確顯示mermaid svg
@@ -188,7 +206,7 @@ describe("Editor Workflow Tests", () => {
     cy.get('[data-cy="edit-dialog"]').should("exist");
 
     // 插入 code block
-    cy.get(".mdxeditor-toolbar > button").eq(2).click();
+    cy.get(".mdxeditor-toolbar > button").eq(3).click();
 
     // 選擇 mermaid
     cy.get('[data-cy="editor-content"] .mdxeditor-root-contenteditable button')

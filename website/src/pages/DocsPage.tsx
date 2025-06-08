@@ -178,6 +178,7 @@ const DocsPage: React.FC = () => {
       />
       <label
         htmlFor="import-markdown-input"
+        id="import-markdown-input-label"
         className="absolute top-4 right-36 w-12 h-12 bg-yellow-500 text-white rounded-full shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 flex items-center justify-center group cursor-pointer"
       >
         <FontAwesomeIcon icon={faUpload} />

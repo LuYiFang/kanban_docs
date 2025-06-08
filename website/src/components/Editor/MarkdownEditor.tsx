@@ -143,6 +143,7 @@ const MarkdownEditor = forwardRef<MarkdownEditorMethods, MarkdownEditorProps>(
           }),
           codeMirrorPlugin({
             codeBlockLanguages: {
+              txt: "text",
               javascript: "JavaScript",
               css: "CSS",
               tsx: "TypeScript",
