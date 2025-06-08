@@ -9,7 +9,7 @@ import React, {
 } from "react";
 import { useSelector } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEllipsisH, faUser } from "@fortawesome/free-solid-svg-icons";
+import { faEllipsisH, faLink, faUser } from "@fortawesome/free-solid-svg-icons";
 import _ from "lodash";
 import { RootState } from "../../store/store";
 import InteractiveSelect from "../Select/InteractiveSelect";
@@ -39,6 +39,7 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
     const editorRef = useRef<MDXEditorMethods>(null);
+    const [isTooltipVisible, setIsTooltipVisible] = useState(false);
 
     const {
       title,
@@ -75,6 +76,14 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
       };
     }, [handleClickOutside]);
 
+    const handleCopyTaskUrl = () => {
+      const taskUrl = `${window.location.origin}/task/${taskId}`;
+      navigator.clipboard.writeText(taskUrl).then(() => {
+        setIsTooltipVisible(true);
+        setTimeout(() => setIsTooltipVisible(false), 2000);
+      });
+    };
+
     const propertyConfig = useSelector(
       (state: RootState) => state.kanban.propertySetting,
     );
@@ -95,7 +104,24 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
         data-cy="edit-dialog"
       >
         {/* Menu */}
-        <div className="absolute top-4 right-4">
+        <div className="absolute top-4 right-4 flex items-center">
+          {/* Copy Task URL */}
+          <div className="relative  mr-2">
+            <FontAwesomeIcon
+              icon={faLink}
+              className="text-gray-400 cursor-pointer"
+              onClick={handleCopyTaskUrl}
+              data-cy="copy-task-url-button"
+            />
+            {isTooltipVisible && (
+              <div
+                className="absolute top-8 right-0 bg-gray-700 shadow rounded p-1 text-sm text-gray-200 whitespace-nowrap"
+                data-cy="copy-tooltip"
+              >
+                URL Copied!
+              </div>
+            )}
+          </div>
           <FontAwesomeIcon
             icon={faEllipsisH}
             className="text-gray-400 cursor-pointer"

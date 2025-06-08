@@ -164,8 +164,7 @@ export const uploadFile = createAsyncThunk(
   "files/uploadFile",
   async (formData: FormData, thunkAPI) => {
     try {
-      const response = await uploadFileApi(formData);
-      return response;
+      return await uploadFileApi(formData);
     } catch (error) {
       const axiosError = error as AxiosError;
       return thunkAPI.rejectWithValue(axiosError?.response?.data);
@@ -177,8 +176,7 @@ export const downloadFile = createAsyncThunk(
   "files/downloadFile",
   async (fileId: string, thunkAPI) => {
     try {
-      const response = await downloadFileApi(fileId);
-      return response;
+      return await downloadFileApi(fileId);
     } catch (error) {
       const axiosError = error as AxiosError;
       return thunkAPI.rejectWithValue(axiosError?.response?.data);
@@ -215,8 +213,7 @@ export const saveLayout = createAsyncThunk(
         layoutFileName,
       );
 
-      const response = await uploadFileApi(formData);
-      return response;
+      return await uploadFileApi(formData);
     } catch (error) {
       const axiosError = error as AxiosError;
       return thunkAPI.rejectWithValue(axiosError?.response?.data);
