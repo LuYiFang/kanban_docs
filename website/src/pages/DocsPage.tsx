@@ -224,27 +224,33 @@ const DocsPage: React.FC = () => {
           return (
             <div
               key={doc.id}
-              className="relative"
+              className="relative border-2 border-gray-500 rounded-lg shadow-lg"
               data-cy={`doc-card-id-${doc.id}`}
             >
+              <div
+                className="absolute z-10 top-0 left-1 bg-gray-700 text-white text-xs px-2 py-1"
+                data-cy={`doc-title-${doc.id}`}
+              >
+                {doc.title}
+              </div>
               {/* Top draggable handle */}
               <div
-                className="absolute top-0 left-0 right-0 h-8 draggable-handle"
+                className="absolute top-0 left-0 right-0 h-8 draggable-handle bg-transparent"
                 data-cy={"doc-drag-top"}
               ></div>
               {/* Bottom draggable handle */}
               <div
-                className="absolute bottom-0 left-0 right-0 h-8 draggable-handle"
+                className="absolute bottom-0 left-0 right-0 h-8 draggable-handle bg-transparent"
                 data-cy={"doc-drag-bottom"}
               ></div>
               {/* Left draggable handle */}
               <div
-                className="absolute top-0 bottom-0 left-0 w-8 draggable-handle"
+                className="absolute top-0 bottom-0 left-0 w-8 draggable-handle bg-transparent"
                 data-cy={"doc-drag-left"}
               ></div>
               {/* Right draggable handle */}
               <div
-                className="absolute top-0 bottom-0 right-0 w-6 draggable-handle"
+                className="absolute top-0 bottom-0 right-0 w-6 draggable-handle bg-transparent"
                 data-cy={"doc-drag-right"}
               ></div>
 
@@ -262,6 +268,7 @@ const DocsPage: React.FC = () => {
                 propertyOptionsIdNameMap={propertyOptionsIdNameMap}
                 readonly={false}
                 deleteContentLabelTaskCallback={() => handleDeleteDoc(doc.id)}
+                cardClass={"p-0"}
               />
             </div>
           );

@@ -16,6 +16,7 @@ interface KanbanCardContentProps {
   propertyOptionsIdNameMap: Record<string, string>;
   readonly: boolean;
   deleteContentLabelTaskCallback?: () => void;
+  cardClass?: string;
 }
 
 const Card: React.FC<KanbanCardContentProps> = ({
@@ -24,10 +25,13 @@ const Card: React.FC<KanbanCardContentProps> = ({
   propertyOptionsIdNameMap,
   readonly = false,
   deleteContentLabelTaskCallback,
+  cardClass = "",
 }) => {
   return (
     <div
-      className="p-4 mb-2 bg-gray-700 rounded shadow w-full h-full flex flex-col overflow-auto"
+      className={`
+        mb-2 bg-gray-900 rounded shadow w-full h-full flex flex-col overflow-auto ${cardClass}
+      `}
       style={{ boxSizing: "border-box" }}
     >
       {cardVisibleProperties.map((propertyName, i) => {
