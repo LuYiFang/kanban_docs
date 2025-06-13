@@ -2,10 +2,9 @@ from typing import List
 
 from motor.core import AgnosticDatabase
 
-from models.tasks import TaskBatch
+from models.tasks import TaskBatch, TaskResponse
 from repositories.tasks import (upsert_task, delete_task_by_id,
                                 update_multiple_tasks)
-from routes.tasks import TaskResponse
 from services.base import upsert_service, delete_service
 
 
