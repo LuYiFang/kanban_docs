@@ -22,7 +22,7 @@ import {
 import { generateTask } from "../utils/kanbanUtils";
 import { defaultDocsProperties } from "../types/property";
 import AddTaskButton from "../components/Kanban/AddTaskButton";
-import { readMarkdownFile } from "../utils/tools";
+import { isTaskUrl, readMarkdownFile, UUID_PATTERN } from "../utils/tools";
 import SearchSelect from "../components/Select/SearchSelect";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
@@ -236,22 +236,22 @@ const DocsPage: React.FC = () => {
               </div>
               {/* Top draggable handle */}
               <div
-                className="absolute top-0 left-0 right-0 h-8 draggable-handle bg-transparent"
+                className="absolute z-50 top-3 left-3 right-3 h-8 draggable-handle bg-transparent"
                 data-cy={"doc-drag-top"}
               ></div>
               {/* Bottom draggable handle */}
               <div
-                className="absolute bottom-0 left-0 right-0 h-8 draggable-handle bg-transparent"
+                className="absolute z-50 bottom-3 left-3 right-3 h-5 draggable-handle bg-transparent"
                 data-cy={"doc-drag-bottom"}
               ></div>
               {/* Left draggable handle */}
               <div
-                className="absolute top-0 bottom-0 left-0 w-8 draggable-handle bg-transparent"
+                className="absolute z-50 top-3 bottom-3 left-3 w-5 draggable-handle bg-transparent"
                 data-cy={"doc-drag-left"}
               ></div>
               {/* Right draggable handle */}
               <div
-                className="absolute top-0 bottom-0 right-0 w-6 draggable-handle bg-transparent"
+                className="absolute z-50 top-3 bottom-3 right-3 w-4 draggable-handle bg-transparent"
                 data-cy={"doc-drag-right"}
               ></div>
 
@@ -270,6 +270,15 @@ const DocsPage: React.FC = () => {
                 readonly={false}
                 deleteContentLabelTaskCallback={() => handleDeleteDoc(doc.id)}
                 cardClass={"p-0"}
+                onOpenLink={(url: string) => {
+                  if (isTaskUrl(url)) {
+                    const itemId = url.match(UUID_PATTERN)?.[0];
+                    if (!itemId) return;
+                    handleSelectDoc(itemId);
+                  } else {
+                    window.open(url, "_blank");
+                  }
+                }}
               />
             </div>
           );

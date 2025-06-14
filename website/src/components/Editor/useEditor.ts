@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   deleteFile,
   deleteTask,
@@ -40,9 +40,11 @@ export const useEditor = (
   }, [tasks, taskId]);
 
   const [title, setTitle] = useState("");
+  const content = useRef("");
 
   useEffect(() => {
     setTitle(task.title);
+    content.current = task.content;
   }, [task.id]);
 
   function deleteContentFiles(content: string) {
@@ -125,6 +127,7 @@ export const useEditor = (
   return {
     title,
     setTitle,
+    content,
     task,
     saveTask,
     delaySaveTask,

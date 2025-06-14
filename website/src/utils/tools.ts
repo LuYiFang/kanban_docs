@@ -48,3 +48,11 @@ export const readMarkdownFile = (file: File): Promise<string> => {
     reader.readAsText(file);
   });
 };
+
+export const UUID_PATTERN =
+  /[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/;
+
+export const isTaskUrl = (url: string): boolean => {
+  const taskUrlPattern = new RegExp(`#\/task\/${UUID_PATTERN.source}$`);
+  return taskUrlPattern.test(url);
+};

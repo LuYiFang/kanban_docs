@@ -27,6 +27,7 @@ interface EditorProps {
   propertyOrder: string[];
   readOnly: boolean;
   deleteTaskCallback?: () => void;
+  onOpenLink?: (url: string) => void | null;
 }
 
 export interface EditorMethods {
@@ -35,7 +36,17 @@ export interface EditorMethods {
 }
 
 const Editor = forwardRef<EditorMethods, EditorProps>(
-  ({ taskId, dataName, propertyOrder, readOnly, deleteTaskCallback }, ref) => {
+  (
+    {
+      taskId,
+      dataName,
+      propertyOrder,
+      readOnly,
+      deleteTaskCallback,
+      onOpenLink,
+    },
+    ref,
+  ) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
     const editorRef = useRef<MDXEditorMethods>(null);
@@ -44,6 +55,7 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
     const {
       title,
       setTitle,
+      content,
       task,
       handlePropertyChange,
       formatDateTimeLocal,
@@ -237,8 +249,12 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
           <MarkdownEditor
             ref={editorRef}
             readOnly={readOnly}
-            content={task.content}
-            onChange={delaySaveTask}
+            content={content.current || ""}
+            onChange={(value: string | null) => {
+              delaySaveTask(null, value);
+              content.current = value || "";
+            }}
+            onOpenLink={onOpenLink}
           />
         </div>
       </div>

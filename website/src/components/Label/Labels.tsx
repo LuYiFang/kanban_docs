@@ -131,7 +131,14 @@ export const ContentLabel: React.FC<{
   readonly: boolean;
   taskId: string;
   deleteTaskCallback?: () => void;
-}> = ({ propertyName, readonly, taskId, deleteTaskCallback = () => {} }) => {
+  onOpenLink?: (url: string) => void | null;
+}> = ({
+  propertyName,
+  readonly,
+  taskId,
+  deleteTaskCallback = () => {},
+  onOpenLink,
+}) => {
   return (
     <div
       className="mt-2 text-gray-300 text-sm flex-grow"
@@ -143,6 +150,7 @@ export const ContentLabel: React.FC<{
         propertyOrder={["tags"]}
         readOnly={readonly}
         deleteTaskCallback={deleteTaskCallback}
+        onOpenLink={onOpenLink}
       />
     </div>
   );

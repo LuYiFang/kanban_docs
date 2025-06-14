@@ -16,6 +16,7 @@ interface KanbanCardContentProps {
   propertyOptionsIdNameMap: Record<string, string>;
   readonly: boolean;
   deleteContentLabelTaskCallback?: () => void;
+  onOpenLink?: (url: string) => void | null;
   cardClass?: string;
 }
 
@@ -25,6 +26,7 @@ const Card: React.FC<KanbanCardContentProps> = ({
   propertyOptionsIdNameMap,
   readonly = false,
   deleteContentLabelTaskCallback,
+  onOpenLink,
   cardClass = "",
 }) => {
   return (
@@ -123,6 +125,7 @@ const Card: React.FC<KanbanCardContentProps> = ({
               taskId={task.id}
               readonly={readonly}
               deleteTaskCallback={deleteContentLabelTaskCallback}
+              onOpenLink={onOpenLink}
             />
           );
         }

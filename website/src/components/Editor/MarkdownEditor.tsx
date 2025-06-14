@@ -52,7 +52,8 @@ import { InsertTask } from "./InsertTask";
 interface MarkdownEditorProps {
   readOnly: boolean;
   content: string;
-  onChange: (title: string | null, content: string | null) => void;
+  onChange: (content: string | null) => void;
+  onOpenLink?: (url: string) => void | null;
 }
 
 export interface MarkdownEditorMethods {
@@ -60,7 +61,7 @@ export interface MarkdownEditorMethods {
 }
 
 const MarkdownEditor = forwardRef<MarkdownEditorMethods, MarkdownEditorProps>(
-  ({ readOnly, content, onChange }, ref) => {
+  ({ readOnly, content, onChange, onOpenLink }, ref) => {
     const dispatch = useDispatch<AppDispatch>();
     const editorRef = useRef<MDXEditorMethods>(null);
 
@@ -78,7 +79,7 @@ const MarkdownEditor = forwardRef<MarkdownEditorMethods, MarkdownEditorProps>(
     }, [content]);
 
     const handleEditorChange = (markdown: string) => {
-      onChange(null, markdown);
+      onChange(markdown);
     };
 
     const uploadImage = async (image: File): Promise<string> => {
@@ -133,6 +134,15 @@ const MarkdownEditor = forwardRef<MarkdownEditorMethods, MarkdownEditorProps>(
           headingsPlugin(),
           linkPlugin(),
           linkDialogPlugin(),
+          linkDialogPlugin({
+            onClickLinkCallback: (url: string) => {
+              if (!onOpenLink) {
+                window.open(url, "_blank");
+                return;
+              }
+              onOpenLink(url);
+            },
+          }),
           imagePlugin({ imageUploadHandler: uploadImage }),
           tablePlugin(),
           thematicBreakPlugin(),
