@@ -161,6 +161,7 @@ const MarkdownEditor = forwardRef<MarkdownEditorMethods, MarkdownEditorProps>(
               sql: "SQL",
               mermaid: "Mermaid",
               csharp: "C#",
+              shell: "shell",
             },
           }),
           directivesPlugin({

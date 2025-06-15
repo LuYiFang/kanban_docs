@@ -32,7 +32,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
         <div
           ref={provided.innerRef}
           {...provided.droppableProps}
-          className="p-4 bg-gray-800 rounded shadow"
+          className="p-4 bg-gray-800 rounded shadow max-h-[80vh] overflow-y-auto"
           data-cy="kanban-column"
           id={column.id}
         >

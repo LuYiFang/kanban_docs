@@ -75,8 +75,7 @@ const SearchSelect: React.FC<SearchComponentProps> = ({
     const invertedMap = _.invert(propertyOptionsIdNameMap);
     const tagId = invertedMap[tagName];
     if (tagId === selectedTag) {
-      setSelectedTag("");
-      setSearchItems([]);
+      clearSearch();
       return;
     }
     setSelectedTag(tagId);
@@ -88,6 +87,12 @@ const SearchSelect: React.FC<SearchComponentProps> = ({
           ?.value.includes(tagId),
       ),
     );
+  };
+
+  const clearSearch = () => {
+    setSearchTerm("");
+    setSearchItems([]);
+    setSelectedTag("");
   };
 
   return (
@@ -118,7 +123,7 @@ const SearchSelect: React.FC<SearchComponentProps> = ({
         <div className="mb-4 relative" data-cy="show-docs-result">
           <button
             className="absolute p-0 top-2 right-6 w-6 h-6 bg-gray-800 text-white rounded-full flex items-center justify-center hover:bg-gray-600"
-            onClick={() => setSearchItems([])}
+            onClick={clearSearch}
             data-cy="clear-search-results"
           >
             <FontAwesomeIcon icon={faTimes} />
