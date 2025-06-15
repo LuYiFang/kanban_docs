@@ -109,3 +109,8 @@ export const deleteFileApi = async (fileId: string) => {
     throw error;
   }
 };
+
+export const getSummeryWeeklyApi = async () => {
+  const response = await apiClient.get(`/summary/weekly`);
+  return response.data;
+};

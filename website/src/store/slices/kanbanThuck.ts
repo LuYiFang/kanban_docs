@@ -11,6 +11,7 @@ import {
   getAllTaskWithPropertiesApi,
   getFileIdByNameApi,
   getPropertiesAndOptionsApi,
+  getSummeryWeeklyApi,
   updatePropertyApi,
   updateTaskApi,
   uploadFileApi,
@@ -246,6 +247,18 @@ export const deleteFile = createAsyncThunk(
     try {
       await deleteFileApi(fileId);
       return { fileId };
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      return thunkAPI.rejectWithValue(axiosError?.response?.data);
+    }
+  },
+);
+
+export const getSummary = createAsyncThunk(
+  "kanban/summary",
+  async (_, thunkAPI) => {
+    try {
+      return await getSummeryWeeklyApi();
     } catch (error) {
       const axiosError = error as AxiosError;
       return thunkAPI.rejectWithValue(axiosError?.response?.data);
