@@ -54,4 +54,25 @@ describe("Weekly Page Workflow Tests", () => {
       .invoke("attr", "class")
       .should("include", "readOnly");
   });
+
+  it("should generate summary and allow copying an item", () => {
+    cy.get('[data-cy="generate-summary-button"]').click();
+    cy.get('[data-cy="summary-area"]').should("exist");
+
+    cy.get('[data-cy="summary-area"] input[type="text"]')
+      .first()
+      .type("123") // 在輸入框中輸入123
+      .invoke("val")
+      .then((text) => {
+        cy.get('[data-cy="input-copy-button"]').first().click();
+        cy.document().then((doc) => {
+          doc.hasFocus = true; // 確保文檔獲得焦點
+          cy.window().then((win) => {
+            win.navigator.clipboard.readText().then((clipboardText) => {
+              expect(clipboardText).to.eq(`${text}123`); // 確保複製的文本後面包含123
+            });
+          });
+        });
+      });
+  });
 });

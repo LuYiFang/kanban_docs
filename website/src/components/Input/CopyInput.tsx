@@ -19,6 +19,7 @@ const CopyInput: React.FC<CopyInputProps> = ({ text }) => {
       <button
         className="text-gray-300 hover:text-white w-8 h-8 p-1 bg-gray-600 hover:bg-gray-500 rounded-md"
         onClick={() => navigator.clipboard.writeText(value)}
+        data-cy={"input-copy-button"}
       >
         <FontAwesomeIcon icon={faClone} />
       </button>

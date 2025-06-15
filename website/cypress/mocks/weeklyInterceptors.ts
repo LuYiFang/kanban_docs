@@ -145,4 +145,10 @@ export const setupInterceptors = () => {
       },
     ],
   }).as("getAllTaskWithPropertiesWeekly");
+
+  // Get Weekly Summary
+  cy.intercept("GET", "**/api/summary/weekly", {
+    statusCode: 200,
+    body: "Summary Line 1\nSummary Line 2\nSummary Line 3",
+  }).as("getSummeryWeekly");
 };

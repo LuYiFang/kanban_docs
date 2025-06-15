@@ -236,27 +236,27 @@ const DocsPage: React.FC = () => {
               </div>
               {/* Top draggable handle */}
               <div
-                className="absolute z-50 top-3 left-3 right-3 h-8 draggable-handle bg-transparent"
+                className="absolute z-40 top-3 left-3 right-[55px] h-8 draggable-handle bg-transparent"
                 data-cy={"doc-drag-top"}
               ></div>
               {/* Bottom draggable handle */}
               <div
-                className="absolute z-50 bottom-3 left-3 right-3 h-5 draggable-handle bg-transparent"
+                className="absolute z-40 bottom-3 left-3 right-3 h-5 draggable-handle bg-transparent"
                 data-cy={"doc-drag-bottom"}
               ></div>
               {/* Left draggable handle */}
               <div
-                className="absolute z-50 top-3 bottom-3 left-3 w-5 draggable-handle bg-transparent"
+                className="absolute z-40 top-3 bottom-3 left-3 w-5 draggable-handle bg-transparent"
                 data-cy={"doc-drag-left"}
               ></div>
               {/* Right draggable handle */}
               <div
-                className="absolute z-50 top-3 bottom-3 right-3 w-4 draggable-handle bg-transparent"
+                className="absolute z-40 top-[55px] bottom-3 right-3 w-4 draggable-handle bg-transparent"
                 data-cy={"doc-drag-right"}
               ></div>
 
               <button
-                className="z-20 absolute top-0.5 right-6 ml-2 w-5 h-5 p-0 flex items-center justify-center rounded-full text-gray-100 hover:bg-gray-300 hover:bg-opacity-80 text-[10px]"
+                className="z-50 absolute top-0.5 right-6 ml-2 w-5 h-5 p-0 flex items-center justify-center rounded-full text-gray-100 hover:bg-gray-300 hover:bg-opacity-80 text-[10px]"
                 onClick={() => UnpinnedDocs(doc.id)}
                 data-cy={`unpinned-${doc.id}`}
               >

@@ -45,7 +45,10 @@ const WeeklyReportPage: React.FC = () => {
       <div className="flex flex-col p-4 space-y-2">
         <h1 className="text-2xl font-bold">Weekly</h1>
         {summaryTexts.length > 0 && (
-          <div className="bg-gray-800 p-4 rounded-md max-h-72 overflow-auto relative">
+          <div
+            className="bg-gray-800 p-4 rounded-md max-h-72 overflow-auto relative"
+            data-cy="summary-area"
+          >
             <button
               className="absolute p-0 top-1 right-1 w-6 h-6 bg-gray-800 text-white rounded-full flex items-center justify-center hover:bg-gray-600"
               onClick={clearSummary}
@@ -62,6 +65,7 @@ const WeeklyReportPage: React.FC = () => {
       <button
         className="absolute top-4 right-20 w-12 h-12 text-gray-300 hover:text-white flex items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700"
         title="Summarize"
+        data-cy="generate-summary-button"
         onClick={generateSummary}
       >
         <FontAwesomeIcon icon={faListCheck} />
