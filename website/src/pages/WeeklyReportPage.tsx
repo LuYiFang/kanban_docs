@@ -24,6 +24,9 @@ const WeeklyReportPage: React.FC = () => {
       .unwrap()
       .then((summary) => {
         setSummaryText(summary);
+      })
+      .catch((error) => {
+        console.error("Failed to generate summary:", error);
       });
   };
 

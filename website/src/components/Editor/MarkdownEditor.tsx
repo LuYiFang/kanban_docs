@@ -115,8 +115,8 @@ const MarkdownEditor = forwardRef<MarkdownEditorMethods, MarkdownEditorProps>(
                   <ListsToggle />
                   <InsertTable />
                   <InsertTask />
-                  <StrikeThroughSupSubToggles />
                   <BoldItalicUnderlineToggles />
+                  <StrikeThroughSupSubToggles />
                   <InsertThematicBreak />
                   <InsertAdmonition />
                   <CodeToggle />
