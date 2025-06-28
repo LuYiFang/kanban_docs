@@ -5,7 +5,6 @@ import { AxiosError } from "axios";
 
 export const getAllTaskWithPropertiesApi = async (taskType: taskType) => {
   const params = new URLSearchParams({ task_type: taskType }).toString();
-
   const response = await apiClient.get(`/task/properties?${params}`);
   return response.data;
 };
@@ -111,6 +110,25 @@ export const deleteFileApi = async (fileId: string) => {
 };
 
 export const getSummeryWeeklyApi = async () => {
+  console.log("getSummeryWeeklyApi");
   const response = await apiClient.get(`/summary/weekly`);
+  console.log("getSummeryWeeklyApi response", response);
   return response.data;
+};
+
+export const repository = {
+  getAllTaskWithPropertiesApi,
+  createTaskWithPropertiesApi,
+  updateTaskApi,
+  deleteTaskWithPropertiesApi,
+  updatePropertyApi,
+  deletePropertiesApi,
+  createPropertyOptionApi,
+  getPropertiesAndOptionsApi,
+  batchUpdateTasksApi,
+  uploadFileApi,
+  downloadFileApi,
+  getFileIdByNameApi,
+  deleteFileApi,
+  getSummeryWeeklyApi,
 };

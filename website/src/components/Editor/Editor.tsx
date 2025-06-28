@@ -9,7 +9,13 @@ import React, {
 } from "react";
 import { useSelector } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEllipsisH, faLink, faUser } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCaretDown,
+  faCaretUp,
+  faEllipsisH,
+  faLink,
+  faUser,
+} from "@fortawesome/free-solid-svg-icons";
 import _ from "lodash";
 import { RootState } from "../../store/store";
 import InteractiveSelect from "../Select/InteractiveSelect";
@@ -51,12 +57,12 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
     const menuRef = useRef<HTMLDivElement>(null);
     const editorRef = useRef<MDXEditorMethods>(null);
     const [isTooltipVisible, setIsTooltipVisible] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(false);
 
     const {
       title,
       setTitle,
       content,
-      task,
       handlePropertyChange,
       formatDateTimeLocal,
       handleDeleteTask,
@@ -159,23 +165,34 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
           )}
         </div>
         {/* Title */}
-        <div>
-          <input
-            type="text"
-            className="w-full text-lg p-2 border border-gray-700 bg-gray-800 text-gray-300 rounded"
-            value={title}
-            onChange={(e) => {
-              delaySaveTask(e.target.value, null);
-              setTitle(e.target.value);
-            }}
-            placeholder="Task Title"
-            data-cy="title-input"
-            disabled={readOnly}
-          />
-        </div>
+        <input
+          type="text"
+          className="w-full text-lg p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
+          value={title}
+          onChange={(e) => {
+            delaySaveTask(e.target.value, null);
+            setTitle(e.target.value);
+          }}
+          placeholder="Task Title"
+          data-cy="title-input"
+          disabled={readOnly}
+        />
         {/* Properties */}
-        <div>
-          <h3 className="text-lg font-bold text-gray-200 mb-2">Properties</h3>
+        <div className="flex items-start ">
+          <h3 className="text-sm text-gray-200 mb-2">Properties</h3>
+          <button
+            className="text-sm text-gray-300 underline p-0 ml-2 mb-2  w-6 h-6 rounded-full bg-transparent"
+            onClick={() => setIsExpanded(!isExpanded)}
+            data-cy="toggle-properties"
+          >
+            {isExpanded ? (
+              <FontAwesomeIcon icon={faCaretUp} className="text-gray-300" />
+            ) : (
+              <FontAwesomeIcon icon={faCaretDown} className="text-gray-300" />
+            )}
+          </button>
+        </div>
+        {isExpanded && (
           <div className="flex flex-col space-y-1">
             {_.map(propertyOrder, (key) => {
               const title = formatToCapitalCase(key) || "";
@@ -240,7 +257,7 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
               );
             })}
           </div>
-        </div>
+        )}
         {/* Markdown Input & Preview */}
         <div
           className="flex space-x-4 flex-1 h-full w-full relative"

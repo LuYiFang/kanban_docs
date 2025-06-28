@@ -94,7 +94,7 @@ const MultiInteractiveSelect: React.FC<{
   return (
     <div className="relative w-full" data-cy="multi-interactive-select">
       <div
-        className="w-full text-sm p-2 border border-gray-700 bg-gray-800 text-gray-300 rounded flex flex-wrap gap-2"
+        className="w-full text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded flex flex-wrap gap-2"
         data-cy="multi-interactive-select-selected"
       >
         {selectedOptions.map((option) => {
@@ -102,7 +102,7 @@ const MultiInteractiveSelect: React.FC<{
           return (
             <div
               key={option.id}
-              className={`px-2 py-1 text-xs w-[fit-content] font-semibold flex items-center rounded ${color}`}
+              className={`px-1 py-0.5 text-sm w-[fit-content] flex items-center rounded ${color}`}
             >
               {option.name}
               {!readOnly && (

@@ -5,7 +5,6 @@ import {
   InteractiveSelectPropertyConfig,
   PropertyOption,
 } from "../../types/property";
-import { formatToCapitalCase } from "../../utils/tools";
 import { createPropertyOption } from "../../store/slices/kanbanThuck";
 import { TaskWithProperties } from "../../types/task";
 import { kanbanDataName } from "../../types/kanban";
@@ -74,15 +73,13 @@ const InteractiveSelect: React.FC<{
   return (
     <div className="relative w-64">
       <button
-        className="w-full text-sm p-2 border border-gray-700 bg-gray-800 text-gray-300 rounded"
+        className="w-full text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
         onClick={() => setIsExpanded(true)}
         data-cy="property-select-input"
         disabled={readOnly}
       >
-        {formatToCapitalCase(
-          propertyConfig.options.find((op) => op.id === taskProperty.value)
-            ?.name || "",
-        ) || "Select an option"}
+        {propertyConfig.options.find((op) => op.id === taskProperty.value)
+          ?.name || "Select an option"}
       </button>
 
       <DropdownMenu

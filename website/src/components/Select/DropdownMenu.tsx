@@ -35,6 +35,7 @@ const DropdownMenu: React.FC<{
       );
       if (dropdownElement && !dropdownElement.contains(event.target as Node)) {
         setIsExpanded(false);
+        setInputValue("");
       }
     };
 
@@ -117,30 +118,30 @@ const DropdownMenu: React.FC<{
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           placeholder="Search or add an option"
-          className="w-full border-b border-gray-700 p-2 bg-gray-800 text-gray-300 placeholder-gray-500 rounded-t-md"
+          className="w-full border-b border-gray-700 p-1 bg-gray-800 text-gray-300 placeholder-gray-500 rounded-t-md"
           onFocus={handleExpand}
           data-cy="property-select-search"
         />
       )}
       {isExpanded && (
-        <ul
-          className="absolute top-12 left-0 w-full z-50 bg-gray-800 border border-gray-700 rounded-md shadow-md max-h-48 overflow-y-auto"
+        <div
+          className="absolute w-full z-50 bg-gray-800 border border-gray-700 shadow-md max-h-48 overflow-y-auto"
           data-cy="property-select-options"
         >
           {filteredOptions.map((option) => (
-            <li
+            <div
               key={option.id}
               onClick={() => handleSelectOption(option)}
               className="p-2 cursor-pointer hover:bg-gray-700 text-gray-300"
               data-cy="property-select-option"
             >
               {option.name}
-            </li>
+            </div>
           ))}
           {filteredOptions.length === 0 && (
-            <li className="p-2 text-gray-500">No matching options</li>
+            <div className="p-2 text-gray-500">No matching options</div>
           )}
-        </ul>
+        </div>
       )}
     </div>
   );

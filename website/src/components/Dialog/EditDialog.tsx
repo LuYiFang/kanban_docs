@@ -47,7 +47,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
       onClick={handleOverlayClick}
       data-cy="edit-dialog-backdrop"
     >
-      <div className="w-3/4 max-h-[90vh] overflow-auto">
+      <div className="w-3/4 h-[90vh] overflow-auto">
         <Editor
           ref={editorRef}
           taskId={taskId}
