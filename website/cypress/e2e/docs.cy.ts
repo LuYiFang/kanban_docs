@@ -145,6 +145,8 @@ describe("DocsPage", () => {
     cy.get("[data-cy=tag-documents]").children().first().click();
     cy.get("[data-cy=tag-documents]").children().eq(1).click();
 
+    cy.get("[data-cy=toggle-properties]").first().click();
+
     // 驗證 MultiInteractiveSelect 是否可見
     cy.get("[data-cy=multi-interactive-select]")
       .first()
@@ -290,6 +292,8 @@ describe("DocsPage", () => {
     // 選擇標籤 "Tag2" 並選中第一個文檔
     cy.get("[data-cy=kanban-task-tags]").contains("Tag2").click();
     cy.get("[data-cy=tag-documents]").children().first().click();
+
+    cy.get("[data-cy=toggle-properties]").first().click();
 
     // 打開屬性編輯選單
     cy.get(".layout")

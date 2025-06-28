@@ -32,6 +32,8 @@ describe("Kanban Page Workflow Tests", () => {
     // 確認 Edit Dialog 打開
     cy.get('[data-cy="edit-dialog"]').should("exist");
 
+    cy.get("[data-cy=toggle-properties]").click();
+
     // 編輯任務標題和內容
     cy.get('[data-cy="title-input"]').type("Test Task");
     cy.get('[data-cy="editor-content"] .mdxeditor-root-contenteditable').type(
@@ -94,6 +96,8 @@ describe("Kanban Page Workflow Tests", () => {
     cy.get(
       `[data-rbd-droppable-id="${destinationColumnId}"] [data-rbd-draggable-id="${draggableTaskId}"]`,
     ).click();
+
+    cy.get("[data-cy=toggle-properties]").click();
 
     // 使用 InteractiveSelect 驗證屬性狀態
     cy.get('[data-cy="edit-dialog"]')

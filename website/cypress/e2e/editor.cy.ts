@@ -43,6 +43,8 @@ describe("Editor Workflow Tests", () => {
     // 確保 Edit Dialog 打開
     cy.get('[data-cy="edit-dialog"]').should("exist");
 
+    cy.get("[data-cy=toggle-properties]").click();
+
     // 編輯任務優先級
     cy.get('[data-cy="property-select-title"]')
       .contains("Priority:")
@@ -54,7 +56,7 @@ describe("Editor Workflow Tests", () => {
         // 點選 option high
         cy.get('[data-cy="property-select-search"]')
           .parent()
-          .find("ul")
+          .find("div")
           .contains("High")
           .click();
       });
@@ -89,6 +91,8 @@ describe("Editor Workflow Tests", () => {
     // 確保 Edit Dialog 打開
     cy.get('[data-cy="edit-dialog"]').should("exist");
 
+    cy.get("[data-cy=toggle-properties]").click();
+
     // 找標題是 "Epic" 的選項
     cy.get('[data-cy="edit-dialog"]')
       .find('[data-cy="property-select-title"]')
@@ -102,8 +106,8 @@ describe("Editor Workflow Tests", () => {
     // 確認 Epic 選項有兩個
     cy.get('[data-cy="property-select-search"]')
       .parent()
-      .find("li")
-      .should("have.length", 1);
+      .find("div")
+      .should("have.length", 2);
   });
 
   it("should add a new project option and verify it exists in the options list", () => {
@@ -114,6 +118,8 @@ describe("Editor Workflow Tests", () => {
 
     // 確保 Edit Dialog 打開
     cy.get('[data-cy="edit-dialog"]').should("exist");
+
+    cy.get("[data-cy=toggle-properties]").click();
 
     // 找到屬性選擇器並展開
     cy.get('[data-cy="edit-dialog"]')
@@ -134,7 +140,7 @@ describe("Editor Workflow Tests", () => {
         // 確認新選項是否出現在選項列表中
         cy.get('[data-cy="property-select-search"]')
           .parent()
-          .find("ul")
+          .find("div")
           .contains(newProjectName)
           .should("exist");
       });
@@ -143,13 +149,14 @@ describe("Editor Workflow Tests", () => {
     cy.get("body").click(0, 0);
     cy.get('[data-rbd-draggable-id="task-id-2"]').click();
     cy.get('[data-cy="edit-dialog"]').should("exist");
+    cy.get("[data-cy=toggle-properties]").click();
     cy.get('[data-cy="edit-dialog"]')
       .find('[data-cy="property-select-input"]')
       .first()
       .click();
     cy.get('[data-cy="property-select-search"]')
       .parent()
-      .find("ul")
+      .find("div")
       .contains(newProjectName)
       .should("exist");
   });

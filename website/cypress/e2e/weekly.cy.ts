@@ -44,6 +44,7 @@ describe("Weekly Page Workflow Tests", () => {
     cy.get("#add-task-button").should("not.exist");
     cy.get('[data-cy="kanban-task"]').last().click();
     cy.get('[data-cy="edit-dialog"]').should("exist");
+    cy.get("[data-cy=toggle-properties]").click();
 
     cy.get('[data-cy="title-input"]').should("have.attr", "disabled");
 
