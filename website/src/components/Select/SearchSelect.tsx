@@ -5,6 +5,7 @@ import { TaskWithProperties } from "../../types/task";
 import { MultiChipLabel } from "../Label/Labels";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
+import CollapsibleSection from "../CollapsibleSection/CollapsibleSection";
 
 interface SearchComponentProps {
   allItems: TaskWithProperties[];
@@ -119,7 +120,11 @@ const SearchSelect: React.FC<SearchComponentProps> = ({
           />
         </div>
       </div>
-      {searchItems.length > 0 && (
+
+      <CollapsibleSection
+        isCollapsed={searchItems.length <= 0}
+        maxHigh={"max-h-[280px]"}
+      >
         <div className="mb-4 relative" data-cy="show-docs-result">
           <button
             className="absolute p-0 top-2 right-6 w-6 h-6 bg-gray-800 text-white rounded-full flex items-center justify-center hover:bg-gray-600"
@@ -129,7 +134,7 @@ const SearchSelect: React.FC<SearchComponentProps> = ({
             <FontAwesomeIcon icon={faTimes} />
           </button>
           <div
-            className="bg-gray-800 p-2 rounded max-h-72 overflow-auto"
+            className="bg-gray-800 p-2 rounded max-h-[280px] overflow-auto"
             data-cy="tag-documents"
           >
             {searchItems.map((doc) => (
@@ -143,7 +148,7 @@ const SearchSelect: React.FC<SearchComponentProps> = ({
             ))}
           </div>
         </div>
-      )}
+      </CollapsibleSection>
     </div>
   );
 };

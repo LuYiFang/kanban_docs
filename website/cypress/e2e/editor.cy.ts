@@ -284,4 +284,36 @@ describe("Editor Workflow Tests", () => {
     // 確保 API 被呼叫
     cy.wait("@updateTask").its("response.statusCode").should("eq", 200);
   });
+
+  it("should auto-save after 3 seconds of inactivity and continue editing", () => {
+    // 打開第一個任務
+    cy.get('[data-rbd-draggable-id="task-id-1"]').click();
+
+    // 確保 Edit Dialog 打開
+    cy.get('[data-cy="edit-dialog"]').should("exist");
+
+    // 修改編輯器內容
+    const initialContent = "Initial content.";
+    cy.get('[data-cy="editor-content"] .mdxeditor-root-contenteditable').type(
+      initialContent,
+    );
+
+    // 等待 3 秒以觸發自動保存
+    cy.wait(3500);
+
+    // 繼續編輯內容
+    const additionalContent = " Additional content.";
+    cy.get('[data-cy="editor-content"] .mdxeditor-root-contenteditable').type(
+      additionalContent,
+    );
+
+    // 再次等待 3 秒以觸發自動保存
+    cy.wait(3500);
+
+    // 確認編輯器內容包含所有修改
+    cy.get('[data-cy="editor-content"] .mdxeditor-root-contenteditable').should(
+      "contain",
+      initialContent + additionalContent,
+    );
+  });
 });

@@ -16,6 +16,8 @@ import _ from "lodash";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBookmark,
+  faChevronDown,
+  faChevronUp,
   faTimes,
   faUpload,
 } from "@fortawesome/free-solid-svg-icons";
@@ -24,6 +26,7 @@ import { defaultDocsProperties } from "../types/property";
 import AddTaskButton from "../components/Kanban/AddTaskButton";
 import { isTaskUrl, readMarkdownFile, UUID_PATTERN } from "../utils/tools";
 import SearchSelect from "../components/Select/SearchSelect";
+import CollapsibleSection from "../components/CollapsibleSection/CollapsibleSection";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -36,6 +39,7 @@ const DocsPage: React.FC = () => {
   const [newItemId, setNewItemId] = useState<string>("");
   const [isDocsLayoutLoaded, setIsDocsLayoutLoaded] = useState(false);
   const [showSaveSuccess, setShowSaveSuccess] = useState<boolean | null>(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const dispatch = useDispatch<AppDispatch>();
   const allItems: TaskWithProperties[] = useSelector(
@@ -91,6 +95,14 @@ const DocsPage: React.FC = () => {
 
     return _.merge({}, taskIdTitleMap, propertyIdNameMap);
   }, [allItems, propertySetting]);
+
+  const buttonSize = useMemo(() => {
+    return isCollapsed ? "w-8 h-6" : "w-12 h-12";
+  }, [isCollapsed]);
+
+  const iconSize = useMemo(() => {
+    return isCollapsed ? "w-4 h-4" : "w-6 h-6";
+  }, [isCollapsed]);
 
   const handleSelectDoc = (docId: string) => {
     const doc = allItems.find((item) => item.id === docId);
@@ -152,43 +164,55 @@ const DocsPage: React.FC = () => {
 
   return (
     <div className="p-4 bg-gray-900 text-gray-300 h-full relative flex flex-col">
-      <h1 className="text-2xl font-bold mb-4">Documents</h1>
-      <AddTaskButton onClick={() => handleAddDoc("", "")} />
       <button
-        className="absolute top-4 right-20 w-12 h-12 bg-green-500 text-white rounded-full shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 flex items-center justify-center group"
-        onClick={handleSaveLayout}
-        id="save-layout-button"
+        className="toggle-button bg-transparent text-white flex items-center justify-center h-6 w-6 rounded-full mb-2"
+        onClick={() => setIsCollapsed(!isCollapsed)}
       >
-        <FontAwesomeIcon icon={faBookmark} />
-        <span className="absolute top-full mb-2 px-2 py-1 text-xs text-white bg-black rounded opacity-0 group-hover:opacity-100 transition-opacity">
-          Save Layout
-        </span>
+        <FontAwesomeIcon icon={isCollapsed ? faChevronUp : faChevronDown} />
       </button>
-      {showSaveSuccess !== null && (
-        <span className="z-50 absolute top-[68px] right-[56px] px-2 py-1 text-xs text-white bg-gray-700 rounded shadow-lg">
-          {showSaveSuccess ? "Layout Saved!" : "Failed to Save Layout!"}
-        </span>
-      )}
-      <input
-        type="file"
-        accept=".md"
-        className="hidden"
-        id="import-markdown-input"
-        onChange={handleImportMarkdown}
-      />
-      <label
-        htmlFor="import-markdown-input"
-        id="import-markdown-input-label"
-        className="absolute top-4 right-36 w-12 h-12 bg-yellow-500 text-white rounded-full shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 flex items-center justify-center group cursor-pointer"
-      >
-        <FontAwesomeIcon icon={faUpload} />
-      </label>
-      <SearchSelect
-        allItems={allItems}
-        propertyOptionsIdNameMap={propertyOptionsIdNameMap}
-        onSelectDoc={handleSelectDoc}
-        searchClass="w-1/3"
-      />
+      <CollapsibleSection isCollapsed={isCollapsed} maxHigh={"max-h-[640px]"}>
+        <h1 className="text-2xl font-bold mb-4">Documents</h1>
+        <AddTaskButton
+          onClick={() => handleAddDoc("", "")}
+          buttonSize={buttonSize}
+          iconSize={iconSize}
+        />
+        <button
+          className={`absolute top-4 right-20 ${buttonSize} bg-green-500 text-white rounded-full shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 flex items-center justify-center group`}
+          onClick={handleSaveLayout}
+          id="save-layout-button"
+        >
+          <FontAwesomeIcon icon={faBookmark} className={iconSize} />
+          <span className="absolute top-full mb-2 px-2 py-1 text-xs text-white bg-black rounded opacity-0 group-hover:opacity-100 transition-opacity">
+            Save Layout
+          </span>
+        </button>
+        {showSaveSuccess !== null && (
+          <span className="z-50 absolute top-[68px] right-[56px] px-2 py-1 text-xs text-white bg-gray-700 rounded shadow-lg">
+            {showSaveSuccess ? "Layout Saved!" : "Failed to Save Layout!"}
+          </span>
+        )}
+        <input
+          type="file"
+          accept=".md"
+          className="hidden"
+          id="import-markdown-input"
+          onChange={handleImportMarkdown}
+        />
+        <label
+          htmlFor="import-markdown-input"
+          id="import-markdown-input-label"
+          className={`absolute top-4 right-36 ${buttonSize} bg-yellow-500 text-white rounded-full shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 flex items-center justify-center group cursor-pointer`}
+        >
+          <FontAwesomeIcon icon={faUpload} className={iconSize} />
+        </label>
+        <SearchSelect
+          allItems={allItems}
+          propertyOptionsIdNameMap={propertyOptionsIdNameMap}
+          onSelectDoc={handleSelectDoc}
+          searchClass="w-1/3"
+        />
+      </CollapsibleSection>
       <ResponsiveGridLayout
         className="layout bg-gray-800 flex-grow overflow-auto"
         layouts={layouts}

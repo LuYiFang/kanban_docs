@@ -105,7 +105,7 @@ describe("DocsPage", () => {
     )
       .trigger("mousedown", { clientX: 200, clientY: 200, force: true }) // 起始位置
       .trigger("mousemove", { clientX: 50, clientY: 350, force: true }) // 往左下移動
-      .trigger("mouseup"); // 結束拖動
+      .trigger("mouseup", { force: true }); // 結束拖動
 
     // 驗證文檔的寬度和高度是否符合條件
     cy.get("[data-cy=doc-card-id-task-id-1]")
@@ -195,12 +195,12 @@ describe("DocsPage", () => {
     cy.get("[data-cy=doc-card-id-task-id-1] .react-resizable-handle-ne")
       .trigger("mousedown", { clientX: 600, clientY: 500, force: true })
       .trigger("mousemove", { clientX: 0, clientY: 0, force: true })
-      .trigger("mouseup");
+      .trigger("mouseup", { force: true });
 
     cy.get("[data-cy=doc-card-id-task-id-2] .react-resizable-handle-ne")
       .trigger("mousedown", { clientX: 600, clientY: 500, force: true })
       .trigger("mousemove", { clientX: 0, clientY: 0, force: true })
-      .trigger("mouseup");
+      .trigger("mouseup", { force: true });
 
     // Step 4: 將第二個 card 拖移到與第一個並行
     cy.get("[data-cy=doc-card-id-task-id-2] [data-cy=doc-drag-top]")
