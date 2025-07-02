@@ -111,7 +111,7 @@ export const deleteFileApi = async (fileId: string) => {
 
 export const getSummeryWeeklyApi = async () => {
   console.log("getSummeryWeeklyApi");
-  const response = await apiClient.get(`/summary/weekly`);
+  const response = await apiClient.get(`/summary/weekly`, { timeout: 600000 });
   console.log("getSummeryWeeklyApi response", response);
   return response.data;
 };
