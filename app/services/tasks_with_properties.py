@@ -12,9 +12,10 @@ from services.tasks import upsert_task_service
 
 
 async def get_tasks_with_properties_service(task_type: TaskType,
-                                            db: AgnosticDatabase) \
+                                            db: AgnosticDatabase,
+                                            weeks_ago) \
         -> List[TaskWithPropertiesResponse]:
-    tasks_with_properties = await get_tasks_with_properties_repo(task_type, db)
+    tasks_with_properties = await get_tasks_with_properties_repo(task_type, db, weeks_ago)
     return [TaskWithPropertiesResponse(**task) for task in
             tasks_with_properties]
 
@@ -36,8 +37,8 @@ async def create_task_with_properties_service(
                                       properties=properties)
 
 
-async def generate_summary(db) -> str:
-    tasks = await get_tasks_with_properties_repo(TaskType.weekly, db)
+async def generate_summary(weeks_ago, db) -> str:
+    tasks = await get_tasks_with_properties_repo(TaskType.weekly, db, weeks_ago)
     if not tasks:
         return "No weekly tasks found."
 
@@ -97,13 +98,13 @@ async def generate_summary(db) -> str:
     return "\n---\n".join(summary_lines)
 
 
-async def summarize_weekly_tasks(db):
+async def summarize_weekly_tasks(weeks_ago, db):
     """
     Summarize weekly tasks into a text format.
     """
     summary = ''
     try:
-        summary = await generate_summary(db)
+        summary = await generate_summary(weeks_ago, db)
         return await CustomSummaryAPI().run(summary)
     except Exception as e:
         print(f"Error generating summary: {e}")

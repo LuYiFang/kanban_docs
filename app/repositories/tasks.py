@@ -20,7 +20,8 @@ async def delete_task_by_id(task_id: str, db: AgnosticDatabase) -> bool:
 
 
 async def get_tasks_with_properties_repo(task_type: TaskType,
-                                         db: AgnosticDatabase) -> List[dict]:
+                                         db: AgnosticDatabase,
+                                         weeks_ago: int = 0) -> List[dict]:
     pipeline = [
         {
             "$lookup": {
@@ -72,7 +73,8 @@ async def get_tasks_with_properties_repo(task_type: TaskType,
     if task_type == TaskType.weekly:
         now = datetime.utcnow().replace(hour=0, minute=0, second=0,
                                         microsecond=0, tzinfo=timezone.utc)
-        start_of_week = now - timedelta(days=now.weekday())
+        start_of_week = now - timedelta(
+            days=now.weekday()) - timedelta(weeks=weeks_ago)
         end_of_week = start_of_week + timedelta(days=7)
         end_of_week = end_of_week.replace(hour=23, minute=59, second=59)
 

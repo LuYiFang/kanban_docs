@@ -17,11 +17,16 @@ router = APIRouter()
 
 @router.get("/task/properties",
             response_model=List[TaskWithPropertiesResponse])
-async def get_tasks_with_properties(task_type: TaskType, db=Depends(get_db)):
+async def get_tasks_with_properties(
+        task_type: TaskType,
+        weeks_ago: int = 0,
+        db=Depends(get_db)
+):
     try:
         tasks_with_properties = await get_tasks_with_properties_service(
             task_type,
-            db
+            db,
+            weeks_ago
         )
 
         return tasks_with_properties
@@ -62,8 +67,8 @@ async def delete_tasks_with_properties(task_id: str, db=Depends(get_db)):
 
 
 @router.get("/summary/weekly", response_model=str)
-async def get_weekly_tasks_summary(db=Depends(get_db)):
+async def get_weekly_tasks_summary(weeks_ago: int = 0, db=Depends(get_db)):
     """
     API to summarize weekly tasks.
     """
-    return await summarize_weekly_tasks(db)
+    return await summarize_weekly_tasks(weeks_ago, db)
