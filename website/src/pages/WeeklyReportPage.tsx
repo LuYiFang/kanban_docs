@@ -12,12 +12,18 @@ import {
   getSummary,
 } from "../store/slices/kanbanThuck";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faListCheck, faTimes } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronLeft,
+  faChevronRight,
+  faListCheck,
+  faTimes,
+} from "@fortawesome/free-solid-svg-icons";
 import CopyInput from "../components/Input/CopyInput"; // 新增导入
 
 const WeeklyReportPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const [summaryText, setSummaryText] = useState<string>("");
+  const [currentWeek, setCurrentWeek] = useState<number>(0);
 
   const generateSummary = () => {
     dispatch(getSummary())
@@ -31,8 +37,10 @@ const WeeklyReportPage: React.FC = () => {
   };
 
   useEffect(() => {
-    dispatch(getAllTaskWithProperties({ taskType: "weekly" }));
-  }, []);
+    dispatch(
+      getAllTaskWithProperties({ taskType: "weekly", weeksAgo: currentWeek }),
+    );
+  }, [currentWeek]);
 
   const summaryTexts = useMemo(() => {
     if (!summaryText) return [];
@@ -43,10 +51,34 @@ const WeeklyReportPage: React.FC = () => {
     setSummaryText("");
   };
 
+  const handleWeekChange = (direction: "prev" | "next") => {
+    setCurrentWeek((prevWeek) => {
+      const newWeek = direction === "prev" ? prevWeek - 1 : prevWeek + 1;
+      return newWeek < 0 ? 0 : newWeek;
+    });
+  };
+
   return (
     <div className="h-screen overflow-auto w-full flex flex-col bg-gray-900 text-gray-300">
       <div className="flex flex-col p-4 space-y-2">
-        <h1 className="text-2xl font-bold">Weekly</h1>
+        <div className="flex items-start justify-start">
+          <h1 className="text-2xl font-bold">Weekly</h1>
+          <div className="flex items-center space-x-2 ml-4">
+            <button
+              className="px-2 py-1 bg-transparent text-white rounded hover:bg-gray-600"
+              onClick={() => handleWeekChange("prev")}
+            >
+              <FontAwesomeIcon icon={faChevronLeft} />
+            </button>
+            <span>{currentWeek}</span>
+            <button
+              className="px-2 py-1 bg-transparent text-white rounded hover:bg-gray-600"
+              onClick={() => handleWeekChange("next")}
+            >
+              <FontAwesomeIcon icon={faChevronRight} />
+            </button>
+          </div>
+        </div>
         {summaryTexts.length > 0 && (
           <div
             className="bg-gray-800 p-4 rounded-md max-h-72 overflow-auto relative"

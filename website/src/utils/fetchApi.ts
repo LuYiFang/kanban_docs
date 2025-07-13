@@ -3,8 +3,14 @@ import apiClient from "./apiClient";
 import { DefaultProperty } from "../types/property";
 import { AxiosError } from "axios";
 
-export const getAllTaskWithPropertiesApi = async (taskType: taskType) => {
-  const params = new URLSearchParams({ task_type: taskType }).toString();
+export const getAllTaskWithPropertiesApi = async (
+  taskType: taskType,
+  weeksAgo: number,
+) => {
+  const params = new URLSearchParams({
+    task_type: taskType,
+    weeks_ago: `${weeksAgo}`,
+  }).toString();
   const response = await apiClient.get(`/task/properties?${params}`);
   return response.data;
 };

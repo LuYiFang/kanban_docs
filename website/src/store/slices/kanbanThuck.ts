@@ -8,9 +8,12 @@ import _ from "lodash";
 
 export const getAllTaskWithProperties = createAsyncThunk(
   "kanban/getAllTaskWithProperties",
-  async ({ taskType }: { taskType: taskType }, thunkAPI) => {
+  async (
+    { taskType, weeksAgo }: { taskType: taskType; weeksAgo: number },
+    thunkAPI,
+  ) => {
     try {
-      return await repository.getAllTaskWithPropertiesApi(taskType);
+      return await repository.getAllTaskWithPropertiesApi(taskType, weeksAgo);
     } catch (error) {
       const axiosError = error as AxiosError;
       return thunkAPI.rejectWithValue(axiosError?.response?.data);
