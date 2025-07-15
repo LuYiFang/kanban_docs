@@ -1,7 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { Task, TaskCreate, taskType, TaskUpdate } from "../../types/task";
 import { DefaultProperty } from "../../types/property";
-import { repository } from "../../utils/fetchApi"; // 修改为从 repository 导入
+import { repository } from "../../utils/fetchApi";
 import { AxiosError } from "axios";
 import { Layouts } from "react-grid-layout";
 import _ from "lodash";
@@ -9,7 +9,7 @@ import _ from "lodash";
 export const getAllTaskWithProperties = createAsyncThunk(
   "kanban/getAllTaskWithProperties",
   async (
-    { taskType, weeksAgo }: { taskType: taskType; weeksAgo: number },
+    { taskType, weeksAgo }: { taskType: taskType; weeksAgo?: number },
     thunkAPI,
   ) => {
     try {
@@ -61,9 +61,9 @@ export const updateTask = createAsyncThunk(
 );
 
 export const updateMultipleTasks = createAsyncThunk<
-  Task[], // 成功时返回的類型
-  TaskUpdate[], // 参数類型
-  { rejectValue: any } // rejectWithValue 的類型
+  Task[],
+  TaskUpdate[],
+  { rejectValue: any }
 >("kanban/updateMultipleTasks", async (tasks: TaskUpdate[], thunkAPI) => {
   try {
     return await repository.batchUpdateTasksApi(tasks);

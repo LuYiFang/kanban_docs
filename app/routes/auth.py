@@ -1,8 +1,8 @@
-from fastapi import APIRouter, HTTPException, Depends, Response
+from fastapi import APIRouter, HTTPException, Depends, Response, Request
 
 from database import get_db
 from models.auth import (LoginRequest, SignupRequest)
-from services.auth import login_service, signup_service
+from services.auth import login_service, signup_service, me_service
 
 router = APIRouter()
 
@@ -27,3 +27,12 @@ async def login(request: LoginRequest, response: Response, db=Depends(get_db)):
 async def logout(response: Response):
     response.delete_cookie(key="access_token")
     return {"message": "Successfully logged out"}
+
+
+@router.get("/me")
+async def me(request: Request, db=Depends(get_db)):
+    token = request.cookies.get("access_token")
+    if not token:
+        raise HTTPException(status_code=401, detail="Token not found")
+    user_info = await me_service(token, db)
+    return user_info

@@ -5,7 +5,7 @@ import { AxiosError } from "axios";
 
 export const getAllTaskWithPropertiesApi = async (
   taskType: taskType,
-  weeksAgo: number,
+  weeksAgo?: number,
 ) => {
   const params = new URLSearchParams({
     task_type: taskType,
@@ -116,9 +116,22 @@ export const deleteFileApi = async (fileId: string) => {
 };
 
 export const getSummeryWeeklyApi = async () => {
-  console.log("getSummeryWeeklyApi");
   const response = await apiClient.get(`/summary/weekly`, { timeout: 600000 });
-  console.log("getSummeryWeeklyApi response", response);
+  return response.data;
+};
+
+export const loginApi = async (username: string, password: string) => {
+  const response = await apiClient.post(`/auth/login`, { username, password });
+  return response.data;
+};
+
+export const logoutApi = async () => {
+  const response = await apiClient.post(`/auth/logout`);
+  return response.data;
+};
+
+export const meApi = async () => {
+  const response = await apiClient.get(`/auth/me`);
   return response.data;
 };
 
@@ -137,4 +150,7 @@ export const repository = {
   getFileIdByNameApi,
   deleteFileApi,
   getSummeryWeeklyApi,
+  loginApi,
+  logoutApi,
+  meApi,
 };

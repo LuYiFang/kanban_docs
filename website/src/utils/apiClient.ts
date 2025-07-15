@@ -5,6 +5,7 @@ const defaultBaseURL = "http://localhost:9000/api";
 const apiClient = axios.create({
   baseURL: defaultBaseURL,
   timeout: 5000,
+  withCredentials: true,
 });
 
 // 動態載入 API URL

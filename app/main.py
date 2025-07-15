@@ -1,13 +1,16 @@
+import os
+
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from database import mongodb
 from routes import tasks, properties, tasks_with_properties, files, auth
+from utils.middleware import ExtendExpMiddleware
 
 app = FastAPI()
 
 origins = [
-    "*",
+    os.getenv("FRONTEND_URL", "http://localhost:5173"),
 ]
 
 app.add_middleware(
@@ -17,6 +20,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(ExtendExpMiddleware)
 
 prefix = '/api'
 app.include_router(tasks.router, prefix=prefix + '/task', tags=["tasks"])
