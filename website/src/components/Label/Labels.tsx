@@ -5,6 +5,7 @@ import {
   assignProjectColor,
   priorityColor,
   statusColors,
+  taskPropertyOrder,
 } from "../../types/property";
 import { convertToKebabCase } from "../../utils/tools";
 import Editor from "../Editor/Editor";
@@ -147,7 +148,7 @@ export const ContentLabel: React.FC<{
       <Editor
         taskId={taskId}
         dataName={DataType.ALL}
-        propertyOrder={["tags"]}
+        propertyOrder={taskPropertyOrder}
         readOnly={readonly}
         deleteTaskCallback={deleteTaskCallback}
         onOpenLink={onOpenLink}

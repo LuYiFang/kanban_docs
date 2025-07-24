@@ -9,7 +9,7 @@ export const getAllTaskWithPropertiesApi = async (
 ) => {
   const params = new URLSearchParams({
     task_type: taskType,
-    weeks_ago: `${weeksAgo}`,
+    ...(weeksAgo !== undefined && { weeks_ago: `${weeksAgo}` }),
   }).toString();
   const response = await apiClient.get(`/task/properties?${params}`);
   return response.data;

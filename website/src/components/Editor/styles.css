@@ -43,3 +43,7 @@
 .dark-theme.mdxeditor [class*="codeMirrorWrapper"] {
     background-color: theme('colors.gray.900');
 }
+
+.dark-theme div._codeMirrorWrapper_1pxqm_392 {
+    padding-top: 36px;
+}

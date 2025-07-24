@@ -5,7 +5,6 @@ const defaultBaseURL = "http://localhost:9000/api";
 const apiClient = axios.create({
   baseURL: defaultBaseURL,
   timeout: 5000,
-  withCredentials: true,
 });
 
 // 動態載入 API URL
@@ -29,5 +28,21 @@ async function setApiBaseUrl() {
 
 // 啟動應用時載入 API URL
 setApiBaseUrl().then((r) => {});
+
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem("accessToken");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+apiClient.interceptors.response.use((response) => {
+  const newToken = response.headers["x-new-token"];
+  if (newToken) {
+    localStorage.setItem("accessToken", newToken);
+  }
+  return response;
+});
 
 export default apiClient;

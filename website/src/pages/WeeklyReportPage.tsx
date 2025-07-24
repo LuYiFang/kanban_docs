@@ -102,6 +102,7 @@ const WeeklyReportPage: React.FC = () => {
         title="Summarize"
         data-cy="generate-summary-button"
         onClick={generateSummary}
+        disabled={true}
       >
         <FontAwesomeIcon icon={faListCheck} />
       </button>

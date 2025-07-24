@@ -1,10 +1,14 @@
-from fastapi import APIRouter, HTTPException, Depends, Response, Request
+from fastapi import APIRouter, HTTPException, Depends
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.responses import JSONResponse
 
 from database import get_db
 from models.auth import (LoginRequest, SignupRequest)
 from services.auth import login_service, signup_service, me_service
 
 router = APIRouter()
+
+security = HTTPBearer()
 
 
 @router.post("/signup")
@@ -17,22 +21,30 @@ async def signup(request: SignupRequest, db=Depends(get_db)):
 
 
 @router.post("/login")
-async def login(request: LoginRequest, response: Response, db=Depends(get_db)):
+async def login(request: LoginRequest, db=Depends(get_db)):
     access_token = await login_service(request, db)
-    response.set_cookie(key="access_token", value=access_token, httponly=True)
-    return {"message": "Login successful"}
+    if not access_token:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    response = JSONResponse(
+        content={"message": "Login successful"},
+        status_code=200
+    )
+    response.headers["X-New-Token"] = access_token
+    return response
 
 
 @router.post("/logout")
-async def logout(response: Response):
-    response.delete_cookie(key="access_token")
+async def logout():
+    # TODO
     return {"message": "Successfully logged out"}
 
 
 @router.get("/me")
-async def me(request: Request, db=Depends(get_db)):
-    token = request.cookies.get("access_token")
-    if not token:
-        raise HTTPException(status_code=401, detail="Token not found")
+async def me(credentials: HTTPAuthorizationCredentials = Depends(security),
+             db=Depends(get_db)):
+    token = credentials.credentials
     user_info = await me_service(token, db)
+    if not user_info:
+        raise HTTPException(status_code=401, detail="Invalid token")
     return user_info

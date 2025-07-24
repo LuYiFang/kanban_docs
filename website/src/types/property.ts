@@ -34,9 +34,10 @@ export const taskPropertyOrder = [
   "priority",
   "status",
   "level",
-  "assignee",
-  "deadline",
-  "finishedAt",
+  "tags",
+  // "assignee",
+  // "deadline",
+  // "finishedAt",
 ];
 
 // 狀態的排序
