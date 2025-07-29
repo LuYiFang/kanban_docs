@@ -11,7 +11,6 @@ import {
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { TaskWithProperties } from "../types/task";
-import Card from "../components/Card/Card";
 import _ from "lodash";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -27,18 +26,33 @@ import AddTaskButton from "../components/Kanban/AddTaskButton";
 import { isTaskUrl, readMarkdownFile, UUID_PATTERN } from "../utils/tools";
 import SearchSelect from "../components/Select/SearchSelect";
 import CollapsibleSection from "../components/CollapsibleSection/CollapsibleSection";
+import LazyCard from "../components/Card/LazyCard";
+import Tooltip from "../components/Tooltip/ToolTip";
+import StatusBubble, {
+  StatusType,
+} from "../components/StatusBubble/StatusBubble";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 const CARD_WIDTH = 6;
 const CARD_HEIGHT = 16;
 
+function DraggableHandle({ classListStr = "", direction = "" }) {
+  return (
+    <div
+      className={`absolute z-40 ${classListStr} draggable-handle bg-transparent hover:bg-gray-700/20 transition-colors duration-150`}
+      data-cy={`doc-drag-${direction}`}
+    ></div>
+  );
+}
+
 const DocsPage: React.FC = () => {
   const [pinnedItems, setPinnedItems] = useState<TaskWithProperties[]>([]);
   const [layouts, setLayouts] = useState<Layouts>({});
   const [newItemId, setNewItemId] = useState<string>("");
   const [isDocsLayoutLoaded, setIsDocsLayoutLoaded] = useState(false);
-  const [showSaveSuccess, setShowSaveSuccess] = useState<boolean | null>(null);
+  const [saveStatus, setSaveStatus] = useState<StatusType>("none");
+  const [importStatus, setImportStatus] = useState<StatusType>("none");
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const dispatch = useDispatch<AppDispatch>();
@@ -128,11 +142,11 @@ const DocsPage: React.FC = () => {
       .unwrap()
       .then((result) => {
         if (result) {
-          setShowSaveSuccess(true);
+          setSaveStatus("success");
         } else {
-          setShowSaveSuccess(false);
+          setSaveStatus("error");
         }
-        setTimeout(() => setShowSaveSuccess(null), 2000);
+        setTimeout(() => setSaveStatus("none"), 2000);
       });
   };
 
@@ -155,15 +169,101 @@ const DocsPage: React.FC = () => {
   const handleImportMarkdown = async (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+    try {
+      const file = event.target.files?.[0];
+      if (!file) return;
 
-    const markdownContent = await readMarkdownFile(file);
-    handleAddDoc(file.name.replace(/\.[^/.]+$/, ""), markdownContent);
+      const markdownContent = await readMarkdownFile(file);
+      handleAddDoc(file.name.replace(/\.[^/.]+$/, ""), markdownContent);
+      setImportStatus("success");
+    } catch (error) {
+      console.error("Error reading markdown file:", error);
+      setImportStatus("error");
+      return;
+    }
+    event.target.value = "";
   };
+
+  const debouncedLayoutChange = useMemo(
+    () =>
+      _.debounce((layout, layouts) => {
+        setLayouts(
+          _.mapValues(layouts, (layout) => {
+            return layout.map((item: TaskWithProperties) => {
+              if (item.i === newItemId) {
+                setNewItemId("");
+                return {
+                  ...item,
+                  w: CARD_WIDTH,
+                  h: CARD_HEIGHT,
+                  resizeHandles: ["s", "w", "e", "n", "sw", "nw", "se", "ne"],
+                  static: false,
+                };
+              }
+              return item;
+            });
+          }) as Layouts,
+        );
+      }, 300),
+    [newItemId],
+  );
 
   return (
     <div className="p-4 bg-gray-900 text-gray-300 h-full relative flex flex-col">
+      <AddTaskButton
+        onClick={() => handleAddDoc("", "")}
+        buttonSize={buttonSize}
+        iconSize={iconSize}
+      />
+      <StatusBubble
+        targetId="import-markdown-input-label"
+        status={saveStatus}
+        message={
+          saveStatus == "success"
+            ? "Layout Saved!"
+            : saveStatus == "error"
+              ? "Failed to Save Layout!"
+              : ""
+        }
+        duration={3000}
+        position="center"
+      >
+        <Tooltip title={"Save Layout"}>
+          <button
+            className={`absolute top-4 right-20 ${buttonSize} bg-green-500 text-white rounded-full shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 flex items-center justify-center group`}
+            onClick={handleSaveLayout}
+            id="save-layout-button"
+          >
+            <FontAwesomeIcon icon={faBookmark} className={iconSize} />
+          </button>
+        </Tooltip>
+      </StatusBubble>
+      <input
+        type="file"
+        accept=".md"
+        className="hidden"
+        id="import-markdown-input"
+        onChange={handleImportMarkdown}
+      />
+      <StatusBubble
+        targetId="import-markdown-input-label"
+        status={importStatus}
+        message={
+          importStatus == "success" ? "Layout Saved!" : "Failed to Save Layout!"
+        }
+        duration={3000}
+        position="center"
+      >
+        <Tooltip title={"Import Markdown"}>
+          <label
+            htmlFor="import-markdown-input"
+            id="import-markdown-input-label"
+            className={`absolute top-4 right-36 ${buttonSize} px-5 bg-yellow-500 text-white rounded-full shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 flex items-center justify-center group cursor-pointer`}
+          >
+            <FontAwesomeIcon icon={faUpload} className={iconSize} />
+          </label>
+        </Tooltip>
+      </StatusBubble>
       <button
         className="toggle-button bg-transparent text-white flex items-center justify-center h-6 w-6 rounded-full mb-2"
         onClick={() => setIsCollapsed(!isCollapsed)}
@@ -172,40 +272,7 @@ const DocsPage: React.FC = () => {
       </button>
       <CollapsibleSection isCollapsed={isCollapsed} maxHigh={"max-h-[640px]"}>
         <h1 className="text-2xl font-bold mb-4">Documents</h1>
-        <AddTaskButton
-          onClick={() => handleAddDoc("", "")}
-          buttonSize={buttonSize}
-          iconSize={iconSize}
-        />
-        <button
-          className={`absolute top-4 right-20 ${buttonSize} bg-green-500 text-white rounded-full shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 flex items-center justify-center group`}
-          onClick={handleSaveLayout}
-          id="save-layout-button"
-        >
-          <FontAwesomeIcon icon={faBookmark} className={iconSize} />
-          <span className="absolute top-full mb-2 px-2 py-1 text-xs text-white bg-black rounded opacity-0 group-hover:opacity-100 transition-opacity">
-            Save Layout
-          </span>
-        </button>
-        {showSaveSuccess !== null && (
-          <span className="z-50 absolute top-[68px] right-[56px] px-2 py-1 text-xs text-white bg-gray-700 rounded shadow-lg">
-            {showSaveSuccess ? "Layout Saved!" : "Failed to Save Layout!"}
-          </span>
-        )}
-        <input
-          type="file"
-          accept=".md"
-          className="hidden"
-          id="import-markdown-input"
-          onChange={handleImportMarkdown}
-        />
-        <label
-          htmlFor="import-markdown-input"
-          id="import-markdown-input-label"
-          className={`absolute top-4 right-36 ${buttonSize} bg-yellow-500 text-white rounded-full shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 flex items-center justify-center group cursor-pointer`}
-        >
-          <FontAwesomeIcon icon={faUpload} className={iconSize} />
-        </label>
+
         <SearchSelect
           allItems={allItems}
           propertyOptionsIdNameMap={propertyOptionsIdNameMap}
@@ -223,25 +290,7 @@ const DocsPage: React.FC = () => {
         isDraggable={true}
         onDragStart={() => console.log("Drag started")}
         draggableHandle={".draggable-handle"}
-        onLayoutChange={(layout, layouts) => {
-          setLayouts(
-            _.mapValues(layouts, (layout) => {
-              return _.map(layout, (item) => {
-                if (item.i === newItemId) {
-                  setNewItemId("");
-                  return {
-                    ...item,
-                    w: CARD_WIDTH,
-                    h: CARD_HEIGHT,
-                    resizeHandles: ["s", "w", "e", "n", "sw", "nw", "se", "ne"],
-                    static: false,
-                  };
-                }
-                return item;
-              });
-            }) as Layouts,
-          );
-        }}
+        onLayoutChange={debouncedLayoutChange}
       >
         {pinnedItems.map((doc) => {
           if (!doc) return null;
@@ -258,27 +307,14 @@ const DocsPage: React.FC = () => {
               >
                 {doc.title}
               </div>
-              {/* Top draggable handle */}
-              <div
-                className="absolute z-40 top-3 left-3 right-[55px] h-8 draggable-handle bg-transparent"
-                data-cy={"doc-drag-top"}
-              ></div>
-              {/* Bottom draggable handle */}
-              <div
-                className="absolute z-40 bottom-3 left-3 right-3 h-5 draggable-handle bg-transparent"
-                data-cy={"doc-drag-bottom"}
-              ></div>
-              {/* Left draggable handle */}
-              <div
-                className="absolute z-40 top-3 bottom-3 left-3 w-5 draggable-handle bg-transparent"
-                data-cy={"doc-drag-left"}
-              ></div>
-              {/* Right draggable handle */}
-              <div
-                className="absolute z-40 top-[55px] bottom-3 right-3 w-4 draggable-handle bg-transparent"
-                data-cy={"doc-drag-right"}
-              ></div>
-
+              <DraggableHandle
+                classListStr="top-3 bottom-3 left-3 w-5"
+                direction={"left"}
+              />
+              <DraggableHandle
+                classListStr="z-40 top-[55px] bottom-3 right-3 w-4"
+                direction={"right"}
+              />
               <button
                 className="z-50 absolute top-0.5 right-6 ml-2 w-5 h-5 p-0 flex items-center justify-center rounded-full text-gray-100 hover:bg-gray-300 hover:bg-opacity-80 text-[10px]"
                 onClick={() => UnpinnedDocs(doc.id)}
@@ -287,7 +323,7 @@ const DocsPage: React.FC = () => {
                 <FontAwesomeIcon icon={faTimes} />
               </button>
 
-              <Card
+              <LazyCard
                 task={doc}
                 cardVisibleProperties={["content"]}
                 propertyOptionsIdNameMap={propertyOptionsIdNameMap}

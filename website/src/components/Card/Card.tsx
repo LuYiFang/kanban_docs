@@ -10,7 +10,7 @@ import {
 } from "../Label/Labels";
 import _ from "lodash";
 
-interface KanbanCardContentProps {
+export interface KanbanCardContentProps {
   task: TaskWithProperties;
   cardVisibleProperties: string[];
   propertyOptionsIdNameMap: Record<string, string>;
