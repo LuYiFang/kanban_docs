@@ -63,6 +63,7 @@ const StatusBubble = ({
             className={`fixed z-50 px-3 py-2 text-xs rounded shadow-lg transform -translate-x-1/2 transition-opacity
               ${status === "success" ? "bg-gray-700 text-white" : "bg-red-600 text-white"}`}
             style={{ top: coords.top, left: coords.left }}
+            data-cy={"status-bubble"}
           >
             {message}
           </span>,

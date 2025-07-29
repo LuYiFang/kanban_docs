@@ -14,7 +14,9 @@ class ExtendExpMiddleware:
         self.excluded_paths = {
             "/api/auth/logout",
             "/api/auth/login",
-            "/api/auth/signup"
+            "/api/auth/signup",
+            "/docs",
+            "/openapi.json"
         }
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send):

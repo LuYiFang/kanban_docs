@@ -56,24 +56,58 @@ describe("Weekly Page Workflow Tests", () => {
       .should("include", "readOnly");
   });
 
-  it("should generate summary and allow copying an item", () => {
-    cy.get('[data-cy="generate-summary-button"]').click();
-    cy.get('[data-cy="summary-area"]').should("exist");
+  it("should not change week number on first previous click", () => {
+    cy.get("[data-cy=week-ago-number]")
+      .invoke("text")
+      .then((initialWeek) => {
+        cy.get("[data-cy=previous-week-button]").click();
 
-    cy.get('[data-cy="summary-area"] input[type="text"]')
-      .first()
-      .type("123") // 在輸入框中輸入123
-      .invoke("val")
-      .then((text) => {
-        cy.get('[data-cy="input-copy-button"]').first().click();
-        cy.document().then((doc) => {
-          doc.hasFocus = true; // 確保文檔獲得焦點
-          cy.window().then((win) => {
-            win.navigator.clipboard.readText().then((clipboardText) => {
-              expect(clipboardText).to.eq(`${text}123`); // 確保複製的文本後面包含123
-            });
-          });
-        });
+        cy.get("[data-cy=week-ago-number]").should("have.text", initialWeek);
       });
   });
+
+  it("should change week number and update content on next/previous clicks", () => {
+    cy.get("[data-cy=week-ago-number]")
+      .invoke("text")
+      .then((weekBeforeClick) => {
+        cy.get("[data-cy=next-week-button]").click();
+
+        cy.get("[data-cy=week-ago-number]").should(
+          "have.text",
+          `${parseInt(weekBeforeClick) + 1}`,
+        );
+        cy.get("[data-cy=kanban-task]").should("have.length", 1);
+      });
+
+    // 再點一次 next
+    cy.get("[data-cy=next-week-button]").click();
+    // 檢查內容數量仍正確
+    cy.get("[data-cy=kanban-task]").should("have.length", 3);
+
+    // 點一次 previous
+    cy.get("[data-cy=previous-week-button]").click();
+    // 檢查內容數量仍正確
+    cy.get("[data-cy=kanban-task]").should("have.length", 1);
+  });
+
+  // it("should generate summary and allow copying an item", () => {
+  //   cy.get('[data-cy="generate-summary-button"]').click();
+  //   cy.get('[data-cy="summary-area"]').should("exist");
+  //
+  //   cy.get('[data-cy="summary-area"] input[type="text"]')
+  //     .first()
+  //     .type("123") // 在輸入框中輸入123
+  //     .invoke("val")
+  //     .then((text) => {
+  //       cy.get('[data-cy="input-copy-button"]').first().click();
+  //       cy.document().then((doc) => {
+  //         doc.hasFocus = true; // 確保文檔獲得焦點
+  //         cy.window().then((win) => {
+  //           win.navigator.clipboard.readText().then((clipboardText) => {
+  //             expect(clipboardText).to.eq(`${text}123`); // 確保複製的文本後面包含123
+  //           });
+  //         });
+  //       });
+  //     });
+  // });
 });

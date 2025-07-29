@@ -124,7 +124,7 @@ describe("DocsPage", () => {
     cy.get("[data-cy=tag-documents]").children().eq(1).click();
 
     // 模擬拖放操作，將第一個文檔移動到新位置
-    cy.get("[data-cy=doc-drag-top]")
+    cy.get("[data-cy=doc-drag-right]")
       .first()
       .trigger("mousedown", { clientX: 0, clientY: 0, force: true }) // 起始位置
       .trigger("mousemove", { clientX: 300, clientY: 1500, force: true }) // 拖動到目標位置
@@ -143,7 +143,9 @@ describe("DocsPage", () => {
     // 選擇標籤 "Tag2" 並選中兩個文檔
     cy.get("[data-cy=kanban-task-tags]").contains("Tag2").click();
     cy.get("[data-cy=tag-documents]").children().first().click();
+    cy.wait(300);
     cy.get("[data-cy=tag-documents]").children().eq(1).click();
+    cy.wait(300);
 
     cy.get("[data-cy=toggle-properties]").first().click();
 
@@ -185,7 +187,9 @@ describe("DocsPage", () => {
     // Step 1: 用 tag 點兩個 card
     cy.get("[data-cy=kanban-task-tags]").contains("Tag2").click();
     cy.get("[data-cy=tag-documents]").children().eq(0).click();
+    cy.wait(300);
     cy.get("[data-cy=tag-documents]").children().eq(1).click();
+    cy.wait(300);
 
     // // Step 2: 用 search 點一個 card
     cy.get("[data-cy=search-input]").type("task");
@@ -203,7 +207,7 @@ describe("DocsPage", () => {
       .trigger("mouseup", { force: true });
 
     // Step 4: 將第二個 card 拖移到與第一個並行
-    cy.get("[data-cy=doc-card-id-task-id-2] [data-cy=doc-drag-top]")
+    cy.get("[data-cy=doc-card-id-task-id-2] [data-cy=doc-drag-right]")
       .trigger("mousedown", { clientX: 0, clientY: 0, force: true })
       .trigger("mousemove", { clientX: 600, clientY: 600, force: true })
       .trigger("mouseup", { force: true });
@@ -247,13 +251,15 @@ describe("DocsPage", () => {
 
     // 填寫文檔標題和內容
     cy.get("[data-cy=title-input]").type("New Document Title");
+    // 等待 5 秒以確保自動保存觸發
+    cy.wait(3500);
+    cy.wait("@updateDoc").its("response.statusCode").should("eq", 200);
+
     cy.get('[data-cy="editor-content"] .mdxeditor-root-contenteditable').type(
       "This is the content of the new document.",
     );
-
     // 等待 5 秒以確保自動保存觸發
     cy.wait(3500);
-
     // 確保 API 被呼叫
     cy.wait("@updateDoc").its("response.statusCode").should("eq", 200);
   });
@@ -348,7 +354,26 @@ describe("DocsPage", () => {
       { force: true },
     );
 
+    cy.get("[data-cy=status-bubble]").should("exist");
     cy.get("[data-cy=doc-card-id-doc-id-import]").should("exist");
+  });
+
+  it("should open task doc when clicking task link", () => {
+    // 假設 task link 是以 data-cy 標記，或是用文字選取
+    cy.get("[data-cy=search-input]").type("Regular Task 2");
+    cy.get("[data-cy=tag-documents]").children().eq(2).click();
+
+    cy.wait(300);
+    cy.get("[data-cy=editor-content]").should("contain.text", "Regular Task 2");
+    cy.get("[data-cy=editor-content] span").contains("Regular Task 2").click();
+
+    cy.get(".mdxeditor-popup-container a").click();
+    cy.wait(300);
+
+    // 或者驗證 task doc 的內容是否正確載入
+    cy.get(
+      "[data-cy=doc-card-id-3f9c1e8a-7b2f-4a6e-9d8f-2c1a4d9e2b1c] [data-cy=title-input]",
+    ).should("have.value", "Regular Task 2");
   });
 
   function verifyFilteredResults(expectedCount: number) {

@@ -1,10 +1,13 @@
 import asyncio
+
 import uuid
 from datetime import datetime, timedelta
 
 from database import (get_db, mongodb, default_option_info,
                       default_property_config_info, insert_property_options)
+from models.auth import SignupRequest
 from models.tasks import TaskType
+from services.auth import signup_service
 
 # 生成時間戳
 now = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
@@ -128,7 +131,8 @@ async def insert_task_properties(db, tasks, options):
 
             assigned_value = ""
             if property_name != "tags" and property_options:
-                assigned_value = property_options[(i + j) % len(property_options)]
+                assigned_value = property_options[
+                    (i + j) % len(property_options)]
 
             elif property_name == "tags":
                 # Assign 1-5 tags based on loop index
@@ -155,6 +159,11 @@ async def insert_task_properties(db, tasks, options):
     print(f"Inserted {len(task_properties)} task properties")
 
 
+async def insert_users(db):
+    await signup_service(
+        SignupRequest(**{'username': '00012345', 'password': '12345'}), db)
+
+
 async def connect_to_mongodb():
     """連接到 MongoDB"""
     await mongodb.connect()
@@ -166,6 +175,7 @@ async def main():
     await connect_to_mongodb()
     db = await get_db()
 
+    await insert_users(db)
     options = await insert_property_options(db, dummy_option_info)
     tasks_inserted = await insert_tasks(db)
     await insert_task_properties(db, tasks_inserted, options)

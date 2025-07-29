@@ -78,7 +78,7 @@ export const setupInterceptors = () => {
         ],
       },
       {
-        id: "task-id-5",
+        id: "3f9c1e8a-7b2f-4a6e-9d8f-2c1a4d9e2b1c",
         createdAt: "2025-04-30T14:00:00Z",
         updatedAt: "2025-05-01T15:00:00Z",
         title: "Regular Task 2",
@@ -118,7 +118,8 @@ export const setupInterceptors = () => {
         createdAt: "2025-04-30T16:00:00Z",
         updatedAt: "2025-05-02T08:00:00Z",
         title: "Regular Task 3",
-        content: "This is a regular task 3.",
+        content:
+          "This is a regular task 3.[Regular Task 2](http://localhost:xxxx#/task/3f9c1e8a-7b2f-4a6e-9d8f-2c1a4d9e2b1c)",
         order: 5,
         type: "task",
         properties: [
@@ -166,12 +167,12 @@ export const setupInterceptors = () => {
       sm: [
         { i: "task-id-1", x: 0, y: 16, w: 2, h: 16 },
         { i: "task-id-2", x: 4, y: 16, w: 2, h: 29 },
-        { i: "task-id-5", x: 0, y: 0, w: 6, h: 16 },
+        { i: "3f9c1e8a-7b2f-4a6e-9d8f-2c1a4d9e2b1c", x: 0, y: 0, w: 6, h: 16 },
       ],
       lg: [
         { i: "task-id-1", x: 0, y: 16, w: 2, h: 16 },
         { i: "task-id-2", x: 4, y: 16, w: 2, h: 29 },
-        { i: "task-id-5", x: 0, y: 0, w: 6, h: 16 },
+        { i: "3f9c1e8a-7b2f-4a6e-9d8f-2c1a4d9e2b1c", x: 0, y: 0, w: 6, h: 16 },
       ],
     },
   }).as("getLayout");

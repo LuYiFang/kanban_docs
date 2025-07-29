@@ -61,6 +61,7 @@ export const InsertTask = () => {
           setIsDialogOpen(true);
         }}
         title="Insert Task"
+        data-cy={"insert-task-button"}
       >
         <FontAwesomeIcon
           icon={faTableList}

@@ -9,3 +9,7 @@ class LoginRequest(BaseModel):
 class SignupRequest(BaseModel):
     username: str
     password: str
+
+
+class MeResponse(BaseModel):
+    username: str

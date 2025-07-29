@@ -67,13 +67,15 @@ const WeeklyReportPage: React.FC = () => {
             <button
               className="px-2 py-1 bg-transparent text-white rounded hover:bg-gray-600"
               onClick={() => handleWeekChange("prev")}
+              data-cy={"previous-week-button"}
             >
               <FontAwesomeIcon icon={faChevronLeft} />
             </button>
-            <span>{currentWeek}</span>
+            <span data-cy={"week-ago-number"}>{currentWeek}</span>
             <button
               className="px-2 py-1 bg-transparent text-white rounded hover:bg-gray-600"
               onClick={() => handleWeekChange("next")}
+              data-cy={"next-week-button"}
             >
               <FontAwesomeIcon icon={faChevronRight} />
             </button>

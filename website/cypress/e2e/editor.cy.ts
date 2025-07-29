@@ -316,4 +316,35 @@ describe("Editor Workflow Tests", () => {
       initialContent + additionalContent,
     );
   });
+
+  it("should insert task markdown when clicking insert-task-button", () => {
+    // 點選指定 task 卡片
+    cy.get('[data-rbd-draggable-id="task-id-1"]').click();
+
+    // 確保 Edit Dialog 打開
+    cy.get('[data-cy="edit-dialog"]').should("exist");
+
+    // 點進 markdown 編輯器
+    cy.get(
+      '[data-cy="editor-content"] .mdxeditor-root-contenteditable',
+    ).click();
+
+    // 點選工具列按鈕（假設是 bold）
+    cy.get('[data-cy="insert-task-button"]').click();
+
+    // 搜尋文件
+    cy.get("[data-cy=search-input]").type("This is default");
+
+    // 等待搜尋結果並點選第一個
+    cy.get("[data-cy=tag-documents] > div")
+      .first()
+      .should("contain.text", "This is default task")
+      .click();
+
+    // 驗證文件是否成功插入／綁定（視 UI 而定）
+    cy.get("[data-cy=editor-content]").should(
+      "contain.text",
+      "This is default task",
+    );
+  });
 });

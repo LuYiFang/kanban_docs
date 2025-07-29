@@ -1,9 +1,11 @@
+from typing import Dict
+
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.responses import JSONResponse
 
 from database import get_db
-from models.auth import (LoginRequest, SignupRequest)
+from models.auth import (LoginRequest, SignupRequest, MeResponse)
 from services.auth import login_service, signup_service, me_service
 
 router = APIRouter()
@@ -40,7 +42,7 @@ async def logout():
     return {"message": "Successfully logged out"}
 
 
-@router.get("/me")
+@router.get("/me", response_model=MeResponse)
 async def me(credentials: HTTPAuthorizationCredentials = Depends(security),
              db=Depends(get_db)):
     token = credentials.credentials
