@@ -1,4 +1,7 @@
+import apiClient from "./apiClient";
+
 const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const markdownImgRegex = /!\[.*]\((.*\/api\/files\/[^)]+)\)/g;
 
 export function convertUtcToLocal(utcDateString: string) {
   const utcDate = new Date(utcDateString);
@@ -25,15 +28,14 @@ export function convertToKebabCase(value: string): string {
 
 // Helper function to extract file URLs from content
 export const extractFileUrls = (content: string): string[] => {
-  const regex = /!\[.*]\((.*\/api\/files\/[^)]+)\)/g;
-  const urls: string[] = [];
+  const fileIds: string[] = [];
   let match;
-  while ((match = regex.exec(content)) !== null) {
+  while ((match = markdownImgRegex.exec(content)) !== null) {
     const fileId = match[1].split("/").pop();
     if (!fileId) continue;
-    urls.push(fileId);
+    fileIds.push(fileId);
   }
-  return urls;
+  return fileIds;
 };
 
 export const readMarkdownFile = (file: File): Promise<string> => {
@@ -56,3 +58,38 @@ export const isTaskUrl = (url: string): boolean => {
   const taskUrlPattern = new RegExp(`#\/task\/${UUID_PATTERN.source}$`);
   return taskUrlPattern.test(url);
 };
+
+export async function transformMarkdownImagesToBlobUrls(
+  content: string,
+): Promise<string> {
+  const matches = [...content.matchAll(markdownImgRegex)];
+
+  const replacements: Record<string, string> = {};
+
+  await Promise.all(
+    matches.map(async (match) => {
+      const original = match[0]; // 整個 ![](url)
+      const url = match[1]; // 圖片 URL
+
+      if (replacements[original]) return; // 已處理過
+
+      try {
+        const response = await apiClient.get(url, {
+          responseType: "blob",
+        });
+
+        const blobUrl = URL.createObjectURL(response.data);
+        replacements[original] = `![](${blobUrl})`;
+      } catch (err) {
+        console.error("Failed to fetch image:", match, err);
+        replacements[original] = `![Image failed to load](${url})`;
+      }
+    }),
+  );
+  let transformed = content;
+  for (const [original, replacement] of Object.entries(replacements)) {
+    transformed = transformed.replace(original, replacement);
+  }
+
+  return transformed;
+}

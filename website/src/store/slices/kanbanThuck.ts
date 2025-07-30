@@ -162,18 +162,6 @@ export const uploadFile = createAsyncThunk(
   },
 );
 
-export const downloadFile = createAsyncThunk(
-  "files/downloadFile",
-  async (fileId: string, thunkAPI) => {
-    try {
-      return await repository.downloadFileApi(fileId);
-    } catch (error) {
-      const axiosError = error as AxiosError;
-      return thunkAPI.rejectWithValue(axiosError?.response?.data);
-    }
-  },
-);
-
 export const saveLayout = createAsyncThunk(
   "kanban/saveLayout",
   async (layouts: Layouts, thunkAPI) => {

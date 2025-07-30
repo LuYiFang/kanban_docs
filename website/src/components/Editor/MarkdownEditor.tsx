@@ -48,6 +48,7 @@ import { AppDispatch } from "../../store/store";
 import { MermaidCodeEditorDescriptor } from "./MermaidCodeEditorDescriptor";
 import mermaid from "mermaid";
 import { InsertTask } from "./InsertTask";
+import { transformMarkdownImagesToBlobUrls } from "../../utils/tools";
 
 interface MarkdownEditorProps {
   readOnly: boolean;
@@ -70,12 +71,19 @@ const MarkdownEditor = forwardRef<MarkdownEditorMethods, MarkdownEditorProps>(
     }));
 
     useEffect(() => {
-      if (!editorRef.current) return;
+      const setMarkdownContent = async () => {
+        if (!editorRef.current) return;
 
-      editorRef.current.setMarkdown(content);
-      mermaid.run({
-        querySelector: ".mermaid",
-      });
+        const transformedContent =
+          await transformMarkdownImagesToBlobUrls(content);
+
+        editorRef.current.setMarkdown(transformedContent);
+        mermaid.run({
+          querySelector: ".mermaid",
+        });
+      };
+
+      setMarkdownContent();
     }, [content]);
 
     const handleEditorChange = (markdown: string) => {
