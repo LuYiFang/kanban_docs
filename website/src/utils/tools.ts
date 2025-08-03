@@ -2,6 +2,7 @@ import apiClient from "./apiClient";
 
 const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const markdownImgRegex = /!\[.*]\((.*\/api\/files\/[^)]+)\)/g;
+const BLOB_MAP_KEY = "markdownBlobMap";
 
 export function convertUtcToLocal(utcDateString: string) {
   const utcDate = new Date(utcDateString);
@@ -65,6 +66,7 @@ export async function transformMarkdownImagesToBlobUrls(
   const matches = [...content.matchAll(markdownImgRegex)];
 
   const replacements: Record<string, string> = {};
+  const blobMap: Record<string, string> = {};
 
   await Promise.all(
     matches.map(async (match) => {
@@ -80,16 +82,55 @@ export async function transformMarkdownImagesToBlobUrls(
 
         const blobUrl = URL.createObjectURL(response.data);
         replacements[original] = `![](${blobUrl})`;
+        blobMap[blobUrl] = url;
       } catch (err) {
         console.error("Failed to fetch image:", match, err);
         replacements[original] = `![Image failed to load](${url})`;
       }
     }),
   );
+  const existBlobMap: Record<string, string> = getBlobMap();
+  sessionStorage.setItem(
+    BLOB_MAP_KEY,
+    JSON.stringify({ ...existBlobMap, ...blobMap }),
+  );
+
   let transformed = content;
   for (const [original, replacement] of Object.entries(replacements)) {
     transformed = transformed.replace(original, replacement);
   }
-
   return transformed;
+}
+
+export function restoreBlobUrlsToOriginal(content: string): string {
+  const blobMap: Record<string, string> = getBlobMap();
+  if (!blobMap) return content;
+
+  let transformed = content;
+
+  const imageRegex = /!\[([^\]]*)\]\((blob\\:[^\)]+)\)/g;
+
+  for (const match of content.matchAll(imageRegex)) {
+    const fullMatch = match[0];
+    const altText = match[1];
+    const blobUrl = normalizeBlobUrls(match[2]);
+
+    const originalUrl = blobMap[blobUrl];
+    if (originalUrl) {
+      const replacement = `![${altText}](${originalUrl})`;
+      transformed = transformed.replace(fullMatch, replacement);
+    }
+  }
+  return transformed;
+}
+
+function getBlobMap() {
+  const blobMapRaw = sessionStorage.getItem(BLOB_MAP_KEY);
+  if (!blobMapRaw) return {};
+
+  return JSON.parse(blobMapRaw);
+}
+
+export function normalizeBlobUrls(markdown: string): string {
+  return markdown.replace(/blob\\:/g, "blob:");
 }

@@ -51,14 +51,6 @@ export const setupInterceptors = () => {
     },
   }).as("uploadFile");
 
-  cy.fixture("past_image.jpeg", "base64").then((fileContent) => {
-    cy.intercept("GET", "**/api/files/*", {
-      statusCode: 200,
-      headers: { "Content-Type": "image/jpeg" },
-      body: Cypress.Blob.base64StringToBlob(fileContent, "image/jpeg"),
-    }).as("getFile");
-  });
-
   // Update Task
   cy.intercept(
     {
@@ -77,10 +69,4 @@ export const setupInterceptors = () => {
       },
     },
   ).as("updateTask");
-  //
-  // // Delete File
-  // cy.intercept("DELETE", "**/api/files/*", {
-  //   statusCode: 200,
-  //   body: "12345678",
-  // }).as("deleteFile");
 };

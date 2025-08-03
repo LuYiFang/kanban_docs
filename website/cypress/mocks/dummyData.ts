@@ -36,7 +36,7 @@ export const dummyTasks: TaskWithProperties[] = [
     updatedAt: "2025-05-01T15:45:00Z",
     title: "Second task",
     content:
-      "This is the second task content.![link](https://api/files/edwefewf).",
+      "This is the second task content.![link](https://api/files/f47ac10b-58cc-4372-a567-0e02b2c3d479).",
     order: 1,
     type: "task",
     properties: [

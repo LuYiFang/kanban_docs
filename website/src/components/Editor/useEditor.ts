@@ -40,11 +40,11 @@ export const useEditor = (
   }, [tasks, taskId]);
 
   const [title, setTitle] = useState("");
-  const content = useRef("");
+  const contentRef = useRef("");
 
   useEffect(() => {
     setTitle(task.title);
-    content.current = task.content;
+    contentRef.current = task.content;
   }, [task.id]);
 
   function deleteContentFiles(content: string) {
@@ -127,7 +127,7 @@ export const useEditor = (
   return {
     title,
     setTitle,
-    content,
+    content: contentRef,
     task,
     saveTask,
     delaySaveTask,

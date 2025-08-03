@@ -48,7 +48,10 @@ import { AppDispatch } from "../../store/store";
 import { MermaidCodeEditorDescriptor } from "./MermaidCodeEditorDescriptor";
 import mermaid from "mermaid";
 import { InsertTask } from "./InsertTask";
-import { transformMarkdownImagesToBlobUrls } from "../../utils/tools";
+import {
+  restoreBlobUrlsToOriginal,
+  transformMarkdownImagesToBlobUrls,
+} from "../../utils/tools";
 
 interface MarkdownEditorProps {
   readOnly: boolean;
@@ -67,7 +70,8 @@ const MarkdownEditor = forwardRef<MarkdownEditorMethods, MarkdownEditorProps>(
     const editorRef = useRef<MDXEditorMethods>(null);
 
     useImperativeHandle(ref, () => ({
-      getMarkdown: () => editorRef.current?.getMarkdown() || "",
+      getMarkdown: () =>
+        restoreBlobUrlsToOriginal(editorRef.current?.getMarkdown() || ""),
     }));
 
     useEffect(() => {

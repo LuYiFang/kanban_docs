@@ -191,6 +191,9 @@ describe("Editor Workflow Tests", () => {
     // 等自動儲存好
     cy.wait(4000);
 
+    //檢查有沒有去撈 img
+    cy.wait("@getFile").its("response.statusCode").should("eq", 200);
+
     // 刪除圖片
     cy.get('[data-editor-block-type="image"] button').first().click();
     //

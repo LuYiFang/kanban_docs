@@ -20,7 +20,10 @@ import _ from "lodash";
 import { RootState } from "../../store/store";
 import InteractiveSelect from "../Select/InteractiveSelect";
 import MultiInteractiveSelect from "../Select/MultiInteractiveSelect";
-import { formatToCapitalCase } from "../../utils/tools";
+import {
+  formatToCapitalCase,
+  restoreBlobUrlsToOriginal,
+} from "../../utils/tools";
 import { PropertyConfig as PropertyConfigType } from "../../types/property";
 import { kanbanDataName } from "../../types/kanban";
 import MarkdownEditor from "../Editor/MarkdownEditor";
@@ -75,7 +78,11 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
     });
 
     useImperativeHandle(ref, () => ({
-      save: () => saveTask(title, editorRef.current?.getMarkdown() || ""),
+      save: () =>
+        saveTask(
+          title,
+          restoreBlobUrlsToOriginal(editorRef.current?.getMarkdown() || ""),
+        ),
       close: () => {
         setIsMenuOpen(false);
       },
@@ -155,7 +162,11 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
               <button
                 className="text-gray-200 hover:text-red-600"
                 onClick={() =>
-                  handleDeleteTask(editorRef.current?.getMarkdown() || "")
+                  handleDeleteTask(
+                    restoreBlobUrlsToOriginal(
+                      editorRef.current?.getMarkdown() || "",
+                    ),
+                  )
                 }
                 data-cy="delete-task-button"
               >
