@@ -8,7 +8,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.status import HTTP_401_UNAUTHORIZED
 
 from config.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
-from utils.tools import validate_exp
+from utils.tools import validate_exp, FRONTEND_URL
 
 EXCLUDED_PATHS = {
     "/api/auth/logout",
@@ -67,5 +67,10 @@ class ExtendExpMiddleware(BaseHTTPMiddleware):
     def _unauthorized(detail: str) -> Response:
         return JSONResponse(
             status_code=HTTP_401_UNAUTHORIZED,
-            content={"detail": detail}
+            content={"detail": detail},
+            headers={
+                "Access-Control-Allow-Origin": FRONTEND_URL,
+                "Access-Control-Allow-Credentials": "true"
+            }
+
         )

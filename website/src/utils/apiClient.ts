@@ -1,6 +1,13 @@
 import axios from "axios";
+import { logout } from "../store/slices/authSlice";
 
 const defaultBaseURL = "http://localhost:9000/api";
+
+let storeInstance: any;
+
+export const injectStore = (_store: any) => {
+  storeInstance = _store;
+};
 
 const apiClient = axios.create({
   baseURL: defaultBaseURL,
@@ -37,12 +44,21 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-apiClient.interceptors.response.use((response) => {
-  const newToken = response.headers["x-new-token"];
-  if (newToken) {
-    localStorage.setItem("accessToken", newToken);
-  }
-  return response;
-});
+apiClient.interceptors.response.use(
+  (response) => {
+    const newToken = response.headers["x-new-token"];
+    if (newToken) {
+      localStorage.setItem("accessToken", newToken);
+    }
+    return response;
+  },
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("accessToken");
+      storeInstance.dispatch(logout());
+    }
+    return Promise.reject(error);
+  },
+);
 
 export default apiClient;

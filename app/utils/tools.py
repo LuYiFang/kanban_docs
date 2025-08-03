@@ -1,9 +1,12 @@
 import inspect
+import os
 import sys
 from datetime import datetime
 from pprint import pprint
 
 from fastapi import HTTPException
+
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
 
 def dprint(name, value):

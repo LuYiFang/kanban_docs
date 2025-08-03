@@ -6,12 +6,11 @@ from starlette.middleware.cors import CORSMiddleware
 from database import mongodb
 from routes import tasks, properties, tasks_with_properties, files, auth
 from utils.middleware import ExtendExpMiddleware
+from utils.tools import FRONTEND_URL
 
 app = FastAPI()
 
-origins = [
-    os.getenv("FRONTEND_URL", "http://localhost:5173"),
-]
+origins = [FRONTEND_URL,]
 
 app.add_middleware(
     CORSMiddleware,
