@@ -194,8 +194,35 @@ describe("Editor Workflow Tests", () => {
     //檢查有沒有去撈 img
     cy.wait("@getFile").its("response.statusCode").should("eq", 200);
 
+    // 確認 sessionStorage 中的 markdownBlobMap 有圖片 URL
+    cy.get("body").click(0, 0);
+    cy.get("body").click(0, 0);
+    cy.get("body").click(0, 0);
+    // cy.wait(400);
+    cy.get('[data-rbd-draggable-id="task-id-2"]').click();
+    cy.get('[data-cy="edit-dialog"]').should("exist");
+    cy.get(
+      '[data-cy="editor-content"] .mdxeditor-root-contenteditable',
+    ).trigger("paste", {
+      clipboardData,
+    });
+    // 確保圖片 URL 被插入到內容中
+    cy.get('[data-editor-block-type="image"]').should("exist");
+    // 等自動儲存好
+    cy.wait(4000);
+    // 確認 sessionStorage 中的 markdownBlobMap 有兩個圖片 URL
+    cy.window().then((win) => {
+      const blobMap = JSON.parse(
+        win.sessionStorage.getItem("markdownBlobMap") || "{}",
+      );
+      const imageUrls = Object.keys(blobMap);
+      expect(imageUrls.length).to.equal(3); // 確認有三個圖片 URL
+    });
+
     // 刪除圖片
-    cy.get('[data-editor-block-type="image"] button').first().click();
+    cy.get('[data-editor-block-type="image"] button')
+      .first()
+      .click({ force: true });
     //
     // 等待 4 秒以確保刪除 API 被觸發
     cy.wait(4000);
@@ -237,12 +264,12 @@ describe("Editor Workflow Tests", () => {
 
     // 插入 mermaid 語法
     const mermaidSyntax = `classDiagram
-    class User {
-        + string Name
-        + int Age
-        + login()
-    }
-    `;
+      class User {
+          + string Name
+          + int Age
+          + login()
+      }
+      `;
 
     cy.get('[data-cy="mermaid-code-editor"]').type(mermaidSyntax);
 

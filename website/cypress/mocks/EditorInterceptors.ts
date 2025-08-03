@@ -1,23 +1,4 @@
 export const setupInterceptors = () => {
-  // Update Task
-  cy.intercept(
-    {
-      method: "PUT",
-      url: "**/task/*",
-      times: 1, // 此回應僅使用一次
-    },
-    {
-      statusCode: 200,
-      body: {
-        id: "task-id-1",
-        createdAt: "2025-04-06T12:00:00Z",
-        updatedAt: "2025-04-06T15:30:00Z",
-        title: "Updated Task Title",
-        content: "default",
-      },
-    },
-  ).as("updateTask");
-
   // Update Property
   cy.intercept("PUT", "**/property/*", {
     statusCode: 200,
@@ -55,8 +36,7 @@ export const setupInterceptors = () => {
   cy.intercept(
     {
       method: "PUT",
-      url: "**/task/*",
-      times: 1, // 此回應僅使用一次
+      url: "**/task/task-id-1",
     },
     {
       statusCode: 200,
@@ -65,7 +45,26 @@ export const setupInterceptors = () => {
         createdAt: "2025-04-06T12:00:00Z",
         updatedAt: "2025-04-06T15:30:00Z",
         title: "Updated Task Title",
-        content: "default![](http://localhost:9000/api/files/12345678)",
+        content:
+          "default![](http://localhost:9000/api/files/3c9e7f2a-8b6d-4e3a-9f8f-2d1a4c6e1a3b)",
+      },
+    },
+  ).as("updateTask");
+
+  cy.intercept(
+    {
+      method: "PUT",
+      url: "**/task/task-id-2",
+    },
+    {
+      statusCode: 200,
+      body: {
+        id: "task-id-2",
+        createdAt: "2025-04-06T12:00:00Z",
+        updatedAt: "2025-04-06T15:30:00Z",
+        title: "Second task",
+        content:
+          "This is the second task content.![link](https://api/files/f47ac10b-58cc-4372-a567-0e02b2c3d479)![](http://localhost:9000/api/files/3c9e7f2a-8b6d-4e3a-9f8f-2d1a4c6e1a3b)",
       },
     },
   ).as("updateTask");
