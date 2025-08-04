@@ -152,6 +152,7 @@ export const ContentLabel: React.FC<{
         readOnly={readonly}
         deleteTaskCallback={deleteTaskCallback}
         onOpenLink={onOpenLink}
+        config={{ titleExpanded: false }}
       />
     </div>
   );

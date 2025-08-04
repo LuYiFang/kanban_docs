@@ -29,6 +29,11 @@ import { kanbanDataName } from "../../types/kanban";
 import MarkdownEditor from "../Editor/MarkdownEditor";
 import { MDXEditorMethods } from "@mdxeditor/editor";
 import { useEditor } from "./useEditor";
+import CollapsibleSection from "../CollapsibleSection/CollapsibleSection";
+
+export interface EditorConfig {
+  titleExpanded: boolean;
+}
 
 interface EditorProps {
   taskId: string;
@@ -37,6 +42,7 @@ interface EditorProps {
   readOnly: boolean;
   deleteTaskCallback?: () => void;
   onOpenLink?: (url: string) => void | null;
+  config?: EditorConfig;
 }
 
 export interface EditorMethods {
@@ -53,6 +59,7 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
       readOnly,
       deleteTaskCallback,
       onOpenLink,
+      config = {},
     },
     ref,
   ) => {
@@ -60,7 +67,10 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
     const menuRef = useRef<HTMLDivElement>(null);
     const editorRef = useRef<MDXEditorMethods>(null);
     const [isTooltipVisible, setIsTooltipVisible] = useState(false);
-    const [isExpanded, setIsExpanded] = useState(false);
+    const [isPropertiesExpanded, setIsPropertiesExpanded] = useState(false);
+    const [isTitleExpanded, setIsTitleExpanded] = useState(
+      typeof config.titleExpanded === "boolean" ? config.titleExpanded : true,
+    );
 
     const {
       title,
@@ -124,7 +134,7 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
 
     return (
       <div
-        className=" bg-gray-900 p-6 rounded shadow-lg w-full h-full  flex flex-col space-y-4 relative overflow-auto"
+        className=" bg-gray-900 p-6 rounded shadow-lg w-full h-full  flex flex-col  relative overflow-auto"
         onClick={(e) => e.stopPropagation()}
         data-cy="edit-dialog"
       >
@@ -176,34 +186,58 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
           )}
         </div>
         {/* Title */}
-        <input
-          type="text"
-          className="w-full text-lg p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
-          value={title}
-          onChange={(e) => {
-            delaySaveTask(e.target.value, null);
-            setTitle(e.target.value);
-          }}
-          placeholder="Task Title"
-          data-cy="title-input"
-          disabled={readOnly}
-        />
-        {/* Properties */}
         <div className="flex items-start ">
+          <h3 className={`text-sm text-gray-200`}>Title</h3>
+          <button
+            className="text-sm text-gray-300 underline p-0 ml-2 mb-2  w-6 h-6 rounded-full bg-transparent"
+            onClick={() => setIsTitleExpanded(!isTitleExpanded)}
+            data-cy="toggle-title"
+          >
+            <FontAwesomeIcon
+              icon={isTitleExpanded ? faCaretUp : faCaretDown}
+              className="text-gray-300"
+            />
+          </button>
+        </div>
+        <CollapsibleSection
+          isCollapsed={!isTitleExpanded}
+          maxHigh={"max-h-[40px]"}
+        >
+          <input
+            type="text"
+            className={`w-full text-lg p-1 pl-2 border border-gray-700 bg-gray-800 text-gray-300 rounded 
+            ${isTitleExpanded ? "" : "scale-y-0"} transform origin-top transition-all duration-300`}
+            value={title}
+            onChange={(e) => {
+              delaySaveTask(e.target.value, null);
+              setTitle(e.target.value);
+            }}
+            placeholder="Task Title"
+            data-cy="title-input"
+            disabled={readOnly}
+          />
+        </CollapsibleSection>
+
+        {/* Properties */}
+        <div
+          className={`flex items-start  ${isTitleExpanded ? "mt-3" : "mt-0"}`}
+        >
           <h3 className="text-sm text-gray-200 mb-2">Properties</h3>
           <button
             className="text-sm text-gray-300 underline p-0 ml-2 mb-2  w-6 h-6 rounded-full bg-transparent"
-            onClick={() => setIsExpanded(!isExpanded)}
+            onClick={() => setIsPropertiesExpanded(!isPropertiesExpanded)}
             data-cy="toggle-properties"
           >
-            {isExpanded ? (
-              <FontAwesomeIcon icon={faCaretUp} className="text-gray-300" />
-            ) : (
-              <FontAwesomeIcon icon={faCaretDown} className="text-gray-300" />
-            )}
+            <FontAwesomeIcon
+              icon={isPropertiesExpanded ? faCaretUp : faCaretDown}
+              className="text-gray-300"
+            />
           </button>
         </div>
-        {isExpanded && (
+        <CollapsibleSection
+          isCollapsed={!isPropertiesExpanded}
+          maxHigh={"max-h-[900px]"}
+        >
           <div className="flex flex-col space-y-1">
             {_.map(propertyOrder, (key) => {
               const title = formatToCapitalCase(key) || "";
@@ -268,10 +302,9 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
               );
             })}
           </div>
-        )}
-        {/* Markdown Input & Preview */}
+        </CollapsibleSection>
         <div
-          className="flex space-x-4 flex-1 h-full w-full relative"
+          className="flex space-x-4 flex-1 h-full w-full relative mt-3"
           data-cy="editor-content"
         >
           <MarkdownEditor

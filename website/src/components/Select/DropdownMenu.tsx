@@ -1,28 +1,36 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   InteractiveSelectPropertyConfig,
   PropertyOption,
 } from "../../types/property";
+import { createPortal } from "react-dom";
+
+export type DropdownMode = "bottom" | "right";
 
 const DropdownMenu: React.FC<{
   propertyConfig: InteractiveSelectPropertyConfig;
   selectedOptions: PropertyOption[] | string;
   readOnly: boolean;
   isExpanded: boolean;
-  setIsExpanded: (value: boolean) => void;
+  onClose: () => void;
   onChange: (value: string | PropertyOption[]) => void;
   onCreateOption: (name: string) => Promise<PropertyOption>;
+  mode?: DropdownMode;
 }> = ({
   propertyConfig,
   selectedOptions,
   readOnly,
   isExpanded,
-  setIsExpanded,
+  onClose,
   onChange,
   onCreateOption,
+  mode = "right",
 }) => {
   const [inputValue, setInputValue] = useState("");
   const [filteredOptions, setFilteredOptions] = useState<PropertyOption[]>([]);
+  const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const DropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setFilteredOptions(propertyConfig?.options || []);
@@ -30,25 +38,47 @@ const DropdownMenu: React.FC<{
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      const dropdownElement = document.querySelector(
-        ".dropdown-menu.relative.w-full",
-      );
-      if (dropdownElement && !dropdownElement.contains(event.target as Node)) {
-        setIsExpanded(false);
+      const target = event.target as HTMLElement;
+
+      if (
+        !DropdownRef.current?.contains(target) &&
+        !DropdownRef.current?.contains(target)
+      ) {
+        onClose();
         setInputValue("");
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("click", handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("click", handleClickOutside);
     };
-  }, [setIsExpanded]);
+  }, [onClose]);
 
-  const handleExpand = useCallback(() => {
-    setIsExpanded(true);
+  useEffect(() => {
+    if (!isExpanded) return;
+
+    const rect = triggerRef.current?.getBoundingClientRect();
+
+    if (rect) {
+      const style =
+        mode === "right"
+          ? {
+              top: rect.top + window.scrollY,
+              left: rect.right + window.scrollX + 8,
+            }
+          : {
+              top: rect.bottom + window.scrollY + 8,
+              left: rect.left + window.scrollX,
+            };
+
+      setMenuStyle(style);
+    }
+  }, [isExpanded, mode]);
+
+  const handleSearch = useCallback(() => {
     setFilteredOptions(propertyConfig?.options || []);
-  }, [propertyConfig, setIsExpanded]);
+  }, [propertyConfig]);
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,7 +105,7 @@ const DropdownMenu: React.FC<{
               option.name.toLowerCase() === newOptionName.toLowerCase(),
           )
         ) {
-          setIsExpanded(false);
+          onClose();
           return;
         }
 
@@ -88,7 +118,7 @@ const DropdownMenu: React.FC<{
         }
       }
     },
-    [inputValue, propertyConfig, onCreateOption, setIsExpanded],
+    [inputValue, propertyConfig, onCreateOption, onClose],
   );
 
   const handleSelectOption = useCallback(
@@ -102,48 +132,57 @@ const DropdownMenu: React.FC<{
       } else {
         onChange(option.id);
       }
-      setIsExpanded(false);
+      onClose();
     },
-    [selectedOptions, onChange, setIsExpanded],
+    [selectedOptions, onChange, onClose],
   );
 
   if (!isExpanded) return null;
 
   return (
-    <div className="dropdown-menu relative w-full">
-      {!readOnly && (
-        <input
-          type="text"
-          value={inputValue}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          placeholder="Search or add an option"
-          className="w-full border-b border-gray-700 p-1 bg-gray-800 text-gray-300 placeholder-gray-500 rounded-t-md"
-          onFocus={handleExpand}
-          data-cy="property-select-search"
-        />
-      )}
-      {isExpanded && (
-        <div
-          className="absolute w-full z-50 bg-gray-800 border border-gray-700 shadow-md max-h-48 overflow-y-auto"
-          data-cy="property-select-options"
-        >
-          {filteredOptions.map((option) => (
+    <>
+      <div ref={triggerRef} className="relative w-full " />
+      {menuStyle.top !== undefined &&
+        createPortal(
+          <div
+            className="absolute w-64 bg-gray-950 border border-gray-500 z-50 p-1"
+            style={menuStyle}
+            ref={DropdownRef}
+          >
+            <input
+              type="text"
+              value={inputValue}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              placeholder="Search or add an option"
+              className="w-full border-b border-gray-700 focus:border-blue-500 focus:outline-none p-1 bg-gray-950 text-gray-300 placeholder-gray-500 rounded-t-sm"
+              onFocus={handleSearch}
+              data-cy="property-select-search"
+              style={{ display: !readOnly ? "block" : "none" }}
+            />
             <div
-              key={option.id}
-              onClick={() => handleSelectOption(option)}
-              className="p-2 cursor-pointer hover:bg-gray-700 text-gray-300"
-              data-cy="property-select-option"
+              className="   shadow-md max-h-48 overflow-y-auto"
+              style={{ display: isExpanded ? "block" : "none" }}
+              data-cy="property-select-options"
             >
-              {option.name}
+              {filteredOptions.map((option) => (
+                <div
+                  key={option.id}
+                  onClick={() => handleSelectOption(option)}
+                  className="p-2 cursor-pointer hover:bg-gray-700 text-gray-300"
+                  data-cy="property-select-option"
+                >
+                  {option.name}
+                </div>
+              ))}
+              {filteredOptions.length === 0 && (
+                <div className="p-2 text-gray-500">No matching options</div>
+              )}
             </div>
-          ))}
-          {filteredOptions.length === 0 && (
-            <div className="p-2 text-gray-500">No matching options</div>
-          )}
-        </div>
-      )}
-    </div>
+          </div>,
+          document.body,
+        )}
+    </>
   );
 };
 

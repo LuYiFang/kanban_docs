@@ -74,7 +74,7 @@ const InteractiveSelect: React.FC<{
     <div className="relative w-64">
       <button
         className="w-full text-sm p-1 border border-gray-700 bg-gray-800 text-gray-300 rounded"
-        onClick={() => setIsExpanded(true)}
+        onClick={() => setIsExpanded(!isExpanded)}
         data-cy="property-select-input"
         disabled={readOnly}
       >
@@ -87,7 +87,7 @@ const InteractiveSelect: React.FC<{
         selectedOptions={taskProperty.value as string}
         readOnly={readOnly}
         isExpanded={isExpanded}
-        setIsExpanded={setIsExpanded}
+        onClose={() => setIsExpanded(false)}
         onChange={handleSelectChange}
         onCreateOption={(name) =>
           dispatch(

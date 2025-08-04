@@ -1,5 +1,11 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { Task, TaskCreate, taskType, TaskUpdate } from "../../types/task";
+import {
+  Task,
+  TaskCreate,
+  taskType,
+  TaskUpdate,
+  TaskWithProperties,
+} from "../../types/task";
 import { DefaultProperty } from "../../types/property";
 import { repository } from "../../utils/fetchApi";
 import { AxiosError } from "axios";
@@ -37,7 +43,7 @@ export const getAllTaskWithProperties = withErrorHandler<
 
 // 2. 建立任務與預設屬性
 export const createTaskWithDefaultProperties = withErrorHandler<
-  Task, // Return type
+  TaskWithProperties, // Return type
   { task: TaskCreate; properties: DefaultProperty[] }
 >("kanban/createTaskWithDefaultProperties", async ({ task, properties }) => {
   return await repository.createTaskWithPropertiesApi(task, properties);
@@ -107,7 +113,7 @@ export const uploadFile = withErrorHandler<any, FormData>(
 );
 
 // 10. 儲存版面配置
-export const saveLayout = withErrorHandler<void, Layouts>(
+export const saveLayout = withErrorHandler<any, Layouts>(
   "kanban/saveLayout",
   async (layouts) => {
     if (

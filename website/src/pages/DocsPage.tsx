@@ -181,6 +181,7 @@ const DocsPage: React.FC = () => {
       setImportStatus("error");
       return;
     }
+    setTimeout(() => setImportStatus("none"), 2000);
     event.target.value = "";
   };
 

@@ -127,7 +127,7 @@ const MultiInteractiveSelect: React.FC<{
           <button
             className="my-auto w-7 h-7 p-0 flex items-center text-[12px] justify-center rounded-full bg-gray-600 bg-opacity-90 text-gray-100 hover:bg-gray-300 hover:bg-opacity-80"
             onClick={() => {
-              setIsExpanded(true);
+              setIsExpanded(!isExpanded);
             }}
             disabled={readOnly}
             data-cy="add-property-button"
@@ -142,7 +142,8 @@ const MultiInteractiveSelect: React.FC<{
         selectedOptions={selectedOptions}
         readOnly={readOnly}
         isExpanded={isExpanded}
-        setIsExpanded={setIsExpanded}
+        mode={"bottom"}
+        onClose={() => setIsExpanded(false)}
         onChange={handleSelectChange}
         onCreateOption={(name) =>
           dispatch(

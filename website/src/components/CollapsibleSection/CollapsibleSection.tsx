@@ -14,8 +14,8 @@ const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
   return (
     <div
       className={`collapsible-section ${
-        isCollapsed ? "max-h-0" : maxHigh
-      } transition-all duration-300`}
+        isCollapsed ? "max-h-0 opacity-0" : maxHigh
+      } transform origin-top transition-all duration-300`}
     >
       {children}
     </div>
