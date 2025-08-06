@@ -71,6 +71,7 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
     const [isTitleExpanded, setIsTitleExpanded] = useState(
       typeof config.titleExpanded === "boolean" ? config.titleExpanded : true,
     );
+    const [isSectionExpanded, setIsSectionExpanded] = useState(true);
 
     const {
       title,
@@ -97,6 +98,24 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
         setIsMenuOpen(false);
       },
     }));
+
+    useEffect(() => {
+      const nextValue = isTitleExpanded || isPropertiesExpanded;
+
+      if (nextValue) {
+        // 立即更新為 true
+        setIsSectionExpanded(true);
+      } else {
+        // 延遲更新為 false
+        const delayedCollapse = _.debounce(() => {
+          setIsSectionExpanded(false);
+        }, 300);
+
+        delayedCollapse();
+
+        return () => delayedCollapse.cancel(); // 清除 debounce
+      }
+    }, [isTitleExpanded, isPropertiesExpanded]);
 
     const handleClickOutside = useCallback((event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -134,7 +153,7 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
 
     return (
       <div
-        className=" bg-gray-900 p-6 rounded shadow-lg w-full h-full  flex flex-col  relative overflow-auto"
+        className="bg-gray-900 p-6 rounded shadow-lg w-full h-full  flex flex-col  relative overflow-auto"
         onClick={(e) => e.stopPropagation()}
         data-cy="edit-dialog"
       >
@@ -186,53 +205,56 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
           )}
         </div>
         {/* Title */}
-        <div className="flex items-start ">
-          <h3 className={`text-sm text-gray-200`}>Title</h3>
-          <button
-            className="text-sm text-gray-300 underline p-0 ml-2 mb-2  w-6 h-6 rounded-full bg-transparent"
-            onClick={() => setIsTitleExpanded(!isTitleExpanded)}
-            data-cy="toggle-title"
-          >
-            <FontAwesomeIcon
-              icon={isTitleExpanded ? faCaretUp : faCaretDown}
-              className="text-gray-300"
-            />
-          </button>
-        </div>
-        <CollapsibleSection
-          isCollapsed={!isTitleExpanded}
-          maxHigh={"max-h-[40px]"}
-        >
-          <input
-            type="text"
-            className={`w-full text-lg p-1 pl-2 border border-gray-700 bg-gray-800 text-gray-300 rounded 
-            ${isTitleExpanded ? "" : "scale-y-0"} transform origin-top transition-all duration-300`}
-            value={title}
-            onChange={(e) => {
-              delaySaveTask(e.target.value, null);
-              setTitle(e.target.value);
-            }}
-            placeholder="Task Title"
-            data-cy="title-input"
-            disabled={readOnly}
-          />
-        </CollapsibleSection>
-
-        {/* Properties */}
         <div
-          className={`flex items-start  ${isTitleExpanded ? "mt-3" : "mt-0"}`}
+          className={`flex justify-start ${isSectionExpanded ? "flex-col" : "flex-row"}`}
         >
-          <h3 className="text-sm text-gray-200 mb-2">Properties</h3>
-          <button
-            className="text-sm text-gray-300 underline p-0 ml-2 mb-2  w-6 h-6 rounded-full bg-transparent"
-            onClick={() => setIsPropertiesExpanded(!isPropertiesExpanded)}
-            data-cy="toggle-properties"
+          <div className="flex items-start ">
+            <h3 className={`text-sm text-gray-200`}>Title</h3>
+            <button
+              className="text-sm text-gray-300 underline p-0 ml-2 mb-2  w-6 h-6 rounded-full bg-transparent"
+              onClick={() => setIsTitleExpanded(!isTitleExpanded)}
+              data-cy="toggle-title"
+            >
+              <FontAwesomeIcon
+                icon={isTitleExpanded ? faCaretUp : faCaretDown}
+                className="text-gray-300"
+              />
+            </button>
+          </div>
+          <CollapsibleSection
+            isCollapsed={!isTitleExpanded}
+            maxHigh={"max-h-[40px]"}
           >
-            <FontAwesomeIcon
-              icon={isPropertiesExpanded ? faCaretUp : faCaretDown}
-              className="text-gray-300"
+            <input
+              type="text"
+              className={`w-full text-lg p-1 pl-2 border border-gray-700 bg-gray-800 text-gray-300 rounded`}
+              value={title}
+              onChange={(e) => {
+                delaySaveTask(e.target.value, null);
+                setTitle(e.target.value);
+              }}
+              placeholder="Task Title"
+              data-cy="title-input"
+              disabled={readOnly}
             />
-          </button>
+          </CollapsibleSection>
+
+          {/* Properties */}
+          <div
+            className={`flex items-start  ${isTitleExpanded ? "mt-3" : "mt-0"}`}
+          >
+            <h3 className="text-sm text-gray-200 mb-2">Properties</h3>
+            <button
+              className="text-sm text-gray-300 underline p-0 ml-2 mb-2  w-6 h-6 rounded-full bg-transparent"
+              onClick={() => setIsPropertiesExpanded(!isPropertiesExpanded)}
+              data-cy="toggle-properties"
+            >
+              <FontAwesomeIcon
+                icon={isPropertiesExpanded ? faCaretUp : faCaretDown}
+                className="text-gray-300"
+              />
+            </button>
+          </div>
         </div>
         <CollapsibleSection
           isCollapsed={!isPropertiesExpanded}
