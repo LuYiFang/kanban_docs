@@ -127,7 +127,7 @@ describe("Kanban Page Workflow Tests", () => {
       .click();
 
     // 確保選單展開
-    cy.get('[data-cy="edit-menu"]').should("exist");
+    cy.get('[data-cy="dropdown-menu"]').should("exist");
 
     // 點擊刪除按鈕
     cy.get('[data-cy="delete-task-button"]').click();

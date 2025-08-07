@@ -155,32 +155,35 @@ describe("DocsPage", () => {
       .should("be.visible")
       .within(() => {
         cy.get("[data-cy=add-property-button]").click();
-
-        // 驗證選中的選項是否正確顯示
-        cy.get("[data-cy=property-select-options]")
-          .children()
-          .should("have.length", 3);
-
-        // 再次打開 MultiInteractiveSelect 並選擇第二個選項
-        cy.get("[data-cy=property-select-option]").eq(2).click();
-
-        // 驗證選中的選項數量是否更新
-        cy.get("[data-cy=multi-interactive-select-selected]")
-          .children()
-          .should("have.length", 4);
-
-        // 移除第一個選中的選項
-        cy.get("[data-cy=multi-interactive-select-selected]")
-          .children()
-          .first()
-          .find("[data-cy=remove-selected-option]")
-          .click();
-
-        // 驗證選中的選項數量是否減少
-        cy.get("[data-cy=multi-interactive-select-selected]")
-          .children()
-          .should("have.length", 3);
       });
+
+    // 驗證選中的選項是否正確顯示
+    cy.get("[data-cy=property-select-options]")
+      .children()
+      .should("have.length", 3);
+
+    // 再次打開 MultiInteractiveSelect 並選擇第二個選項
+    cy.get("[data-cy=property-select-option]").eq(2).click();
+
+    // 驗證選中的選項數量是否更新
+    cy.get("[data-cy=multi-interactive-select-selected]")
+      .first()
+      .children()
+      .should("have.length", 4);
+
+    // 移除第一個選中的選項
+    cy.get("[data-cy=multi-interactive-select-selected]")
+      .first()
+      .children()
+      .first()
+      .find("[data-cy=remove-selected-option]")
+      .click();
+
+    // 驗證選中的選項數量是否減少
+    cy.get("[data-cy=multi-interactive-select-selected]")
+      .first()
+      .children()
+      .should("have.length", 3);
   });
 
   it("should save and reload the layout", () => {
@@ -267,6 +270,7 @@ describe("DocsPage", () => {
   it("should delete a document", () => {
     // 選擇標籤 "Tag2" 並選中第一個文檔
     cy.get("[data-cy=kanban-task-tags]").contains("Tag2").click();
+    cy.wait(500);
     cy.get("[data-cy=tag-documents]").children().first().click();
 
     // 驗證佈局中顯示的文檔數量
@@ -280,7 +284,7 @@ describe("DocsPage", () => {
       .click();
 
     // 確保選單展開
-    cy.get('[data-cy="edit-menu"]').should("exist");
+    cy.get('[data-cy="dropdown-menu"]').should("exist");
 
     // 點擊刪除按鈕
     cy.get('[data-cy="delete-task-button"]').click();
@@ -356,6 +360,20 @@ describe("DocsPage", () => {
 
     cy.get("[data-cy=status-bubble]").should("exist");
     cy.get("[data-cy=doc-card-id-doc-id-import]").should("exist");
+
+    // 驗證多次 import 正常運作
+    cy.get("#import-markdown-input").selectFile(
+      {
+        contents: Cypress.Buffer.from(markdownContent),
+        fileName: fileName,
+        mimeType: "text/markdown",
+      },
+      { force: true },
+    );
+    cy.get("[data-cy=status-bubble]").should("exist");
+    cy.get("[data-cy=doc-card-id-doc-id-import-2]").should("exist");
+
+    cy.get(".layout").children().should("have.length", 2);
   });
 
   it("should open task doc when clicking task link", () => {

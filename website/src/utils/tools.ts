@@ -1,7 +1,7 @@
 import apiClient from "./apiClient";
 
 const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-const markdownImgRegex = /!\[.*]\((.*\/api\/files\/[^)]+)\)/g;
+const markdownImgRegex = /!\[([^\]]*)\]\((.*\/api\/files\/[^)]+)\)/g;
 const BLOB_MAP_KEY = "markdownBlobMap";
 
 export function convertUtcToLocal(utcDateString: string) {
@@ -71,7 +71,8 @@ export async function transformMarkdownImagesToBlobUrls(
   await Promise.all(
     matches.map(async (match) => {
       const original = match[0]; // 整個 ![](url)
-      const url = match[1]; // 圖片 URL
+      const altText = match[1];
+      const url = match[2]; // 圖片 URL
 
       if (replacements[original]) return; // 已處理過
 
@@ -81,7 +82,7 @@ export async function transformMarkdownImagesToBlobUrls(
         });
 
         const blobUrl = URL.createObjectURL(response.data);
-        replacements[original] = `![](${blobUrl})`;
+        replacements[original] = `![${altText}](${blobUrl})`;
         blobMap[blobUrl] = url;
       } catch (err) {
         console.error("Failed to fetch image:", match, err);

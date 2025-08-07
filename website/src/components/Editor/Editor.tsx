@@ -30,6 +30,7 @@ import MarkdownEditor from "../Editor/MarkdownEditor";
 import { MDXEditorMethods } from "@mdxeditor/editor";
 import { useEditor } from "./useEditor";
 import CollapsibleSection from "../CollapsibleSection/CollapsibleSection";
+import DropdownPortal from "../Dialog/DropdwonPortal";
 
 export interface EditorConfig {
   titleExpanded: boolean;
@@ -72,6 +73,8 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
       typeof config.titleExpanded === "boolean" ? config.titleExpanded : true,
     );
     const [isSectionExpanded, setIsSectionExpanded] = useState(true);
+
+    const positionRef = useRef<HTMLDivElement>(null);
 
     const {
       title,
@@ -182,27 +185,28 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             data-cy="edit-menu-trigger"
           />
-          {isMenuOpen && (
-            <div
-              ref={menuRef}
-              className="absolute top-8 right-0 bg-gray-800 shadow rounded p-1 text-sm whitespace-nowrap"
-              data-cy="edit-menu"
+          <div ref={positionRef} className="meee absolute" />
+          <DropdownPortal
+            positionRef={positionRef}
+            isOpen={isMenuOpen}
+            onClose={() => setIsMenuOpen(false)}
+            mode="left-bottom"
+            className="absolute top-8 right-0 bg-gray-800 shadow rounded p-1 text-sm whitespace-nowrap"
+          >
+            <button
+              className="text-gray-200 hover:text-red-600"
+              onClick={() =>
+                handleDeleteTask(
+                  restoreBlobUrlsToOriginal(
+                    editorRef.current?.getMarkdown() || "",
+                  ),
+                )
+              }
+              data-cy="delete-task-button"
             >
-              <button
-                className="text-gray-200 hover:text-red-600"
-                onClick={() =>
-                  handleDeleteTask(
-                    restoreBlobUrlsToOriginal(
-                      editorRef.current?.getMarkdown() || "",
-                    ),
-                  )
-                }
-                data-cy="delete-task-button"
-              >
-                Delete Task
-              </button>
-            </div>
-          )}
+              Delete Task
+            </button>
+          </DropdownPortal>
         </div>
         {/* Title */}
         <div

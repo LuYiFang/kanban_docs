@@ -43,6 +43,10 @@ describe("Editor Workflow Tests", () => {
     // 確保 Edit Dialog 打開
     cy.get('[data-cy="edit-dialog"]').should("exist");
 
+    // 點擊屬性選擇器以展開，並點其他地方確認能關密屬性框
+    cy.get("[data-cy=toggle-properties]").click();
+    cy.get("[data-cy=title-input]").click();
+
     cy.get("[data-cy=toggle-properties]").click();
 
     // 編輯任務優先級
@@ -52,14 +56,14 @@ describe("Editor Workflow Tests", () => {
       .within(() => {
         const interactiveInputSelector = '[data-cy="property-select-input"]';
         cy.get(interactiveInputSelector).click();
-
-        // 點選 option high
-        cy.get('[data-cy="property-select-search"]')
-          .parent()
-          .find("div")
-          .contains("High")
-          .click();
       });
+
+    // 點選 option high
+    cy.get('[data-cy="property-select-search"]')
+      .parent()
+      .find("div")
+      .contains("High")
+      .click();
 
     // 關閉對話框保存
     cy.get("body").click(0, 0);
@@ -121,29 +125,37 @@ describe("Editor Workflow Tests", () => {
 
     cy.get("[data-cy=toggle-properties]").click();
 
+    const interactiveInputSelector = '[data-cy="property-select-input"]';
+
     // 找到屬性選擇器並展開
     cy.get('[data-cy="edit-dialog"]')
       .find('[data-cy="property-select-title"]')
       .contains("Project:")
       .parent()
       .within(() => {
-        const interactiveInputSelector = '[data-cy="property-select-input"]';
         cy.get(interactiveInputSelector).click();
-        // 在搜索框中輸入新選項名稱
-        cy.get('[data-cy="property-select-search"]').type(newProjectName);
-
-        // 按下 Enter 鍵
-        cy.get('[data-cy="property-select-search"]').type("{enter}");
-
-        cy.get(interactiveInputSelector).click();
-
-        // 確認新選項是否出現在選項列表中
-        cy.get('[data-cy="property-select-search"]')
-          .parent()
-          .find("div")
-          .contains(newProjectName)
-          .should("exist");
       });
+
+    // 在搜索框中輸入新選項名稱
+    cy.get('[data-cy="property-select-search"]').type(newProjectName);
+
+    // 按下 Enter 鍵
+    cy.get('[data-cy="property-select-search"]').type("{enter}");
+
+    cy.get('[data-cy="edit-dialog"]')
+      .find('[data-cy="property-select-title"]')
+      .contains("Project:")
+      .parent()
+      .within(() => {
+        cy.get(interactiveInputSelector).click();
+      });
+
+    // 確認新選項是否出現在選項列表中
+    cy.get('[data-cy="property-select-search"]')
+      .parent()
+      .find("div")
+      .contains(newProjectName)
+      .should("exist");
 
     // 關閉 Edit Dialog，點開另一個任務，點開第一個選項，確定新選項有出現在選項列表中
     cy.get("body").click(0, 0);
