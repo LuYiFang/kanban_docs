@@ -1,6 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import {
-  Task,
   TaskCreate,
   taskType,
   TaskUpdate,
@@ -35,7 +34,7 @@ export function withErrorHandler<Returned, ThunkArg>(
 
 // 1. 取得所有任務與屬性
 export const getAllTaskWithProperties = withErrorHandler<
-  Task[], // Return type
+  TaskWithProperties[], // Return type
   { taskType: taskType; weeksAgo?: number }
 >("kanban/getAllTaskWithProperties", async ({ taskType, weeksAgo }) => {
   return await repository.getAllTaskWithPropertiesApi(taskType, weeksAgo);
@@ -51,7 +50,7 @@ export const createTaskWithDefaultProperties = withErrorHandler<
 
 // 3. 更新單一任務
 export const updateTask = withErrorHandler<
-  { task: Task }, // Return type
+  { task: TaskWithProperties }, // Return type
   { taskId: string; task: TaskUpdate }
 >("kanban/updateTask", async ({ taskId, task }) => {
   const updatedTask = await repository.updateTaskApi(taskId, task);
@@ -60,7 +59,7 @@ export const updateTask = withErrorHandler<
 
 // 4. 批次更新任務
 export const updateMultipleTasks = withErrorHandler<
-  Task[], // Return type
+  TaskWithProperties[], // Return type
   TaskUpdate[]
 >("kanban/updateMultipleTasks", async (tasks) => {
   return await repository.batchUpdateTasksApi(tasks);
