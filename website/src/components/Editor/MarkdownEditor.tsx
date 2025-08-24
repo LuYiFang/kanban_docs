@@ -48,10 +48,6 @@ import { AppDispatch } from "../../store/store";
 import { MermaidCodeEditorDescriptor } from "./MermaidCodeEditorDescriptor";
 import mermaid from "mermaid";
 import { InsertTask } from "./InsertTask";
-import {
-  restoreBlobUrlsToOriginal,
-  transformMarkdownImagesToBlobUrls,
-} from "../../utils/tools";
 
 interface MarkdownEditorProps {
   readOnly: boolean;
@@ -70,18 +66,14 @@ const MarkdownEditor = forwardRef<MarkdownEditorMethods, MarkdownEditorProps>(
     const editorRef = useRef<MDXEditorMethods>(null);
 
     useImperativeHandle(ref, () => ({
-      getMarkdown: () =>
-        restoreBlobUrlsToOriginal(editorRef.current?.getMarkdown() || ""),
+      getMarkdown: () => editorRef.current?.getMarkdown() || "",
     }));
 
     useEffect(() => {
       const setMarkdownContent = async () => {
         if (!editorRef.current) return;
 
-        const transformedContent =
-          await transformMarkdownImagesToBlobUrls(content);
-
-        editorRef.current.setMarkdown(transformedContent);
+        editorRef.current.setMarkdown(content);
         mermaid.run({
           querySelector: ".mermaid",
         });

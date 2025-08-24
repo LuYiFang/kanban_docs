@@ -36,7 +36,35 @@ dummy_option_info.extend([
 ])
 
 task_data = [
-    ("Prepare weekly report", "Summarize project progress for this week.",
+    ("Prepare weekly report",
+     """
+     Write API documentation
+     ### API Documentation
+     | **Section**       | **Details**                                                                 |
+     |--------------------|----------------------------------------------------------------------------|
+     | **Objective**      | Provide clear and concise documentation for all API endpoints.            |
+     | **Details**        | 1. Include endpoint descriptions, request/response formats, and examples. |
+     |                    | 2. Document authentication and authorization requirements.                |
+     |                    | 3. Add error codes and their meanings.                                    |
+     | **Expected Outcome** | Developers can easily understand and integrate with the API.            |
+     
+     ### Weekly Report
+     | **Task**           | **Description**                                      |
+     |--------------------|-----------------------------------------------------|
+     | **Objective**      | Summarize project progress for this week.           |
+     | **Details**        | 1. Collect updates from all team members.           |
+     |                    | 2. Highlight key achievements and blockers.         |
+     | **Expected Outcome** | A comprehensive report for stakeholders.
+     
+      ### Kanban Workflow
+     | **Task**           | **Description**                                      |
+     |--------------------|-----------------------------------------------------|
+     | **Objective**      | Refactor and enhance task management approach.       |
+     | **Details**        | 1. Define columns for task stages (e.g., To Do, In Progress, Done). |
+     |                    | 2. Assign tasks to team members.                    |
+     | **Expected Outcome** | Improved task tracking and team collaboration.     |
+     """
+     ,
      TaskType.task),
     ("Write API documentation",
      "Document endpoint specifications and usage guides.", TaskType.docs),

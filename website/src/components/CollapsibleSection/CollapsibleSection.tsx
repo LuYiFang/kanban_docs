@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 interface CollapsibleSectionProps {
   isCollapsed: boolean;
@@ -13,6 +13,13 @@ const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
   children,
   className = "",
 }) => {
+  const [isChildrenRendered, setIsChildrenRendered] = useState(true);
+
+  useEffect(() => {
+    if (isCollapsed) setTimeout(() => setIsChildrenRendered(false), 400);
+    else setIsChildrenRendered(true);
+  }, [isCollapsed]);
+
   return (
     <div
       className={`collapsible-section ${
@@ -20,7 +27,7 @@ const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
       } transform origin-top transition-all duration-300
       ${className}`}
     >
-      {children}
+      {isChildrenRendered && children}
     </div>
   );
 };

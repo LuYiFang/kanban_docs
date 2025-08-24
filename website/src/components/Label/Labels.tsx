@@ -142,7 +142,7 @@ export const ContentLabel: React.FC<{
 }) => {
   return (
     <div
-      className="mt-2 text-gray-300 text-sm flex-grow"
+      className="mt-4 text-gray-300 text-sm flex-grow"
       data-cy={`kanban-task-${propertyName}`}
     >
       <Editor

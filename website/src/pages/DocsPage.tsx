@@ -17,6 +17,7 @@ import {
   faBookmark,
   faChevronDown,
   faChevronUp,
+  faDotCircle,
   faTimes,
   faUpload,
 } from "@fortawesome/free-solid-svg-icons";
@@ -290,6 +291,7 @@ const DocsPage: React.FC = () => {
         isResizable={true}
         isDraggable={true}
         onDragStart={() => console.log("Drag started")}
+        resizeHandle={<ResizeHandle />}
         draggableHandle={".draggable-handle"}
         onLayoutChange={debouncedLayoutChange}
       >
@@ -303,11 +305,15 @@ const DocsPage: React.FC = () => {
               data-cy={`doc-card-id-${doc.id}`}
             >
               <div
-                className="absolute z-10 top-0 left-1 bg-gray-700 text-white text-xs px-2 py-1"
+                className="absolute z-10 top-0 left-3 bg-gray-700 text-white text-xs px-2 py-1"
                 data-cy={`doc-title-${doc.id}`}
               >
                 {doc.title}
               </div>
+              <DraggableHandle
+                classListStr="top-3 left-10 right-20 h-5"
+                direction={"top"}
+              />
               <DraggableHandle
                 classListStr="top-3 bottom-3 left-3 w-5"
                 direction={"left"}
@@ -350,3 +356,37 @@ const DocsPage: React.FC = () => {
 };
 
 export default DocsPage;
+
+const ResizeHandle = React.forwardRef<
+  HTMLInputElement,
+  { handleAxis?: string }
+>((props, ref) => {
+  const { handleAxis, ...restProps } = props;
+  return (
+    <span
+      ref={ref}
+      className={`absolute react-resizable-handle-${handleAxis} text-sm/[8px] ${
+        handleAxis === "s"
+          ? "bottom-0 right-[50%] cursor-s-resize"
+          : handleAxis === "w"
+            ? "left-0 top-[50%] cursor-w-resize"
+            : handleAxis === "e"
+              ? "right-0 top-[50%] cursor-e-resize"
+              : handleAxis === "n"
+                ? "top-0 right-[50%] cursor-n-resize"
+                : handleAxis === "sw"
+                  ? "bottom-0 left-0 cursor-sw-resize"
+                  : handleAxis === "se"
+                    ? "bottom-0 right-0 cursor-se-resize"
+                    : handleAxis === "ne"
+                      ? "top-0 right-0 cursor-ne-resize"
+                      : handleAxis === "nw"
+                        ? "top-0 left-0 cursor-nw-resize"
+                        : ""
+      }`}
+      {...restProps}
+    >
+      <FontAwesomeIcon style={{ width: 8, height: 8 }} icon={faDotCircle} />
+    </span>
+  );
+});

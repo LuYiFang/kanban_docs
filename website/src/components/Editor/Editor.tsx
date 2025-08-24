@@ -20,10 +20,7 @@ import _ from "lodash";
 import { RootState } from "../../store/store";
 import InteractiveSelect from "../Select/InteractiveSelect";
 import MultiInteractiveSelect from "../Select/MultiInteractiveSelect";
-import {
-  formatToCapitalCase,
-  restoreBlobUrlsToOriginal,
-} from "../../utils/tools";
+import { formatToCapitalCase } from "../../utils/tools";
 import { PropertyConfig as PropertyConfigType } from "../../types/property";
 import { kanbanDataName } from "../../types/kanban";
 import MarkdownEditor from "../Editor/MarkdownEditor";
@@ -92,11 +89,7 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
     });
 
     useImperativeHandle(ref, () => ({
-      save: () =>
-        saveTask(
-          title,
-          restoreBlobUrlsToOriginal(editorRef.current?.getMarkdown() || ""),
-        ),
+      save: () => saveTask(title, editorRef.current?.getMarkdown() || ""),
       close: () => {
         setIsMenuOpen(false);
       },
@@ -156,7 +149,7 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
 
     return (
       <div
-        className="bg-gray-900 p-6 rounded shadow-lg w-full h-full  flex flex-col  relative overflow-auto"
+        className="bg-gray-900 p-3 rounded shadow-lg w-full h-full flex flex-col  relative "
         onClick={(e) => e.stopPropagation()}
         data-cy="edit-dialog"
       >
@@ -196,11 +189,7 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
             <button
               className="text-gray-200 hover:text-red-600"
               onClick={() =>
-                handleDeleteTask(
-                  restoreBlobUrlsToOriginal(
-                    editorRef.current?.getMarkdown() || "",
-                  ),
-                )
+                handleDeleteTask(editorRef.current?.getMarkdown() || "")
               }
               data-cy="delete-task-button"
             >
@@ -215,7 +204,7 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
           <div className="flex items-start ">
             <h3 className={`text-sm text-gray-200`}>Title</h3>
             <button
-              className="text-sm text-gray-300 underline p-0 ml-2 mb-2  w-6 h-6 rounded-full bg-transparent"
+              className="text-sm text-gray-300 underline p-0 ml-2 mb-2 mr-1 w-6 h-6 rounded-full bg-transparent"
               onClick={() => setIsTitleExpanded(!isTitleExpanded)}
               data-cy="toggle-title"
             >
@@ -330,7 +319,7 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
           </div>
         </CollapsibleSection>
         <div
-          className="flex space-x-4 flex-1 h-full w-full relative mt-3"
+          className="flex space-x-4 flex-1 w-full  relative mt-3"
           data-cy="editor-content"
         >
           <MarkdownEditor

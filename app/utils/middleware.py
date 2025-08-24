@@ -1,4 +1,5 @@
 import logging
+from fnmatch import fnmatch
 
 import jwt
 from fastapi import Request, Response
@@ -15,14 +16,15 @@ EXCLUDED_PATHS = {
     "/api/auth/login",
     "/api/auth/signup",
     "/docs",
-    "/openapi.json"
+    "/openapi.json",
+    "/api/files/*"
 }
 
 
 class ExtendExpMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
-        if path in EXCLUDED_PATHS or request.method == "OPTIONS":
+        if any(fnmatch(path, pattern) for pattern in EXCLUDED_PATHS) or request.method == "OPTIONS":
             return await call_next(request)
 
         auth_header = request.headers.get("Authorization")
