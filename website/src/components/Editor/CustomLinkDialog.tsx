@@ -69,8 +69,8 @@ export const CustomLinkDialog: React.FC = () => {
         className="absolute eeeeeeee"
         style={{
           position: "fixed",
-          top: `${(containerRect.top || 0) - theRect.top}px`,
-          left: `${(containerRect.left || 0) - theRect.left}px`,
+          top: `${(containerRect?.top || 0) - theRect.top}px`,
+          left: `${(containerRect?.left || 0) - theRect.left}px`,
           width: `${theRect.width}px`,
           height: `${theRect.height}px`,
         }}
