@@ -290,7 +290,10 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
                         taskId={taskId}
                         propertyName={key}
                         dataName={dataName}
-                        onChange={(values) => onChange(values)}
+                        onChange={(values) => {
+                          console.log("multi_select", values);
+                          onChange(values);
+                        }}
                         readOnly={readOnly}
                       />
                     )}

@@ -48,6 +48,7 @@ import { AppDispatch } from "../../store/store";
 import { MermaidCodeEditorDescriptor } from "./MermaidCodeEditorDescriptor";
 import mermaid from "mermaid";
 import { InsertTask } from "./InsertTask";
+import { formatGitLabLink } from "../../utils/tools";
 
 interface MarkdownEditorProps {
   readOnly: boolean;
@@ -64,10 +65,31 @@ const MarkdownEditor = forwardRef<MarkdownEditorMethods, MarkdownEditorProps>(
   ({ readOnly, content, onChange, onOpenLink }, ref) => {
     const dispatch = useDispatch<AppDispatch>();
     const editorRef = useRef<MDXEditorMethods>(null);
+    const editorRootRef = useRef<HTMLDivElement>(null);
 
     useImperativeHandle(ref, () => ({
       getMarkdown: () => editorRef.current?.getMarkdown() || "",
     }));
+
+    useEffect(() => {
+      if (!editorRef.current) return;
+
+      const root = editorRootRef.current;
+      if (!root) return;
+
+      const handlePaste = (e: ClipboardEvent) => {
+        const text = e.clipboardData?.getData("text/plain");
+        const linkText = formatGitLabLink(text || "");
+        if (!linkText) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+        editorRef.current?.insertMarkdown(linkText);
+      };
+
+      root.addEventListener("paste", handlePaste, true);
+      return () => root.removeEventListener("paste", handlePaste, true);
+    }, []);
 
     useEffect(() => {
       const setMarkdownContent = async () => {
@@ -98,86 +120,90 @@ const MarkdownEditor = forwardRef<MarkdownEditorMethods, MarkdownEditorProps>(
       }
     };
 
+    const handleLink = (url: string) => {
+      console.log("handleLink", handleLink);
+      if (!onOpenLink) {
+        window.open(url, "_blank");
+        return;
+      }
+      onOpenLink(url);
+    };
+
     return (
-      <MDXEditor
-        readOnly={readOnly}
-        ref={editorRef}
-        className="dark-theme w-full"
-        markdown={""}
-        onChange={handleEditorChange}
-        onError={(error) => {
-          console.error("Error in MDX editor", error);
-        }}
-        plugins={[
-          listsPlugin(),
-          toolbarPlugin({
-            toolbarClassName: "my-classname",
-            toolbarContents: () => (
-              <>
-                <DiffSourceToggleWrapper>
-                  <UndoRedo />
-                  <ListsToggle />
-                  <InsertTable />
-                  <InsertTask />
-                  <BoldItalicUnderlineToggles />
-                  <StrikeThroughSupSubToggles />
-                  <InsertThematicBreak />
-                  <InsertAdmonition />
-                  <CodeToggle />
-                  <InsertCodeBlock />
-                  <CreateLink />
-                  <InsertImage />
-                  <InsertFrontmatter />
-                  <BlockTypeSelect />
-                </DiffSourceToggleWrapper>
-              </>
-            ),
-          }),
-          jsxPlugin(),
-          quotePlugin(),
-          headingsPlugin(),
-          linkPlugin(),
-          linkDialogPlugin(),
-          linkDialogPlugin({
-            onClickLinkCallback: (url: string) => {
-              if (!onOpenLink) {
-                window.open(url, "_blank");
-                return;
-              }
-              onOpenLink(url);
-            },
-          }),
-          imagePlugin({ imageUploadHandler: uploadImage }),
-          tablePlugin(),
-          thematicBreakPlugin(),
-          frontmatterPlugin(),
-          codeBlockPlugin({
-            defaultCodeBlockLanguage: "txt",
-            codeBlockEditorDescriptors: [MermaidCodeEditorDescriptor],
-          }),
-          codeMirrorPlugin({
-            codeBlockLanguages: {
-              txt: "text",
-              javascript: "JavaScript",
-              css: "CSS",
-              tsx: "TypeScript",
-              python: "Python",
-              sql: "SQL",
-              mermaid: "Mermaid",
-              csharp: "C#",
-              shell: "shell",
-            },
-          }),
-          directivesPlugin({
-            directiveDescriptors: [AdmonitionDirectiveDescriptor],
-          }),
-          markdownShortcutPlugin(),
-          diffSourcePlugin({
-            diffMarkdown: "An older version",
-            viewMode: "rich-text",
-          }),
-        ]}
-      />
+      <div ref={editorRootRef}>
+        <MDXEditor
+          readOnly={readOnly}
+          ref={editorRef}
+          className="dark-theme w-full"
+          markdown={""}
+          onChange={handleEditorChange}
+          onError={(error) => {
+            console.error("Error in MDX editor", error);
+          }}
+          plugins={[
+            listsPlugin(),
+            toolbarPlugin({
+              toolbarClassName: "my-classname",
+              toolbarContents: () => (
+                <>
+                  <DiffSourceToggleWrapper>
+                    <UndoRedo />
+                    <ListsToggle />
+                    <InsertTable />
+                    <CreateLink />
+                    <InsertTask />
+                    <BoldItalicUnderlineToggles />
+                    <StrikeThroughSupSubToggles />
+                    <InsertThematicBreak />
+                    <InsertAdmonition />
+                    <CodeToggle />
+                    <InsertCodeBlock />
+                    <InsertImage />
+                    <InsertFrontmatter />
+                    <BlockTypeSelect />
+                  </DiffSourceToggleWrapper>
+                </>
+              ),
+            }),
+            jsxPlugin(),
+            quotePlugin(),
+            headingsPlugin(),
+            linkPlugin(),
+            linkDialogPlugin({
+              onClickLinkCallback: handleLink,
+            }),
+            imagePlugin({ imageUploadHandler: uploadImage }),
+            tablePlugin(),
+            thematicBreakPlugin(),
+            frontmatterPlugin(),
+            codeBlockPlugin({
+              defaultCodeBlockLanguage: "txt",
+              codeBlockEditorDescriptors: [MermaidCodeEditorDescriptor],
+            }),
+            codeMirrorPlugin({
+              codeBlockLanguages: {
+                txt: "text",
+                javascript: "JavaScript",
+                css: "CSS",
+                tsx: "TypeScript",
+                python: "Python",
+                sql: "SQL",
+                mermaid: "Mermaid",
+                csharp: "C#",
+                shell: "shell",
+              },
+            }),
+            directivesPlugin({
+              directiveDescriptors: [AdmonitionDirectiveDescriptor],
+            }),
+            markdownShortcutPlugin(),
+            diffSourcePlugin({
+              diffMarkdown: "An older version",
+              viewMode: "rich-text",
+            }),
+          ]}
+        />
+      </div>
     );
   },
 );

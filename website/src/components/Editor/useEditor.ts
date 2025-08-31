@@ -94,9 +94,12 @@ export const useEditor = (
 
   const handlePropertyChange = useCallback(
     (property: string, value: string | string[]) => {
+      console.log("handlePropertyChange readOnly", readOnly);
       if (readOnly) return;
 
       const propertyId = propertyMap[property.toLowerCase()]?.id;
+      console.log("handlePropertyChange propertyId", propertyId);
+      console.log("handlePropertyChange  task.id", task.id);
       if (!propertyId) return;
       dispatch(
         updateProperty({ taskId: task.id, propertyId, property, value }),

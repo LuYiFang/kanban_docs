@@ -135,3 +135,19 @@ function getBlobMap() {
 export function normalizeBlobUrls(markdown: string): string {
   return markdown.replace(/blob\\:/g, "blob:");
 }
+
+export function formatGitLabLink(url: string): string | null {
+  const issueMatch = url.match(/\/issues\/(\d+)/);
+  if (issueMatch) {
+    const issueNumber = issueMatch[1];
+    return `[#${issueNumber}](${url})`;
+  }
+
+  const mrMatch = url.match(/\/merge_requests\/(\d+)/);
+  if (mrMatch) {
+    const mrNumber = mrMatch[1];
+    return `[!${mrNumber}](${url})`;
+  }
+
+  return null;
+}

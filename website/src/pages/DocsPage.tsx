@@ -72,6 +72,7 @@ const DocsPage: React.FC = () => {
 
   useEffect(() => {
     if (!isDocsLayoutLoaded && docsLayout && _.keys(docsLayout).length) {
+      console.log("useEffect docsLayout", docsLayout);
       setLayouts(docsLayout);
       const recordedLayout = _.find(docsLayout, (layout) =>
         Boolean(_.isArray(layout) && layout.length),
@@ -189,6 +190,7 @@ const DocsPage: React.FC = () => {
   const debouncedLayoutChange = useMemo(
     () =>
       _.debounce((layout, layouts) => {
+        console.log("debouncedLayoutChange old", layouts);
         setLayouts(
           _.mapValues(layouts, (layout) => {
             return layout.map((item: TaskWithProperties) => {
