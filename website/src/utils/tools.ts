@@ -1,7 +1,9 @@
 import apiClient from "./apiClient";
 
 const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-const markdownImgRegex = /!\[([^\]]*)\]\((.*\/api\/files\/[^)]+)\)/g;
+const markdownImgRegex = /!\[.*]\((.*\/api\/files\/[^)]+)\)/g;
+// for blob url mapping
+// const markdownImgRegex = /!\[([^\]]*)\]\((.*\/api\/files\/[^)]+)\)/g;
 const BLOB_MAP_KEY = "markdownBlobMap";
 
 export function convertUtcToLocal(utcDateString: string) {

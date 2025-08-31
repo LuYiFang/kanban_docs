@@ -128,9 +128,8 @@ const MarkdownEditor = forwardRef<MarkdownEditorMethods, MarkdownEditorProps>(
       }
       onOpenLink(url);
     };
-
     return (
-      <div ref={editorRootRef}>
+      <div ref={editorRootRef} className="w-full min-w-96 flex flex-1 basis-0">
         <MDXEditor
           readOnly={readOnly}
           ref={editorRef}

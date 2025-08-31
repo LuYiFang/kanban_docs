@@ -149,7 +149,7 @@ const Editor = forwardRef<EditorMethods, EditorProps>(
 
     return (
       <div
-        className="bg-gray-900 p-3 rounded shadow-lg w-full h-full flex flex-col  relative "
+        className="bg-gray-900 p-3 rounded shadow-lg w-full h-full flex flex-col  relative  "
         onClick={(e) => e.stopPropagation()}
         data-cy="edit-dialog"
       >

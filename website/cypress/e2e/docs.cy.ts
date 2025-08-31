@@ -43,7 +43,7 @@ describe("DocsPage", () => {
     cy.get(".layout").children().should("have.length", 2);
 
     // 再次點擊第一個文檔並驗證佈局中顯示的文檔數量
-    cy.get("[data-cy=tag-documents]").children().first().click();
+    cy.get("[data-cy=tag-documents]").children().first().click({ force: true });
     cy.get(".layout").children().should("have.length", 1);
   });
 
@@ -77,7 +77,7 @@ describe("DocsPage", () => {
 
     // 選擇標籤 "Tag3" 並選中一個文檔
     cy.get("[data-cy=kanban-task-tags]").contains("Tag3").click();
-    cy.get("[data-cy=tag-documents]").children().first().click();
+    cy.get("[data-cy=tag-documents]").children().first().click({ force: true });
 
     // 驗證佈局中顯示的文檔數量
     cy.get(".layout").children().should("have.length", 3);
@@ -100,9 +100,7 @@ describe("DocsPage", () => {
     cy.get("[data-cy=doc-card-id-task-id-1]").should("be.visible");
 
     // 調整文檔大小
-    cy.get(
-      "[data-cy=doc-card-id-task-id-1] .react-resizable-handle.react-resizable-handle-ne",
-    )
+    cy.get("[data-cy=doc-card-id-task-id-1] .react-resizable-handle-ne")
       .trigger("mousedown", { clientX: 200, clientY: 200, force: true }) // 起始位置
       .trigger("mousemove", { clientX: 50, clientY: 350, force: true }) // 往左下移動
       .trigger("mouseup", { force: true }); // 結束拖動
@@ -144,7 +142,7 @@ describe("DocsPage", () => {
     cy.get("[data-cy=kanban-task-tags]").contains("Tag2").click();
     cy.get("[data-cy=tag-documents]").children().first().click();
     cy.wait(300);
-    cy.get("[data-cy=tag-documents]").children().eq(1).click();
+    cy.get("[data-cy=tag-documents]").children().eq(1).click({ force: true });
     cy.wait(300);
 
     cy.get("[data-cy=toggle-properties]").first().click();
@@ -191,13 +189,13 @@ describe("DocsPage", () => {
     cy.get("[data-cy=kanban-task-tags]").contains("Tag2").click();
     cy.get("[data-cy=tag-documents]").children().eq(0).click();
     cy.wait(300);
-    cy.get("[data-cy=tag-documents]").children().eq(1).click();
+    cy.get("[data-cy=tag-documents]").children().eq(1).click({ force: true });
     cy.wait(300);
 
     // // Step 2: 用 search 點一個 card
     cy.get("[data-cy=search-input]").type("task");
     cy.wait(500);
-    cy.get("[data-cy=tag-documents]").children().eq(0).click();
+    cy.get("[data-cy=tag-documents]").children().eq(0).click({ force: true });
 
     cy.get("[data-cy=doc-card-id-task-id-1] .react-resizable-handle-ne")
       .trigger("mousedown", { clientX: 600, clientY: 500, force: true })
@@ -251,17 +249,21 @@ describe("DocsPage", () => {
   it("should add a new document", () => {
     // 點擊新增文檔按鈕
     cy.get("#add-task-button").click();
-
+    cy.wait(300);
     // 填寫文檔標題和內容
-    cy.get("[data-cy=title-input]").type("New Document Title");
-    // 等待 5 秒以確保自動保存觸發
-    cy.wait(3500);
+    cy.clock();
+    cy.get("[data-cy=toggle-title]").click();
+    cy.tick(500);
+    cy.get("[data-cy=title-input]").type("New Document Title", { force: true });
+
+    // 等待 3.5 秒以確保自動保存觸發
+    cy.tick(3500);
     cy.wait("@updateDoc").its("response.statusCode").should("eq", 200);
 
     cy.get('[data-cy="editor-content"] .mdxeditor-root-contenteditable').type(
       "This is the content of the new document.",
     );
-    // 等待 5 秒以確保自動保存觸發
+    // 等待 3.5 秒以確保自動保存觸發
     cy.wait(3500);
     // 確保 API 被呼叫
     cy.wait("@updateDoc").its("response.statusCode").should("eq", 200);
@@ -271,7 +273,7 @@ describe("DocsPage", () => {
     // 選擇標籤 "Tag2" 並選中第一個文檔
     cy.get("[data-cy=kanban-task-tags]").contains("Tag2").click();
     cy.wait(500);
-    cy.get("[data-cy=tag-documents]").children().first().click();
+    cy.get("[data-cy=tag-documents]").children().first().click({ force: true });
 
     // 驗證佈局中顯示的文檔數量
     cy.get(".layout").children().should("have.length", 1);

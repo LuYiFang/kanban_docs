@@ -27,7 +27,9 @@ const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
       } transform origin-top transition-all duration-300
       ${className}`}
     >
-      {isChildrenRendered && children}
+      <div style={{ display: isChildrenRendered ? "block" : "none" }}>
+        {children}
+      </div>
     </div>
   );
 };
