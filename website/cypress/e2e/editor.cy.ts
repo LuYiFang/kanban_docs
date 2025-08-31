@@ -390,4 +390,78 @@ describe("Editor Workflow Tests", () => {
       "This is default task",
     );
   });
+
+  it("should paste GitLab links and format them correctly", () => {
+    // 1. 點擊第一個任務卡片
+    cy.get('[data-rbd-draggable-id="task-id-2"]').click();
+
+    // 2. 聚焦到編輯器
+    cy.get("[data-cy=editor-content] p").first().click();
+
+    // 換行
+    cy.get("[data-cy=editor-content] p").last().type("{enter}");
+
+    // 3. 模擬貼上 GitLab issue link
+    cy.get("[data-cy=editor-content] p")
+      .first()
+      .trigger("paste", {
+        clipboardData: {
+          getData: () => "https://gitlab.com/example/project/-/issues/123",
+        },
+      });
+
+    // 換行
+    cy.get("[data-cy=editor-content] p").last().type("{enter}");
+
+    // 4. 模擬貼上 GitLab MR link
+    cy.get("[data-cy=editor-content] p")
+      .first()
+      .trigger("paste", {
+        clipboardData: {
+          getData: () =>
+            "https://gitlab.com/example/project/-/merge_requests/456",
+        },
+      });
+
+    // 換行
+    cy.get("[data-cy=editor-content] p").last().type("{enter}");
+
+    // 5. 模擬貼上一個不處理的 GitLab link
+    cy.get("[data-cy=editor-content] p")
+      .first()
+      .trigger("paste", {
+        clipboardData: {
+          getData: () => "https://gitlab.com/example/project/-/milestones/7",
+        },
+      });
+
+    // 換行
+    cy.get("[data-cy=editor-content] p").last().type("{enter}");
+
+    // 6. 模擬貼上純文字
+    cy.get("[data-cy=editor-content] p")
+      .first()
+      .trigger("paste", {
+        clipboardData: {
+          getData: () => "This is a plain text paste test.",
+        },
+      });
+
+    // 7. 驗證編輯器內容（假設你的 paste handler 已經自動轉換）
+    cy.get("[data-cy=editor-content]").should("contain", "#123");
+    cy.get("[data-cy=editor-content]").should("contain", "!456");
+    cy.get("[data-cy=editor-content]").should(
+      "contain",
+      "https://gitlab.com/example/project/-/milestones/7",
+    );
+    cy.get("[data-cy=editor-content]").should(
+      "contain",
+      "This is a plain text paste test.",
+    );
+
+    cy.wait(3500);
+
+    // 7. 驗證 auto-save API 有被呼叫
+    cy.wait("@updateTask").its("response.statusCode").should("eq", 200);
+  });
 });
